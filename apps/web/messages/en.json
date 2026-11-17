@@ -104,7 +104,30 @@
     "welcome": "Welcome, {name}",
     "subtitle": "Here's today at {branch}.",
     "subtitleNoBranch": "Here's your day at Latif Kids.",
-    "placeholder": "Summary cards and the children attendance chart arrive in the next phase."
+    "placeholder": "Summary cards and the children attendance chart arrive in the next phase.",
+    "cards": {
+      "children": "Children",
+      "staff": "Staff",
+      "classes": "Classes",
+      "units": "Units",
+      "activities": "Activities"
+    },
+    "attendanceTitle": "Children attendance",
+    "total": "Total",
+    "refresh": "Refresh",
+    "lastUpdated": "Last updated {time}",
+    "date": "Date",
+    "class": "Class",
+    "allClasses": "All classes",
+    "branchScope": "Branches",
+    "currentBranch": "Current branch",
+    "allBranches": "All branches",
+    "noChildren": "No active children for this filter.",
+    "quickActions": "Quick actions",
+    "openKiosk": "Open attendance kiosk",
+    "takeAttendance": "Take attendance",
+    "addChild": "Add child",
+    "addStaff": "Add staff"
   },
   "parent": {
     "greeting": "Hello, {name}",
@@ -114,7 +137,13 @@
     "today": "Today",
     "enrollTitle": "Enroll my child",
     "enrollBody": "Send an admission request to one of our branches. We'll link your child to your account once it's accepted.",
-    "enrollCta": "Start admission request"
+    "enrollCta": "Start admission request",
+    "todayStatus": "Today",
+    "requestVacation": "Request vacation",
+    "vacationTitle": "Vacation request",
+    "child": "Child",
+    "myRequests": "My vacation requests",
+    "sent": "Request sent"
   },
   "weekdays": {
     "0": "Sun",
@@ -150,7 +179,20 @@
     "guardian_contact_required": "Add a phone or email for each guardian.",
     "age_range_invalid": "Minimum age must be below maximum age.",
     "invalid_phone": "Use the international format, e.g. +966501234567.",
-    "forbidden": "You don't have permission to do this."
+    "forbidden": "You don't have permission to do this.",
+    "not_checked_in": "This child isn't checked in yet.",
+    "future_date": "You can't record a future day.",
+    "invalid_qr": "This QR code has expired. Scan the code on the screen again.",
+    "invalid_pin": "Unknown PIN. Please try again.",
+    "too_soon": "Already recorded a moment ago.",
+    "already_checked_out": "Already checked out today.",
+    "no_children": "No children are linked to this account in this branch.",
+    "outside_geofence": "You're outside the branch area.",
+    "feature_disabled": "This feature is turned off for the branch.",
+    "not_member": "This account doesn't belong to this branch.",
+    "staff_only": "Staff only.",
+    "branch_location_missing": "The branch location isn't set yet.",
+    "date_range_invalid": "End date must be on or after the start date."
   },
   "settings": {
     "title": "Settings",
@@ -323,5 +365,74 @@
     "title": "My children",
     "empty": "No children linked yet. Once a branch adds your child with your email or phone, they appear here.",
     "branch": "Branch"
+  },
+  "status": {
+    "NO_RECORD": "No record",
+    "ATTENDED": "Attended",
+    "ABSENT": "Absent",
+    "VACATION": "Vacation",
+    "DEPARTURE": "Departure",
+    "PENDING": "Under review",
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected"
+  },
+  "attendance": {
+    "title": "Attendance",
+    "childrenTab": "Children",
+    "staffTab": "Staff",
+    "vacationsTab": "Vacation requests",
+    "openKiosk": "Open kiosk",
+    "date": "Date",
+    "checkIn": "Check in",
+    "checkOut": "Check out",
+    "absent": "Absent",
+    "clear": "Clear",
+    "in": "In",
+    "out": "Out",
+    "by": "By",
+    "method": {
+      "MANUAL": "Manual",
+      "QR": "QR",
+      "PIN": "PIN",
+      "GEO": "Location"
+    },
+    "noStaff": "No staff yet.",
+    "notYet": "Not yet",
+    "distance": "{m} m from branch",
+    "noVacations": "No vacation requests.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "from": "From",
+    "to": "To",
+    "reason": "Reason",
+    "requestedBy": "Requested by",
+    "statusFilter": "Status",
+    "readOnly": "You can view attendance. Ask a manager for the attendance permission to make changes."
+  },
+  "kiosk": {
+    "title": "Check-in / Check-out",
+    "scanHint": "Scan this code from the Latif Kids app",
+    "or": "or",
+    "pinHint": "Enter your personal 6-digit PIN",
+    "next": "Next",
+    "refreshIn": "New code in {s}s",
+    "inLabel": "Checked in",
+    "outLabel": "Checked out",
+    "welcome": "Welcome, {name}",
+    "goodbye": "Goodbye, {name}",
+    "disabled": "QR attendance is turned off for this branch. Turn it on in Settings → Features.",
+    "fullscreen": "Fullscreen",
+    "exit": "Back to dashboard",
+    "digit": "Digit {n}"
+  },
+  "pin": {
+    "menu": "My attendance PIN",
+    "title": "Your attendance PIN",
+    "body": "Type this PIN on the entrance kiosk to check in or out. It is shown only once — keep it private.",
+    "hasPin": "You already have a PIN. Generate a new one if you forgot it; the old PIN stops working.",
+    "noPin": "You don't have a PIN yet.",
+    "generate": "Generate PIN",
+    "regenerate": "Generate new PIN",
+    "noBranch": "A PIN becomes available once you belong to a branch."
   }
 }

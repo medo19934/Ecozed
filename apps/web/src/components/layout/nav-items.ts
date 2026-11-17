@@ -47,7 +47,7 @@ export interface NavItem {
 
 const STAFF_NAV: NavItem[] = [
   { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { key: 'attendance', href: '/attendance', icon: ClipboardCheck, soon: true },
+  { key: 'attendance', href: '/attendance', icon: ClipboardCheck },
   { key: 'children', href: '/children', icon: Baby },
   { key: 'staff', href: '/staff', icon: Users, permission: 'canAddStaff' },
   { key: 'classes', href: '/classes', icon: School },

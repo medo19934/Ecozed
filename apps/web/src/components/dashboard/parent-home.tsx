@@ -1,6 +1,19 @@
 'use client';
 
-import { CLOSED_WEEKDAYS, WORK_WEEK, type AuthUser, type ParentChildDto } from '@latif/shared';
+import {
+  CLOSED_WEEKDAYS,
+  WORK_WEEK,
+  type AuthUser,
+  type MyAttendance,
+  type ParentChildDto,
+  type VacationDto,
+} from '@latif/shared';
+import { Umbrella } from 'lucide-react';
+import { DayStatusChip } from '@/components/attendance/status-chip';
+import { MY_ATTENDANCE_KEY } from '@/components/attendance/pin-dialog';
+import { StatusChip } from '@/components/ui/status-chip';
+import { useFormatDate } from '@/lib/format';
+import { VacationDialog } from './vacation-dialog';
 import { useQuery } from '@tanstack/react-query';
 import { Baby, Clock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -58,13 +71,29 @@ function MyChildren() {
   const tk = useTranslations('children');
   const age = useFormatAge();
   const locale = useLocale();
+  const tp = useTranslations('parent');
   const kids = useQuery({
     queryKey: ['parent', 'children'],
     queryFn: () => api.get<ParentChildDto[]>('/parent/children'),
   });
+  const me = useQuery({
+    queryKey: MY_ATTENDANCE_KEY,
+    queryFn: () => api.get<MyAttendance>('/attendance/me'),
+    refetchInterval: 60_000,
+  });
+  const statusOf = (id: string) => me.data?.children.find((c) => c.id === id)?.status;
   return (
     <section className="space-y-3">
-      <h3 className="font-semibold">{t('title')}</h3>
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="font-semibold">{t('title')}</h3>
+        {!!kids.data?.length && (
+          <VacationDialog kids={kids.data}>
+            <Button variant="outline" size="sm">
+              <Umbrella /> {tp('requestVacation')}
+            </Button>
+          </VacationDialog>
+        )}
+      </div>
       {kids.isLoading ? (
         <Skeleton className="h-24" />
       ) : !kids.data?.length ? (
@@ -83,8 +112,11 @@ function MyChildren() {
                     gender={k.gender}
                     className="size-14"
                   />
-                  <div className="min-w-0 space-y-0.5">
-                    <p className="font-semibold">{k.fullName}</p>
+                  <div className="min-w-0 flex-1 space-y-0.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-semibold">{k.fullName}</p>
+                      {statusOf(k.id) && <DayStatusChip status={statusOf(k.id)!} />}
+                    </div>
                     <p className="text-sm text-muted-foreground">{age(k.birthDate)}</p>
                     <p className="text-xs text-muted-foreground">
                       {(locale === 'en' && k.branch.nameEn) || k.branch.name}
@@ -102,6 +134,37 @@ function MyChildren() {
   );
 }
 
+function MyVacations() {
+  const tp = useTranslations('parent');
+  const ts = useTranslations('status');
+  const fmt = useFormatDate();
+  const q = useQuery({
+    queryKey: ['vacations', 'mine'],
+    queryFn: () => api.get<VacationDto[]>('/attendance/vacations/mine'),
+  });
+  if (!q.data?.length) return null;
+  const color = { PENDING: 'amber', APPROVED: 'green', REJECTED: 'red' } as const;
+  return (
+    <section className="space-y-3">
+      <h3 className="font-semibold">{tp('myRequests')}</h3>
+      <ul className="grid gap-2">
+        {q.data.map((v) => (
+          <li
+            key={v.id}
+            className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-card p-4 text-sm shadow-soft"
+          >
+            <span className="font-medium">{v.child.fullName}</span>
+            <span className="text-muted-foreground">
+              {fmt(v.startDate)} – {fmt(v.endDate)}
+            </span>
+            <StatusChip color={color[v.status]}>{ts(v.status)}</StatusChip>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export function ParentHome({ user }: { user: AuthUser }) {
   const t = useTranslations('parent');
   const tc = useTranslations('common');
@@ -114,6 +177,7 @@ export function ParentHome({ user }: { user: AuthUser }) {
         </CardContent>
       </Card>
       <MyChildren />
+      <MyVacations />
       <section className="space-y-3">
         <h3 className="font-semibold">{t('thisWeek')}</h3>
         <WeekStrip />

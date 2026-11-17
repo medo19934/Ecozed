@@ -1,5 +1,5 @@
 import { Baby } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Image, Text, View } from 'react-native';
 import { API_URL } from '@/lib/api';
 import { tokenStore } from '@/lib/token-store';
@@ -41,7 +41,9 @@ export function ChildRow({
   gender,
   name,
   lines,
+  badge,
 }: {
+  badge?: ReactNode;
   photoPath: string | null;
   gender: 'MALE' | 'FEMALE';
   name: string;
@@ -51,7 +53,10 @@ export function ChildRow({
     <View className="flex-row items-center gap-4 rounded-3xl border border-line bg-white p-4">
       <ChildPhoto path={photoPath} gender={gender} />
       <View className="flex-1 gap-0.5">
-        <Text className="text-start text-base font-semibold text-ink">{name}</Text>
+        <View className="flex-row items-center justify-between gap-2">
+          <Text className="flex-1 text-start text-base font-semibold text-ink">{name}</Text>
+          {badge}
+        </View>
         {lines.filter(Boolean).map((l, i) => (
           <Text key={i} className="text-start text-sm text-ink-muted">
             {l}

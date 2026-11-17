@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import { Languages, LogOut } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { changeLocale, i18n } from '@/i18n';
 import { useAuth } from '@/lib/auth';
+import { PinCard } from './pin-card';
 import { ScreenHeader } from './screen-header';
 import { Card, Screen } from './ui';
 
@@ -28,12 +29,13 @@ export function ProfileScreen() {
         title={user?.fullName ?? ''}
         subtitle={user?.phone ?? user?.email ?? undefined}
       />
-      <View className="gap-4 p-5">
+      <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
         <Card>
           <Row label={t('profile.role')} value={user?.role ? t(`roles.${user.role}`) : null} />
           <View className="h-px bg-line" />
           <Row label={t('profile.branch')} value={daycare} />
         </Card>
+        {user?.daycareId && <PinCard />}
         <Pressable
           accessibilityRole="button"
           accessibilityHint={t('profile.restartNote')}
@@ -59,7 +61,7 @@ export function ProfileScreen() {
             {t('profile.logout')}
           </Text>
         </Pressable>
-      </View>
+      </ScrollView>
     </Screen>
   );
 }

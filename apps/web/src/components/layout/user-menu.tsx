@@ -1,7 +1,8 @@
 'use client';
 
 import type { AuthUser } from '@latif/shared';
-import { LogOut } from 'lucide-react';
+import { KeyRound, LogOut } from 'lucide-react';
+import { PinDialog } from '@/components/attendance/pin-dialog';
 import { useTranslations } from 'next-intl';
 import { Avatar } from '@/components/ui/avatar';
 import {
@@ -17,6 +18,7 @@ import { useSessionActions } from '@/lib/use-session';
 
 export function UserMenu({ user }: { user: AuthUser }) {
   const t = useTranslations('user');
+  const tp = useTranslations('pin');
   const router = useRouter();
   const { logout } = useSessionActions();
 
@@ -35,6 +37,14 @@ export function UserMenu({ user }: { user: AuthUser }) {
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel className="truncate">{user.email ?? user.phone}</DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {user.daycareId && user.role !== 'SUPER_ADMIN' && (
+          <PinDialog>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <KeyRound aria-hidden />
+              {tp('menu')}
+            </DropdownMenuItem>
+          </PinDialog>
+        )}
         <DropdownMenuItem
           variant="destructive"
           onSelect={async () => {

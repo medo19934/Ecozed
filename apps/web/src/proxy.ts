@@ -6,7 +6,16 @@ import { REFRESH_COOKIE } from './lib/session-cookies';
 const intl = createMiddleware(routing);
 
 /** Admin areas that require a session (checked after the locale segment). */
-const PROTECTED = ['/dashboard', '/classes', '/children', '/staff', '/settings', '/messages'];
+const PROTECTED = [
+  '/dashboard',
+  '/classes',
+  '/children',
+  '/staff',
+  '/settings',
+  '/messages',
+  '/attendance',
+  '/kiosk',
+];
 const AUTH_PAGES = ['/login'];
 
 export default function proxy(request: NextRequest) {

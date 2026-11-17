@@ -35,11 +35,11 @@ SPEC.md "Revision 1" (from `docs/latif-kids-hub-reference.pdf`) overrides the or
 
 ## Phase 3 — Dashboard & Attendance
 
-- [ ] Dashboard: 5 cards (children, staff, classes, units, activities) + attendance donut (class/date filters, refresh, last updated), branch filter for super admin
-- [ ] Attendance kiosk screen: QR rotating every 30 s (server-signed, no reuse) + 6-digit personal PIN; success/error feedback
-- [ ] Mobile: scan kiosk QR / enter PIN; record person, direction in/out, time, method
-- [ ] Children daily roster (attended, absent, vacation, departure, no record); vacation requests by parents
-- [ ] Staff check-in with geolocation inside branch radius (+ device biometric)
+- [x] Dashboard: 5 cards (children, staff, classes, units, activities) + attendance donut (class/date filters, refresh, last updated), branch filter for super admin
+- [x] Attendance kiosk screen: QR rotating every 30 s (server-signed, no reuse) + 6-digit personal PIN; success/error feedback
+- [x] Mobile: scan kiosk QR (expo-camera); record person, direction in/out, time, method; personal PIN in profile
+- [x] Children daily roster (attended, absent, vacation, departure, no record) on web + teacher app; vacation requests by parents (web + app) with staff approval
+- [x] Staff check-in with geolocation inside branch radius (+ device biometric via expo-local-authentication)
 
 ## Phase 4 — Admissions, Calendar, Units
 
@@ -91,3 +91,7 @@ SPEC.md "Revision 1" (from `docs/latif-kids-hub-reference.pdf`) overrides the or
 - Guardians link to parent accounts by email/phone both when staff save a child and on every parent sign-in; a linked parent gets a PARENT membership in that branch. `/parent/children` filters by `guardians.userId` (crosses branches).
 - Branch map: lat/lng fields + "use my location" + Google Maps embed preview (no API key). A full Places/pin picker needs `NEXT_PUBLIC_GOOGLE_MAPS_KEY` (later).
 - Web route guard: pages not in the user's nav render "no permission"; the API is the real enforcement.
+- Attendance: one `ChildAttendance`/`StaffAttendance` row per person per branch-local day + append-only `AttendanceEvent` log. Kiosk QR = HMAC token (branch + 30 s window, accepted for current/previous window); scanned by the signed-in app user (parent → their children in that branch, staff → themselves). PINs are HMAC-hashed, unique per branch, shown once. Self-service scans are debounced 60 s.
+- Units/activities dashboard cards read 0 until the curriculum module (phase 4).
+- Biometric before location check-in runs on the device (expo-local-authentication); the server enforces the geofence (radius + up to 50 m GPS accuracy).
+- Added dep `qrcode` (web) to render the kiosk QR offline — no third-party QR service.
