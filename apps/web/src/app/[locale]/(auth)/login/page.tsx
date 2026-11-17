@@ -62,16 +62,18 @@ export default async function LoginPage({ params }: PageProps<'/[locale]/login'>
                 <GoogleSignIn />
               </Suspense>
             )}
-            <ul className="grid gap-3 text-sm text-muted-foreground">
-              <li className="flex items-start gap-3">
-                <Baby className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-                {t('parentsNote')}
-              </li>
-              <li className="flex items-start gap-3">
-                <BriefcaseBusiness className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-                {t('staffNote')}
-              </li>
-            </ul>
+            {google && (
+              <ul className="grid gap-3 text-sm text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <Baby className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                  {t('parentsNote')}
+                </li>
+                <li className="flex items-start gap-3">
+                  <BriefcaseBusiness className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                  {t('staffNote')}
+                </li>
+              </ul>
+            )}
           </>
         )}
         {devLogin && !publicDemo && (

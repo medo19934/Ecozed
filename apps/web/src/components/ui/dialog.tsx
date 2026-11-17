@@ -15,11 +15,14 @@ export function DialogContent({
   title,
   description,
   closeLabel,
+  hideClose,
   ...props
 }: React.ComponentProps<typeof D.Content> & {
   title: string;
   description?: string;
   closeLabel: string;
+  /** For dialogs that must be completed (e.g. forced password change). */
+  hideClose?: boolean;
 }) {
   return (
     <D.Portal>
@@ -42,10 +45,12 @@ export function DialogContent({
               <D.Description className="sr-only">{title}</D.Description>
             )}
           </div>
-          <D.Close className="rounded-lg p-1.5 opacity-70 transition hover:bg-accent hover:opacity-100">
-            <XIcon className="size-4" />
-            <span className="sr-only">{closeLabel}</span>
-          </D.Close>
+          {!hideClose && (
+            <D.Close className="rounded-lg p-1.5 opacity-70 transition hover:bg-accent hover:opacity-100">
+              <XIcon className="size-4" />
+              <span className="sr-only">{closeLabel}</span>
+            </D.Close>
+          )}
         </div>
         <div className="overflow-y-auto px-6 py-5">{children}</div>
       </D.Content>

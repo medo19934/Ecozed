@@ -51,6 +51,7 @@ export function ChangePasswordDialog({
         title={forced ? t('forcedTitle') : t('changeTitle')}
         description={forced ? t('forcedHint') : undefined}
         closeLabel={tc('close')}
+        hideClose={forced}
         onInteractOutside={(e) => forced && e.preventDefault()}
         onEscapeKeyDown={(e) => forced && e.preventDefault()}
       >
