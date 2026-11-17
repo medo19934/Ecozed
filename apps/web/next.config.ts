@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ['@latif/shared'],
   reactStrictMode: true,
   // Self-contained server for Docker / Render (pnpm monorepo → trace from the repo root).
-  output: process.env.NETLIFY ? undefined : 'standalone',
+  output: process.env.NETLIFY || process.env.VERCEL ? undefined : 'standalone',
   outputFileTracingRoot: path.join(__dirname, '../../'),
 };
 

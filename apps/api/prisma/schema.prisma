@@ -674,3 +674,12 @@ model DailyReport {
   @@unique([childId, date])
   @@index([daycareId, date])
 }
+
+/// File bytes when STORAGE_DRIVER=db (small free hosting without object storage).
+model StoredFile {
+  key       String   @id
+  mime      String
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now())
+}

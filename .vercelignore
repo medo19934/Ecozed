@@ -1,0 +1,9 @@
+legacy
+**/node_modules
+**/.netlify
+**/.next
+**/dist
+**/.expo
+apps/api/storage
+apps/api/netlify/functions/api/server.cjs
+docs/*.pdf

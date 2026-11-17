@@ -33,7 +33,7 @@ export function TeacherDashboard({ user }: { user: AuthUser }) {
   const toWrite = reports.data?.filter((r) => !r.sharedAt).slice(0, 5) ?? [];
 
   return (
-    <div className="grid gap-6">
+    <div className="grid min-w-0 gap-6">
       <Card className="border-0 bg-brand-gradient text-white">
         <CardContent className="space-y-1">
           <h1 className="text-xl font-semibold">{t('welcome', { name: user.fullName })}</h1>
@@ -73,8 +73,8 @@ export function TeacherDashboard({ user }: { user: AuthUser }) {
           tint="#7b649b"
         />
       </div>
-      <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
-        <div className="grid gap-6">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid min-w-0 gap-6">
           <AttendanceDonut scope="branch" />
           {toWrite.length > 0 && (
             <Card className="gap-3 p-5">

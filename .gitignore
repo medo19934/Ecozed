@@ -18,3 +18,5 @@ next-env.d.ts
 apps/api/netlify/functions/api/server.cjs
 .netlify/
 apps/*/.netlify/
+.vercel/
+apps/api/vercel/api/_server.cjs

@@ -70,7 +70,18 @@ eas build -p ios --profile preview              # needs an Apple developer accou
 
 Add the Android/iOS OAuth client IDs (`EXPO_PUBLIC_GOOGLE_*`) as EAS environment variables (`eas env:create`), and include them in the API's `GOOGLE_CLIENT_IDS`.
 
-## Netlify (public demo)
+## Vercel + Neon (current hosting, free)
+
+Live: web https://latif-kids.vercel.app · mobile app (web build) https://latif-kids-app.vercel.app · API https://latif-kids-api.vercel.app/api/docs · Android APK: GitHub → Releases.
+
+- **API** (`apps/api/vercel`): the bundled Nest API as one Vercel Function (`api/index.mjs`), all paths rewritten to it, region `fra1` (next to the Neon database). Migrations run on cold start. Files are stored in Postgres (`STORAGE_DRIVER=db`, table `StoredFile`).
+  Env: `DATABASE_URL` (Neon), `NODE_ENV=production`, `PUBLIC_DEMO=true`, `STORAGE_DRIVER=db`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `CORS_ORIGINS=https://latif-kids-app.vercel.app,https://latif-kids.vercel.app`.
+- **Web**: Vercel project with root directory `apps/web`, install `pnpm install --frozen-lockfile`, build `pnpm --filter @latif/shared build && pnpm build`, region `fra1`. Env: `API_URL=https://latif-kids-api.vercel.app/api/v1`.
+- **App**: static Expo web export with `EXPO_PUBLIC_API_URL=https://latif-kids-api.vercel.app`.
+- Deploy: `VERCEL_TOKEN=… VERCEL_ORG_ID=… API_PROJECT_ID=… WEB_PROJECT_ID=… APP_PROJECT_ID=… scripts/deploy-vercel.sh`.
+- Free plans: Vercel Hobby (non-commercial use) and Neon Free. If a free limit is reached the service pauses until the next month; there is no charge.
+
+## Netlify (previous hosting, suspended)
 
 Live: web https://latif-kids.netlify.app · mobile app (web build) https://latif-kids-app.netlify.app · API https://latif-kids-api.netlify.app/api/docs
 

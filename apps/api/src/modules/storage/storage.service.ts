@@ -10,6 +10,7 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { AppConfig } from '../../config/app-config.service';
 
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
@@ -54,13 +55,16 @@ const blobs = async () =>
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
-  private readonly driver: 'local' | 's3' | 'netlify';
+  private readonly driver: 'local' | 's3' | 'netlify' | 'db';
   private readonly root: string;
   private readonly bucket: string;
   private readonly s3?: S3Client;
   private bucketReady = false;
 
-  constructor(config: AppConfig) {
+  constructor(
+    config: AppConfig,
+    private readonly prisma: PrismaService,
+  ) {
     this.driver = config.get('STORAGE_DRIVER');
     this.root = resolve(config.get('STORAGE_LOCAL_DIR'));
     this.bucket = config.get('S3_BUCKET');
@@ -90,7 +94,11 @@ export class StorageService {
       throw new BadRequestException({ message: 'File too large', code: 'file_too_large' });
     }
     const key = `${prefix}/${randomUUID()}`;
-    if (this.driver === 'netlify') {
+    if (this.driver === 'db') {
+      await this.prisma.raw.storedFile.create({
+        data: { key, mime: file.mimetype, size: file.size, data: new Uint8Array(file.buffer) },
+      });
+    } else if (this.driver === 'netlify') {
       const ab = file.buffer.buffer.slice(
         file.buffer.byteOffset,
         file.buffer.byteOffset + file.buffer.byteLength,
@@ -116,6 +124,11 @@ export class StorageService {
 
   async read(key: string): Promise<Buffer> {
     try {
+      if (this.driver === 'db') {
+        const f = await this.prisma.raw.storedFile.findUnique({ where: { key } });
+        if (!f) throw new Error('missing');
+        return Buffer.from(f.data);
+      }
       if (this.driver === 'netlify') {
         const data = await (await blobs()).get(key, { type: 'arrayBuffer' });
         if (!data) throw new Error('missing');
@@ -133,7 +146,8 @@ export class StorageService {
 
   async remove(key: string): Promise<void> {
     try {
-      if (this.driver === 'netlify') await (await blobs()).delete(key);
+      if (this.driver === 'db') await this.prisma.raw.storedFile.deleteMany({ where: { key } });
+      else if (this.driver === 'netlify') await (await blobs()).delete(key);
       else if (this.s3)
         await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
       else await rm(this.localPath(key), { force: true });

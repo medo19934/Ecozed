@@ -231,7 +231,7 @@ export function StaffDashboard({ user }: { user: AuthUser }) {
             />
           </div>
         )}
-        <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
           <div className="grid gap-6">
             <AttendanceDonut scope={scope} />
             <div className="grid gap-6 lg:grid-cols-2">
