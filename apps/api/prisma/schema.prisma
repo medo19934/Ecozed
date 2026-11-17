@@ -98,17 +98,21 @@ model Membership {
   qualification String?
   address       String?
   joinDate      DateTime?        @db.Date
+  /// HMAC of the personal 6-digit kiosk PIN (unique per branch). Shown once on generation.
+  pinHash       String?
   /// Created by the admin-only TEST data button.
   isTest        Boolean          @default(false)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   deletedAt     DateTime?
 
-  daycare    Daycare        @relation(fields: [daycareId], references: [id], onDelete: Cascade)
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  daycare    Daycare           @relation(fields: [daycareId], references: [id], onDelete: Cascade)
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   classLinks ClassTeacher[]
+  staffDays  StaffAttendance[]
 
   @@unique([userId, daycareId])
+  @@unique([daycareId, pinHash])
   @@index([daycareId, role])
 }
 
@@ -231,9 +235,11 @@ model Child {
   updatedAt    DateTime     @updatedAt
   deletedAt    DateTime?
 
-  daycare   Daycare         @relation(fields: [daycareId], references: [id], onDelete: Cascade)
-  classroom Classroom?      @relation(fields: [classroomId], references: [id], onDelete: SetNull)
-  guardians ChildGuardian[]
+  daycare    Daycare           @relation(fields: [daycareId], references: [id], onDelete: Cascade)
+  classroom  Classroom?        @relation(fields: [classroomId], references: [id], onDelete: SetNull)
+  guardians  ChildGuardian[]
+  attendance ChildAttendance[]
+  vacations  VacationRequest[]
 
   @@index([daycareId, status])
   @@index([daycareId, classroomId])
@@ -278,4 +284,110 @@ model Document {
   deletedAt    DateTime?
 
   @@index([daycareId, ownerType, ownerId])
+}
+
+enum ChildAttendanceStatus {
+  ATTENDED
+  ABSENT
+  VACATION
+  DEPARTURE
+}
+
+enum AttendanceMethod {
+  MANUAL
+  QR
+  PIN
+  GEO
+}
+
+enum AttendanceDirection {
+  IN
+  OUT
+}
+
+enum VacationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// One row per child per day (branch-local date). No row = "no record".
+model ChildAttendance {
+  id           String                @id @default(uuid()) @db.Uuid
+  daycareId    String                @db.Uuid
+  childId      String                @db.Uuid
+  date         DateTime              @db.Date
+  status       ChildAttendanceStatus
+  checkInAt    DateTime?
+  checkOutAt   DateTime?
+  droppedOffBy String?
+  pickedUpBy   String?
+  method       AttendanceMethod      @default(MANUAL)
+  note         String?
+  recordedById String?               @db.Uuid
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, date])
+  @@index([daycareId, date])
+}
+
+/// One row per staff member per day.
+model StaffAttendance {
+  id           String           @id @default(uuid()) @db.Uuid
+  daycareId    String           @db.Uuid
+  membershipId String           @db.Uuid
+  date         DateTime         @db.Date
+  checkInAt    DateTime
+  checkOutAt   DateTime?
+  method       AttendanceMethod
+  distanceM    Int?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@unique([membershipId, date])
+  @@index([daycareId, date])
+}
+
+/// Append-only log of every check-in/out (who, direction, time, method).
+model AttendanceEvent {
+  id           String              @id @default(uuid()) @db.Uuid
+  daycareId    String              @db.Uuid
+  childId      String?             @db.Uuid
+  membershipId String?             @db.Uuid
+  direction    AttendanceDirection
+  method       AttendanceMethod
+  actorId      String?             @db.Uuid
+  latitude     Float?
+  longitude    Float?
+  distanceM    Int?
+  at           DateTime            @default(now())
+
+  @@index([daycareId, at])
+  @@index([membershipId, at])
+  @@index([childId, at])
+}
+
+model VacationRequest {
+  id            String         @id @default(uuid()) @db.Uuid
+  daycareId     String         @db.Uuid
+  childId       String         @db.Uuid
+  requestedById String         @db.Uuid
+  startDate     DateTime       @db.Date
+  endDate       DateTime       @db.Date
+  reason        String?
+  status        VacationStatus @default(PENDING)
+  reviewedById  String?        @db.Uuid
+  reviewedAt    DateTime?
+  reviewNote    String?
+  createdAt     DateTime       @default(now())
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([daycareId, status])
+  @@index([childId, startDate])
 }

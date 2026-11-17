@@ -15,6 +15,10 @@ export const TENANT_MODELS = new Set<string>([
   'Child',
   'ChildGuardian',
   'Document',
+  'ChildAttendance',
+  'StaffAttendance',
+  'AttendanceEvent',
+  'VacationRequest',
 ]);
 
 /** Models that carry `daycareId` but are intentionally NOT auto-scoped. */

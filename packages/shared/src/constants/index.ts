@@ -23,3 +23,19 @@ export const BRANCHES = [
 ] as const;
 
 export const PAGINATION = { DEFAULT_PAGE_SIZE: 20, MAX_PAGE_SIZE: 100 } as const;
+
+export const ATTENDANCE = {
+  /** Kiosk QR rotates this often; a code is accepted for one extra window to absorb scan delay. */
+  QR_WINDOW_SECONDS: 30,
+  /** Ignore a second scan / PIN for the same person within this time. */
+  DEBOUNCE_SECONDS: 60,
+} as const;
+
+/** YYYY-MM-DD for `at` in a time zone (default Asia/Riyadh). */
+export const localDate = (at: Date = new Date(), timeZone = DEFAULT_TIMEZONE): string =>
+  new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(at);

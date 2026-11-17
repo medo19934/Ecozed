@@ -21,3 +21,11 @@ describe('auth schemas', () => {
     expect(DevLoginSchema.parse({ email: ' A@B.co ' }).email).toBe('a@b.co');
   });
 });
+
+import { localDate } from '../constants';
+describe('localDate', () => {
+  it('uses Riyadh time', () => {
+    // 22:30 UTC on Jan 1 is 01:30 on Jan 2 in Riyadh (UTC+3)
+    expect(localDate(new Date('2026-01-01T22:30:00Z'))).toBe('2026-01-02');
+  });
+});

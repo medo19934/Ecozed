@@ -1,0 +1,76 @@
+import { Controller, ForbiddenException, Get, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  DashboardQuerySchema,
+  localDate,
+  type DashboardAttendance,
+  type DashboardSummary,
+} from '@latif/shared';
+import { createZodDto } from 'nestjs-zod';
+import { CurrentAuth, Roles, type AuthContext } from '../../common/decorators/auth.decorators';
+import { requireBranch } from '../../common/utils/scope';
+import { PrismaService } from '../../prisma/prisma.service';
+import { AttendanceService } from '../attendance/attendance.service';
+
+class DashboardQueryDto extends createZodDto(DashboardQuerySchema) {}
+
+/** Real counts only. Super admins may aggregate all branches (scope=all). */
+@ApiTags('dashboard')
+@ApiBearerAuth()
+@Roles('SUPER_ADMIN', 'MANAGER', 'STAFF')
+@Controller('dashboard')
+export class DashboardController {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly attendance: AttendanceService,
+  ) {}
+
+  private async branchIds(auth: AuthContext, scope: 'branch' | 'all'): Promise<string[]> {
+    if (scope === 'all') {
+      if (!auth.isSuperAdmin) throw new ForbiddenException();
+      return (
+        await this.prisma.raw.daycare.findMany({ where: { deletedAt: null }, select: { id: true } })
+      ).map((d) => d.id);
+    }
+    return [requireBranch(auth)];
+  }
+
+  @Get('summary')
+  async summary(
+    @CurrentAuth() auth: AuthContext,
+    @Query() q: DashboardQueryDto,
+  ): Promise<DashboardSummary> {
+    const ids = await this.branchIds(auth, q.scope);
+    const childScope = q.scope === 'all' ? {} : await this.attendance.childScopeFor(auth);
+    const [children, staff, classes] = await Promise.all([
+      this.prisma.raw.child.count({
+        where: { AND: [childScope, { daycareId: { in: ids }, deletedAt: null, status: 'ACTIVE' }] },
+      }),
+      this.prisma.raw.membership.count({
+        where: {
+          daycareId: { in: ids },
+          deletedAt: null,
+          status: 'ACTIVE',
+          role: { in: ['MANAGER', 'STAFF'] },
+        },
+      }),
+      this.prisma.raw.classroom.count({ where: { daycareId: { in: ids }, deletedAt: null } }),
+    ]);
+    // Units and activities arrive with the curriculum module (phase 4).
+    return { scope: q.scope, children, staff, classes, units: 0, activities: 0 };
+  }
+
+  @Get('attendance')
+  async attendanceChart(
+    @CurrentAuth() auth: AuthContext,
+    @Query() q: DashboardQueryDto,
+  ): Promise<DashboardAttendance> {
+    const ids = await this.branchIds(auth, q.scope);
+    const date = q.date ?? localDate();
+    const scope = q.scope === 'all' ? {} : await this.attendance.childScopeFor(auth);
+    const { total, counts } = await this.attendance.dayCounts(ids, date, {
+      AND: [scope, q.classroomId ? { classroomId: q.classroomId } : {}],
+    });
+    return { date, total, counts, updatedAt: new Date().toISOString() };
+  }
+}

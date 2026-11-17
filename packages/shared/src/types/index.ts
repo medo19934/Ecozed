@@ -167,3 +167,104 @@ export interface ParentChildDto {
   branch: { id: string; name: string; nameEn: string | null };
   classroom: { id: string; name: string } | null;
 }
+
+export type DayStatus = 'NO_RECORD' | 'ATTENDED' | 'ABSENT' | 'VACATION' | 'DEPARTURE';
+
+export interface RosterRow {
+  child: {
+    id: string;
+    fullName: string;
+    gender: 'MALE' | 'FEMALE';
+    hasPhoto: boolean;
+    classroom: { id: string; name: string } | null;
+  };
+  status: DayStatus;
+  checkInAt: string | null;
+  checkOutAt: string | null;
+  droppedOffBy: string | null;
+  pickedUpBy: string | null;
+  method: 'MANUAL' | 'QR' | 'PIN' | 'GEO' | null;
+  note: string | null;
+}
+
+export interface RosterResponse {
+  date: string;
+  rows: RosterRow[];
+  counts: Record<DayStatus, number>;
+}
+
+export interface StaffDayRow {
+  membershipId: string;
+  fullName: string;
+  avatarUrl: string | null;
+  staffType: string | null;
+  checkInAt: string | null;
+  checkOutAt: string | null;
+  method: 'MANUAL' | 'QR' | 'PIN' | 'GEO' | null;
+  distanceM: number | null;
+}
+
+export interface KioskToken {
+  token: string;
+  /** ISO time when this QR stops being accepted. */
+  expiresAt: string;
+  refreshInSeconds: number;
+  branch: { id: string; name: string; nameEn: string | null; hasLogo: boolean };
+}
+
+export interface KioskResultItem {
+  kind: 'CHILD' | 'STAFF';
+  name: string;
+  direction: 'IN' | 'OUT';
+  at: string;
+}
+
+export interface KioskResult {
+  person: string;
+  items: KioskResultItem[];
+}
+
+export interface MyAttendance {
+  date: string;
+  /** Staff members: their own day. */
+  staff: { checkInAt: string | null; checkOutAt: string | null } | null;
+  /** Parents: their children in the active branch (or all branches). */
+  children: {
+    id: string;
+    fullName: string;
+    status: DayStatus;
+    checkInAt: string | null;
+    checkOutAt: string | null;
+  }[];
+  hasPin: boolean;
+  geofence: { enabled: boolean; configured: boolean; radiusM: number };
+  kioskEnabled: boolean;
+}
+
+export interface VacationDto {
+  id: string;
+  child: { id: string; fullName: string; classroom: string | null };
+  requestedBy: string;
+  startDate: string;
+  endDate: string;
+  reason: string | null;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  reviewNote: string | null;
+  createdAt: string;
+}
+
+export interface DashboardSummary {
+  scope: 'branch' | 'all';
+  children: number;
+  staff: number;
+  classes: number;
+  units: number;
+  activities: number;
+}
+
+export interface DashboardAttendance {
+  date: string;
+  total: number;
+  counts: Record<DayStatus, number>;
+  updatedAt: string;
+}
