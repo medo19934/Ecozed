@@ -15,7 +15,7 @@ import { useSession } from '@/lib/use-session';
 import { cn } from '@/lib/utils';
 import { BranchSwitcher } from './branch-switcher';
 import { FullscreenToggle } from './fullscreen-toggle';
-import { navFor } from './nav-items';
+import { canOpen, navFor } from './nav-items';
 import { NotificationsBell } from './notifications-bell';
 import { SidebarNav } from './sidebar';
 import { UserMenu } from './user-menu';
@@ -56,6 +56,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   const user = session.data;
   const items = navFor(user);
+  const allowed = user ? canOpen(user, pathname) : true;
+  // A forbidden URL sends the user back to their own home instead of showing an error page.
+  useEffect(() => {
+    if (user && !allowed) router.replace('/dashboard');
+  }, [user, allowed, router]);
 
   return (
     <div className="flex min-h-dvh">
@@ -111,9 +116,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               <Skeleton className="h-10 w-64" />
               <Skeleton className="h-64 w-full" />
             </div>
-          ) : !items.some(
-              (i) => !i.soon && (pathname === i.href || pathname.startsWith(`${i.href}/`)),
-            ) ? (
+          ) : !allowed ? (
             <EmptyState icon={ShieldX} title={tc('forbidden')} />
           ) : (
             children

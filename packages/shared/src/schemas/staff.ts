@@ -24,7 +24,24 @@ const staffFields = {
 export const CreateStaffSchema = z.object({ email: EmailSchema, ...staffFields });
 export type CreateStaffInput = z.infer<typeof CreateStaffSchema>;
 
-export const UpdateStaffSchema = z.object(staffFields).partial();
+/**
+ * Partial update: no defaults, so a field left out (e.g. classIds when only permissions are
+ * toggled) is untouched instead of being reset to its default.
+ */
+export const UpdateStaffSchema = z
+  .object({
+    fullName: staffFields.fullName,
+    phone: staffFields.phone,
+    role: StaffRoleSchema,
+    staffType: StaffTypeSchema,
+    specialties: z.array(z.string().trim().min(1).max(60)).max(15),
+    qualification: staffFields.qualification,
+    address: staffFields.address,
+    joinDate: staffFields.joinDate,
+    classIds: z.array(z.uuid()).max(20),
+    permissions: z.array(StaffPermissionSchema),
+  })
+  .partial();
 export type UpdateStaffInput = z.infer<typeof UpdateStaffSchema>;
 
 export const StaffListQuerySchema = PaginationQuerySchema.extend({

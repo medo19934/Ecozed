@@ -1,3 +1,4 @@
+import { localDate } from '@latif/shared';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { AuthResponse } from '@latif/shared';
@@ -244,7 +245,10 @@ describe('Phase 3 — dashboard & attendance (e2e)', () => {
   });
 
   it('parents request vacations; staff approve; roster shows VACATION', async () => {
-    const tomorrow = new Date(Date.now() + 86400_000).toISOString().slice(0, 10);
+    // Branch-local tomorrow (Asia/Riyadh), not UTC: after 21:00 UTC they differ.
+    const t = new Date(`${localDate()}T00:00:00Z`);
+    t.setUTCDate(t.getUTCDate() + 1);
+    const tomorrow = t.toISOString().slice(0, 10);
     await http
       .post('/api/v1/attendance/vacations')
       .set(bearer(mom))

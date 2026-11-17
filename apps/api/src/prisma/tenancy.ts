@@ -37,6 +37,31 @@ export const TENANT_EXEMPT_MODELS = new Set<string>([
   'Message',
 ]);
 
+/**
+ * Tables protected by Postgres Row Level Security (migration 20261118030000_row_level_security).
+ * Scoped queries on them run as role `latif_rls` with the verified user id in `app.user_id`.
+ */
+export const RLS_MODELS = new Set<string>([
+  'Child',
+  'ChildGuardian',
+  'ChildAttendance',
+  'DailyReport',
+  'VacationRequest',
+  'AttendanceEvent',
+  'Subscription',
+  'Plan',
+  'AdmissionRequest',
+  'Classroom',
+  'ClassTeacher',
+  'Membership',
+  'StaffAttendance',
+  'Document',
+  'Unit',
+  'UnitItem',
+  'DaycareFeature',
+  'AuditLog',
+]);
+
 /** Models with `deletedAt` (soft delete). */
 export const SOFT_DELETE_MODELS = new Set<string>([
   'Plan',
