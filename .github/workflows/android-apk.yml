@@ -1,0 +1,76 @@
+# Builds the Android app (APK) and publishes it as a GitHub release you can download on a phone.
+# Runs on every push that touches the mobile app, or manually (Actions → Android APK → Run).
+name: Android APK
+
+on:
+  push:
+    branches: [claude/latif-kids-saas-setup-lbtxt1, main]
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/shared/**'
+      - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The live API the app talks to.
+  EXPO_PUBLIC_API_URL: https://latif-kids-api.netlify.app
+  GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @latif/shared build
+
+      - name: Generate native Android project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform android --no-install --clean
+
+      - name: Build release APK
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+
+      - name: Collect APK
+        run: |
+          mkdir -p dist
+          cp apps/mobile/android/app/build/outputs/apk/release/app-release.apk dist/latif-kids.apk
+          ls -la dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: latif-kids-apk
+          path: dist/latif-kids.apk
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-${{ github.run_number }}
+          name: Latif Kids Android ${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          body: |
+            Download **latif-kids.apk** on your Android phone and open it to install
+            (allow "Install unknown apps" for your browser when asked).
+            Connected to ${{ env.EXPO_PUBLIC_API_URL }}.
+          files: dist/latif-kids.apk

@@ -13,7 +13,7 @@
     },
     "android": {
       "package": "app.latifkids.mobile",
-      "edgeToEdgeEnabled": true
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
@@ -72,6 +72,9 @@
     },
     "experiments": {
       "typedRoutes": true
+    },
+    "updates": {
+      "enabled": false
     }
   }
 }
