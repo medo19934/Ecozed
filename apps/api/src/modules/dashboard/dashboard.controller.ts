@@ -11,6 +11,7 @@ import { CurrentAuth, Roles, type AuthContext } from '../../common/decorators/au
 import { requireBranch } from '../../common/utils/scope';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AttendanceService } from '../attendance/attendance.service';
+import { UnitsService } from '../units/units.service';
 
 class DashboardQueryDto extends createZodDto(DashboardQuerySchema) {}
 
@@ -23,6 +24,7 @@ export class DashboardController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly attendance: AttendanceService,
+    private readonly units: UnitsService,
   ) {}
 
   private async branchIds(auth: AuthContext, scope: 'branch' | 'all'): Promise<string[]> {
@@ -56,8 +58,8 @@ export class DashboardController {
       }),
       this.prisma.raw.classroom.count({ where: { daycareId: { in: ids }, deletedAt: null } }),
     ]);
-    // Units and activities arrive with the curriculum module (phase 4).
-    return { scope: q.scope, children, staff, classes, units: 0, activities: 0 };
+    const { units, activities } = await this.units.counts(ids);
+    return { scope: q.scope, children, staff, classes, units, activities };
   }
 
   @Get('attendance')

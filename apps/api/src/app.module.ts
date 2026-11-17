@@ -10,7 +10,10 @@ import { AppConfig } from './config/app-config.service';
 import { AppConfigModule } from './config/config.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { AdmissionsModule } from './modules/admissions/admissions.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
+import { CalendarModule } from './modules/calendar/calendar.module';
+import { UnitsModule } from './modules/units/units.module';
 import { BranchesModule } from './modules/branches/branches.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ChildrenModule } from './modules/children/children.module';
@@ -47,6 +50,9 @@ import { PrismaModule } from './prisma/prisma.module';
     TestDataModule,
     AttendanceModule,
     DashboardModule,
+    AdmissionsModule,
+    UnitsModule,
+    CalendarModule,
   ],
   providers: [
     { provide: APP_PIPE, useClass: ZodValidationPipe },

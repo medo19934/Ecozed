@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { BranchDto, UpdateBranchInput, UpdateFeaturesInput } from '@latif/shared';
+import type {
+  BranchDto,
+  BranchOption,
+  UpdateBranchInput,
+  UpdateFeaturesInput,
+} from '@latif/shared';
 import { requireTenantId } from '../../prisma/tenancy';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -17,6 +22,14 @@ export class BranchesService {
     const b = await this.prisma.scoped.daycare.findFirst({ where: { id } });
     if (!b) throw new NotFoundException();
     return b;
+  }
+
+  list(): Promise<BranchOption[]> {
+    return this.prisma.raw.daycare.findMany({
+      where: { deletedAt: null },
+      select: { id: true, name: true, nameEn: true, city: true },
+      orderBy: { createdAt: 'asc' },
+    });
   }
 
   async current(): Promise<BranchDto> {

@@ -21,6 +21,19 @@ import { BranchesService } from './branches.service';
 class UpdateBranchDto extends createZodDto(UpdateBranchSchema) {}
 class UpdateFeaturesDto extends createZodDto(UpdateFeaturesSchema) {}
 
+/** Branch list for pickers (e.g. parents choosing where to enroll). */
+@ApiTags('branches')
+@ApiBearerAuth()
+@Controller('branches')
+export class BranchListController {
+  constructor(private readonly branches: BranchesService) {}
+
+  @Get()
+  list() {
+    return this.branches.list();
+  }
+}
+
 @ApiTags('branches')
 @ApiBearerAuth()
 @Controller('branches/current')

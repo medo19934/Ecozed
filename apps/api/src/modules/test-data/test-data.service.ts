@@ -37,12 +37,13 @@ export class TestDataService {
   ) {}
 
   async status() {
-    const [classes, children, staff] = await Promise.all([
+    const [classes, children, staff, units] = await Promise.all([
       this.prisma.scoped.classroom.count({ where: { isTest: true } }),
       this.prisma.scoped.child.count({ where: { isTest: true } }),
       this.prisma.scoped.membership.count({ where: { isTest: true } }),
+      this.prisma.scoped.unit.count({ where: { isTest: true } }),
     ]);
-    return { classes, children, staff };
+    return { classes, children, staff, units };
   }
 
   async create() {
@@ -110,6 +111,101 @@ export class TestDataService {
         } as never,
       });
     }
+    // Curriculum units with lessons/activities, and this week's calendar items.
+    const units = [
+      {
+        name: 'TEST · وحدة الماء',
+        color: '#5b6db4',
+        lessons: ['التعرف على الماء', 'مصادر الماء'],
+        activities: ['تجربة الطفو', 'رسم البحر'],
+      },
+      {
+        name: 'TEST · وحدة الفضاء',
+        color: '#7b649b',
+        lessons: ['الشمس والقمر', 'الكواكب'],
+        activities: ['صنع صاروخ'],
+      },
+    ];
+    const unitIds: string[] = [];
+    for (const u of units) {
+      const unit = await this.prisma.scoped.unit.create({
+        data: {
+          name: u.name,
+          color: u.color,
+          goals: ['اكتشاف', 'تواصل'],
+          startDate: new Date(),
+          isTest: true,
+        } as never,
+      });
+      unitIds.push(unit.id);
+      let order = 0;
+      for (const title of u.lessons) {
+        await this.prisma.scoped.unitItem.create({
+          data: { unitId: unit.id, kind: 'LESSON', title, sortOrder: order++ } as never,
+        });
+      }
+      for (const title of u.activities) {
+        await this.prisma.scoped.unitItem.create({
+          data: { unitId: unit.id, kind: 'ACTIVITY', title, sortOrder: order++ } as never,
+        });
+      }
+    }
+    const day = (offset: number) => {
+      const d = new Date();
+      d.setUTCHours(0, 0, 0, 0);
+      d.setUTCDate(d.getUTCDate() + offset);
+      return d;
+    };
+    const events = [
+      {
+        title: 'TEST · درس الماء',
+        type: 'LESSON',
+        audience: 'CLASS',
+        classroomId: classIds[0],
+        unitId: unitIds[0],
+        teacherId: teacherIds[0],
+        offset: 0,
+        startTime: '08:30',
+        endTime: '09:15',
+      },
+      {
+        title: 'TEST · نشاط الرسم',
+        type: 'ACTIVITY',
+        audience: 'CLASS',
+        classroomId: classIds[1],
+        unitId: unitIds[0],
+        teacherId: teacherIds[1],
+        offset: 1,
+        startTime: '10:00',
+        endTime: '10:45',
+      },
+      {
+        title: 'TEST · اجتماع أولياء الأمور',
+        type: 'MEETING',
+        audience: 'BRANCH',
+        offset: 2,
+        startTime: '16:00',
+        endTime: '17:00',
+      },
+      { title: 'TEST · رحلة الحديقة', type: 'TRIP', audience: 'BRANCH', offset: 3 },
+    ] as const;
+    for (const e of events) {
+      await this.prisma.raw.calendarEvent.create({
+        data: {
+          daycareId,
+          title: e.title,
+          type: e.type,
+          audience: e.audience,
+          classroomId: 'classroomId' in e ? e.classroomId : null,
+          unitId: 'unitId' in e ? e.unitId : null,
+          teacherId: 'teacherId' in e ? e.teacherId : null,
+          startDate: day(e.offset),
+          endDate: day(e.offset),
+          startTime: 'startTime' in e ? e.startTime : null,
+          endTime: 'endTime' in e ? e.endTime : null,
+        },
+      });
+    }
     await this.audit.log({ action: 'test_data.create', entity: 'Daycare', entityId: daycareId });
     return this.status();
   }
@@ -121,6 +217,10 @@ export class TestDataService {
       where: { daycareId, isTest: true },
       select: { id: true, userId: true },
     });
+    await this.prisma.raw.calendarEvent.deleteMany({
+      where: { daycareId, title: { startsWith: 'TEST ·' } },
+    });
+    await this.prisma.raw.unit.deleteMany({ where: { daycareId, isTest: true } });
     await this.prisma.raw.child.deleteMany({ where: { daycareId, isTest: true } });
     await this.prisma.raw.classroom.deleteMany({ where: { daycareId, isTest: true } });
     await this.prisma.raw.membership.deleteMany({ where: { daycareId, isTest: true } });

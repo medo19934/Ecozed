@@ -365,7 +365,7 @@ describe('Phase 2 — branch, classes, staff, children, parent (e2e)', () => {
 
   it('TEST data button creates and clears flagged rows', async () => {
     const created = await http.post('/api/v1/test-data').set(bearer(admin)).expect(201);
-    expect(created.body).toEqual({ classes: 3, children: 12, staff: 4 });
+    expect(created.body).toEqual({ classes: 3, children: 12, staff: 4, units: 2 });
     const kids = await http
       .get('/api/v1/children')
       .query({ search: 'TEST', pageSize: 50 })
@@ -374,6 +374,6 @@ describe('Phase 2 — branch, classes, staff, children, parent (e2e)', () => {
     expect(kids.body.items.every((c: { isTest: boolean }) => c.isTest)).toBe(true);
     await http.post('/api/v1/test-data').set(bearer(teacher)).expect(403);
     const cleared = await http.delete('/api/v1/test-data').set(bearer(admin)).expect(200);
-    expect(cleared.body).toEqual({ classes: 0, children: 0, staff: 0 });
+    expect(cleared.body).toEqual({ classes: 0, children: 0, staff: 0, units: 0 });
   });
 });

@@ -19,10 +19,14 @@ export const TENANT_MODELS = new Set<string>([
   'StaffAttendance',
   'AttendanceEvent',
   'VacationRequest',
+  'AdmissionRequest',
+  'Unit',
+  'UnitItem',
 ]);
 
 /** Models that carry `daycareId` but are intentionally NOT auto-scoped. */
-export const TENANT_EXEMPT_MODELS = new Set<string>(['RefreshToken']);
+/** CalendarEvent: daycareId is null for organisation-wide events; queried with explicit filters. */
+export const TENANT_EXEMPT_MODELS = new Set<string>(['RefreshToken', 'CalendarEvent']);
 
 /** Models with `deletedAt` (soft delete). */
 export const SOFT_DELETE_MODELS = new Set<string>([
@@ -32,6 +36,8 @@ export const SOFT_DELETE_MODELS = new Set<string>([
   'Classroom',
   'Child',
   'Document',
+  'Unit',
+  'CalendarEvent',
 ]);
 
 const READ_OPS = new Set([

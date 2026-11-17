@@ -16,6 +16,11 @@ export class GuardianLinkService {
     private readonly audit: AuditService,
   ) {}
 
+  /** Gives a user PARENT access to a branch (no-op if they already belong there). */
+  ensureParent(userId: string, daycareId: string): Promise<void> {
+    return this.ensureParentMembership(userId, daycareId);
+  }
+
   private async ensureParentMembership(userId: string, daycareId: string): Promise<void> {
     const existing = await this.prisma.raw.membership.findFirst({ where: { userId, daycareId } });
     if (!existing) {

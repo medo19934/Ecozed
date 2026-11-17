@@ -268,3 +268,84 @@ export interface DashboardAttendance {
   counts: Record<DayStatus, number>;
   updatedAt: string;
 }
+
+export interface BranchOption {
+  id: string;
+  name: string;
+  nameEn: string | null;
+  city: string | null;
+}
+
+export interface AdmissionDto {
+  id: string;
+  number: number;
+  branch: { id: string; name: string; nameEn: string | null };
+  childName: string;
+  childGender: 'MALE' | 'FEMALE';
+  childBirthDate: string;
+  guardianName: string;
+  relationship: string;
+  phone: string | null;
+  email: string | null;
+  notes: string | null;
+  status: 'UNDER_REVIEW' | 'ACCEPTED' | 'REJECTED';
+  rejectReason: string | null;
+  childId: string | null;
+  createdAt: string;
+}
+
+export interface AdmissionListResponse extends Paginated<AdmissionDto> {
+  counts: { total: number; UNDER_REVIEW: number; ACCEPTED: number; REJECTED: number };
+}
+
+export interface UnitItemDto {
+  id: string;
+  kind: 'LESSON' | 'ACTIVITY';
+  title: string;
+  description: string | null;
+}
+
+export interface UnitDto {
+  id: string;
+  name: string;
+  description: string | null;
+  minAgeMonths: number | null;
+  maxAgeMonths: number | null;
+  goals: string[];
+  color: string | null;
+  startDate: string | null;
+  status: 'ACTIVE' | 'ARCHIVED';
+  isTest: boolean;
+  lessons: number;
+  activities: number;
+  items: UnitItemDto[];
+  createdAt: string;
+}
+
+export interface UnitsResponse {
+  items: UnitDto[];
+  counts: { total: number; active: number; archived: number };
+  teachers: {
+    membershipId: string;
+    fullName: string;
+    avatarUrl: string | null;
+    specialties: string[];
+  }[];
+}
+
+export interface CalendarEventDto {
+  id: string;
+  title: string;
+  description: string | null;
+  type: 'EVENT' | 'LESSON' | 'ACTIVITY' | 'HOLIDAY' | 'MEETING' | 'TRIP';
+  audience: 'ALL' | 'BRANCH' | 'CLASS';
+  branch: { id: string; name: string } | null;
+  classroom: { id: string; name: string; color: string | null } | null;
+  unit: { id: string; name: string } | null;
+  teacher: { membershipId: string; fullName: string } | null;
+  startDate: string;
+  endDate: string;
+  startTime: string | null;
+  endTime: string | null;
+  canEdit: boolean;
+}

@@ -391,3 +391,118 @@ model VacationRequest {
   @@index([daycareId, status])
   @@index([childId, startDate])
 }
+
+enum AdmissionStatus {
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+}
+
+/// "Enroll my child": a parent's admission request to a branch.
+model AdmissionRequest {
+  id             String          @id @default(uuid()) @db.Uuid
+  /// Short human-readable number shown in tables.
+  number         Int             @default(autoincrement())
+  daycareId      String          @db.Uuid
+  requestedById  String?         @db.Uuid
+  childName      String
+  childGender    Gender
+  childBirthDate DateTime        @db.Date
+  guardianName   String
+  relationship   String
+  phone          String?
+  email          String?
+  notes          String?
+  status         AdmissionStatus @default(UNDER_REVIEW)
+  rejectReason   String?
+  reviewedById   String?         @db.Uuid
+  reviewedAt     DateTime?
+  childId        String?         @db.Uuid
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([number])
+  @@index([daycareId, status, createdAt])
+  @@index([requestedById])
+}
+
+enum UnitItemKind {
+  LESSON
+  ACTIVITY
+}
+
+/// Curriculum unit (e.g. "Water Unit") with lessons and activities.
+model Unit {
+  id           String       @id @default(uuid()) @db.Uuid
+  daycareId    String       @db.Uuid
+  name         String
+  description  String?
+  minAgeMonths Int?
+  maxAgeMonths Int?
+  goals        String[]     @default([])
+  color        String?
+  startDate    DateTime?    @db.Date
+  status       RecordStatus @default(ACTIVE)
+  isTest       Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+
+  items UnitItem[]
+
+  @@index([daycareId, status])
+}
+
+model UnitItem {
+  id          String       @id @default(uuid()) @db.Uuid
+  daycareId   String       @db.Uuid
+  unitId      String       @db.Uuid
+  kind        UnitItemKind
+  title       String
+  description String?
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([daycareId, unitId])
+}
+
+enum EventAudience {
+  ALL
+  BRANCH
+  CLASS
+}
+
+enum EventType {
+  EVENT
+  LESSON
+  ACTIVITY
+  HOLIDAY
+  MEETING
+  TRIP
+}
+
+/// Calendar item. audience ALL = every branch (daycareId null, super admin only).
+model CalendarEvent {
+  id          String        @id @default(uuid()) @db.Uuid
+  daycareId   String?       @db.Uuid
+  audience    EventAudience @default(BRANCH)
+  classroomId String?       @db.Uuid
+  unitId      String?       @db.Uuid
+  teacherId   String?       @db.Uuid
+  type        EventType     @default(EVENT)
+  title       String
+  description String?
+  startDate   DateTime      @db.Date
+  endDate     DateTime      @db.Date
+  startTime   String?
+  endTime     String?
+  createdById String?       @db.Uuid
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  @@index([daycareId, startDate])
+  @@index([audience, startDate])
+}
