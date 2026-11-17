@@ -84,6 +84,8 @@ export const api = {
       method: 'POST',
       body: body === undefined ? undefined : JSON.stringify(body),
     }),
+  /** Unauthenticated GET (sign-in options). */
+  publicGet: <T>(path: string) => raw<T>(path, {}),
   /** Unauthenticated call (login, OTP). */
   public: <T>(path: string, body: unknown) =>
     raw<T>(path, { method: 'POST', body: JSON.stringify(body) }),

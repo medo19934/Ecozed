@@ -1,5 +1,5 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { MessagesScreen } from '@/components/messages-screen';
 
 export default function Screen() {
-  return <ComingSoon titleKey="tabs.messages" />;
+  return <MessagesScreen />;
 }

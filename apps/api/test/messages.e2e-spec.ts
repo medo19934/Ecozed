@@ -100,4 +100,17 @@ describe('Messages + email/phone sign-in (e2e)', () => {
     await http.post(`/api/v1/messages/threads/${ann.body.id}`).set(bearer(parent)).send({ body: 'x' }).expect(403);
     await http.post('/api/v1/messages/threads').set(bearer(parent)).send({ kind: 'ANNOUNCEMENT', title: 'nope' }).expect(403);
   });
+
+  it('staff add a parent by local phone; the parent signs in and sees the child', async () => {
+    const phone = `05${String(u + 3).slice(-8)}`;
+    const added = await http.post('/api/v1/parents').set(bearer(admin)).send({ fullName: 'جدة', relationship: 'جدة', phone, childIds: [kidA, kidB] }).expect(201);
+    expect(added.body).toMatchObject({ phone: `+966${phone.slice(1)}`, linked: false });
+    expect(added.body.children).toHaveLength(2);
+    const p = await login(phone);
+    const kids = await http.get('/api/v1/parent/children').set(bearer(p.tokens.accessToken)).expect(200);
+    expect(kids.body.map((k: { id: string }) => k.id).sort()).toEqual([kidA, kidB].sort());
+    const list = await http.get('/api/v1/parents').set(bearer(admin)).expect(200);
+    expect(list.body.find((x: { phone: string }) => x.phone === `+966${phone.slice(1)}`).linked).toBe(true);
+    await http.get('/api/v1/parents').set(bearer(parent)).expect(403);
+  });
 });

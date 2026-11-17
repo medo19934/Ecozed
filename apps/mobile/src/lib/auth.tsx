@@ -18,6 +18,8 @@ interface AuthState {
   user: AuthUser | null;
   /** Sign up or sign in with a Google ID token. */
   signInWithGoogle: (idToken: string, locale: string) => Promise<AuthUser>;
+  /** Public demo mode: email or phone, no verification. */
+  login: (identifier: string, locale: string) => Promise<AuthUser>;
   /** Local development only (API AUTH_DEV_LOGIN=true). */
   devLogin: (email: string) => Promise<AuthUser>;
   signOut: () => Promise<void>;
@@ -71,6 +73,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut,
       signInWithGoogle: async (idToken, locale) =>
         accept(await api.public<AuthResponse>('/auth/google', { idToken, locale })),
+      login: async (identifier, locale) =>
+        accept(await api.public<AuthResponse>('/auth/login', { identifier, locale })),
       devLogin: async (email) =>
         accept(await api.public<AuthResponse>('/auth/dev-login', { email })),
     }),
