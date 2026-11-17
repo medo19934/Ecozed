@@ -133,8 +133,20 @@ export function StaffDashboard({ user }: { user: AuthUser }) {
             href="/classes"
             tint="#2fb36d"
           />
-          <Kpi icon={BookOpen} label={t('cards.units')} value={s?.units} tint="#f2a33a" />
-          <Kpi icon={Shapes} label={t('cards.activities')} value={s?.activities} tint="#e5484d" />
+          <Kpi
+            icon={BookOpen}
+            label={t('cards.units')}
+            value={s?.units}
+            href="/units"
+            tint="#f2a33a"
+          />
+          <Kpi
+            icon={Shapes}
+            label={t('cards.activities')}
+            value={s?.activities}
+            href="/calendar"
+            tint="#e5484d"
+          />
         </div>
         <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
           <AttendanceDonut scope={scope} />

@@ -15,13 +15,13 @@ import { StatusChip } from '@/components/ui/status-chip';
 import { useFormatDate } from '@/lib/format';
 import { VacationDialog } from './vacation-dialog';
 import { useQuery } from '@tanstack/react-query';
-import { Baby, Clock } from 'lucide-react';
+import { Baby } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ChildAvatar } from '@/components/children/child-avatar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api-client';
 import { useFormatAge } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -167,7 +167,6 @@ function MyVacations() {
 
 export function ParentHome({ user }: { user: AuthUser }) {
   const t = useTranslations('parent');
-  const tc = useTranslations('common');
   return (
     <div className="grid gap-6">
       <Card className="border-0 bg-brand-gradient text-white">
@@ -187,17 +186,13 @@ export function ParentHome({ user }: { user: AuthUser }) {
           <span className="row-span-2 flex size-12 items-center justify-center rounded-2xl bg-secondary text-primary">
             <Baby className="size-6" aria-hidden />
           </span>
-          <CardTitle className="flex items-center gap-2">
-            {t('enrollTitle')}
-            <Badge variant="muted">
-              <Clock aria-hidden />
-              {tc('soon')}
-            </Badge>
-          </CardTitle>
+          <CardTitle className="flex items-center gap-2">{t('enrollTitle')}</CardTitle>
           <CardDescription>{t('enrollBody')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button disabled>{t('enrollCta')}</Button>
+          <Button asChild>
+            <Link href="/enroll">{t('enrollCta')}</Link>
+          </Button>
         </CardContent>
       </Card>
     </div>

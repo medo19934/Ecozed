@@ -29,3 +29,26 @@ export const formatBytes = (n: number) =>
     : n < 1048576
       ? `${(n / 1024).toFixed(0)} KB`
       : `${(n / 1048576).toFixed(1)} MB`;
+
+/** Gregorian + Hijri (Umm al-Qura) date and time for a timestamp. */
+export function useDualDate() {
+  const f = useFormatter();
+  return (iso: string) => {
+    const d = new Date(iso);
+    let hijri = '';
+    try {
+      hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      }).format(d);
+    } catch {
+      /* calendar unsupported */
+    }
+    return {
+      gregorian: f.dateTime(d, { dateStyle: 'medium' }),
+      hijri,
+      time: f.dateTime(d, { timeStyle: 'short' }),
+    };
+  };
+}

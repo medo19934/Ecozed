@@ -51,9 +51,9 @@ const STAFF_NAV: NavItem[] = [
   { key: 'children', href: '/children', icon: Baby },
   { key: 'staff', href: '/staff', icon: Users, permission: 'canAddStaff' },
   { key: 'classes', href: '/classes', icon: School },
-  { key: 'units', href: '/units', icon: BookOpen, soon: true },
-  { key: 'calendar', href: '/calendar', icon: CalendarDays, soon: true },
-  { key: 'admissions', href: '/admissions', icon: UserPlus, soon: true },
+  { key: 'units', href: '/units', icon: BookOpen },
+  { key: 'calendar', href: '/calendar', icon: CalendarDays },
+  { key: 'admissions', href: '/admissions', icon: UserPlus, permission: 'canManageEnrollment' },
   { key: 'subscriptions', href: '/subscriptions', icon: CreditCard, soon: true },
   { key: 'messages', href: '/messages', icon: MessageSquare, soon: true, unreadDot: true },
   { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen, soon: true },
@@ -63,8 +63,8 @@ const STAFF_NAV: NavItem[] = [
 
 const PARENT_NAV: NavItem[] = [
   { key: 'home', href: '/dashboard', icon: House },
-  { key: 'enrollChild', href: '/enroll', icon: UserPlus, soon: true },
-  { key: 'calendar', href: '/calendar', icon: CalendarDays, soon: true },
+  { key: 'enrollChild', href: '/enroll', icon: UserPlus },
+  { key: 'calendar', href: '/calendar', icon: CalendarDays },
   { key: 'messages', href: '/messages', icon: MessageSquare, soon: true },
   { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen, soon: true },
 ];

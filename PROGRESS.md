@@ -43,10 +43,10 @@ SPEC.md "Revision 1" (from `docs/latif-kids-hub-reference.pdf`) overrides the or
 
 ## Phase 4 — Admissions, Calendar, Units
 
-- [ ] Parent "Enroll my child" → admission request to a branch
-- [ ] Admission requests: 4 cards, period chips, search/status/date filters; Accept (create child, assign class, link parent, open thread) / Reject (polite message)
-- [ ] Calendar day/week/month, Sat–Thu, Friday closed & greyed; filters class/type; Add to calendar (admin/manager); targets branch/class/everyone; "+N more"
-- [ ] Units (optional): active/archived, lessons & activities, active teachers side panel
+- [x] Parent "Enroll my child" → admission request to a branch (web + app), withdraw while under review, see decision/reason
+- [x] Admission requests: 4 cards, period chips, search/status/date filters, Gregorian + Hijri dates; Accept (create child, assign class, link parent) / Reject (polite message). Message thread on accept arrives with messaging (phase 6)
+- [x] Calendar day/week/month, Sat–Thu, Friday closed & greyed; filters class/type; Add to calendar (admin/manager); targets all branches/branch/class; "+N more"; app day strip + bottom-sheet details
+- [x] Units: active/archived, goals, lessons & activities, active teachers side panel; dashboard units/activities counts
 
 ## Phase 5 — Subscriptions (on-site payments)
 
@@ -95,3 +95,5 @@ SPEC.md "Revision 1" (from `docs/latif-kids-hub-reference.pdf`) overrides the or
 - Units/activities dashboard cards read 0 until the curriculum module (phase 4).
 - Biometric before location check-in runs on the device (expo-local-authentication); the server enforces the geofence (radius + up to 50 m GPS accuracy).
 - Added dep `qrcode` (web) to render the kiosk QR offline — no third-party QR service.
+- Calendar events with audience ALL have no branch (`daycareId` null); `CalendarEvent` is tenancy-exempt and every query filters explicitly by role (admin: branch + all; teacher: branch + all + own classes; parent: their children's branches/classes + all).
+- Admission email defaults to the requesting parent's Google email so the accepted child links to their account automatically.

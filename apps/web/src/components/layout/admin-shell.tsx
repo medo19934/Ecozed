@@ -103,10 +103,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </header>
 
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          {user &&
-          !items.some(
-            (i) => !i.soon && (pathname === i.href || pathname.startsWith(`${i.href}/`)),
-          ) ? (
+          {!user ? (
+            // Wait for the session so pages never fire requests the user isn't allowed to make.
+            <div className="grid gap-4">
+              <Skeleton className="h-10 w-64" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+          ) : !items.some(
+              (i) => !i.soon && (pathname === i.href || pathname.startsWith(`${i.href}/`)),
+            ) ? (
             <EmptyState icon={ShieldX} title={tc('forbidden')} />
           ) : (
             children

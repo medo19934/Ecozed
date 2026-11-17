@@ -100,24 +100,26 @@ export function ParentHome() {
 
         <Text className="text-start text-base font-semibold text-ink">{t('home.thisWeek')}</Text>
         <WeekStrip />
-        <Card className="flex-row items-start gap-4">
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push('/enroll')}
+          className="flex-row items-start gap-4 rounded-3xl border border-line bg-white p-5"
+        >
           <View className="h-12 w-12 items-center justify-center rounded-2xl bg-brand-soft">
             <Baby color="#5b6db4" size={24} />
           </View>
           <View className="flex-1 gap-1">
-            <View className="flex-row items-center gap-2">
-              <Text className="text-start text-base font-semibold text-ink">
-                {t('home.enrollTitle')}
-              </Text>
-              <Text className="rounded-full bg-line px-2 py-0.5 text-[11px] text-ink-muted">
-                {t('common.soon')}
-              </Text>
-            </View>
+            <Text className="text-start text-base font-semibold text-ink">
+              {t('home.enrollTitle')}
+            </Text>
             <Text className="text-start text-sm leading-5 text-ink-muted">
               {t('home.enrollBody')}
             </Text>
+            <Text className="mt-1 text-start text-sm font-semibold text-brand">
+              {t('enroll.open')}
+            </Text>
           </View>
-        </Card>
+        </Pressable>
       </ScrollView>
     </Screen>
   );

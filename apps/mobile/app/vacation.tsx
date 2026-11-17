@@ -139,7 +139,7 @@ export default function VacationScreen() {
                   </Text>
                 </View>
                 <View>
-                  <StatusPill status={PILL[v.status]} />
+                  <StatusPill status={PILL[v.status]} label={t(`status.${v.status}`)} />
                 </View>
               </View>
             ))}

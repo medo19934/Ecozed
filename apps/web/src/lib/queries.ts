@@ -4,8 +4,8 @@ import type { ClassroomDto, Paginated, StaffListItem } from '@latif/shared';
 import { useQuery } from '@tanstack/react-query';
 import { api } from './api-client';
 
-export const useClasses = () =>
-  useQuery({ queryKey: ['classes'], queryFn: () => api.get<ClassroomDto[]>('/classes') });
+export const useClasses = (enabled = true) =>
+  useQuery({ queryKey: ['classes'], queryFn: () => api.get<ClassroomDto[]>('/classes'), enabled });
 
 /** Active staff for pickers (teachers in class forms). */
 export const useStaffOptions = (enabled = true) =>

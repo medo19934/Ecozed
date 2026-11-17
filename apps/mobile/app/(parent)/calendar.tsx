@@ -1,5 +1,1 @@
-import { ComingSoon } from '@/components/coming-soon';
-
-export default function Screen() {
-  return <ComingSoon titleKey="tabs.calendar" />;
-}
+export { CalendarScreen as default } from '@/components/calendar-screen';
