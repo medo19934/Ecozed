@@ -14,7 +14,8 @@
 - **Google sign-in only** (web + mobile). No passwords, no OTP/confirmation codes, no SMS.
 - Parents sign up themselves with Google. Staff accounts are created by admins (by email) and sign in with that Google account.
 - Super admins = emails listed in `SUPER_ADMIN_EMAILS`.
-- **Public demo mode (owner request, `PUBLIC_DEMO=true`)**: sign in with an email or phone number (no code), plus one-tap role cards: General admin, and per branch Manager / Teacher / Parent. Each sees only their own data. Demo data is seeded once (marked TEST). Insecure by design — demos only; real use = `PUBLIC_DEMO=false` + Google.
+- **Real sign-in (owner request, live default)**: email or phone number + password; admins issue one-time passwords to staff and parents; parents may self-register.
+- **Public demo mode (`PUBLIC_DEMO=true`, demos only)**: sign in with an email or phone number (no code), plus one-tap role cards: General admin, and per branch Manager / Teacher / Parent. Each sees only their own data. Demo data is seeded once (marked TEST). Insecure by design — demos only; real use = `PUBLIC_DEMO=false` + Google.
 
 ## Locale & calendar
 - Arabic RTL default, English toggle. Week runs **Saturday → Thursday; Friday is closed** (greyed). Time zone Asia/Riyadh. Currency SAR.

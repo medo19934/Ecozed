@@ -14,12 +14,15 @@ async function boot(): Promise<string> {
   // Netlify Database injects NETLIFY_DB_URL into functions.
   if (!process.env.DATABASE_URL && process.env.NETLIFY_DB_URL)
     process.env.DATABASE_URL = process.env.NETLIFY_DB_URL;
-  const { migrate } = await import('./serverless-migrate');
+  const { migrate, purgeOnce } = await import('./serverless-migrate');
   // Embedded by scripts/build-netlify.mjs (the function has no prisma/ folder).
   const embedded = (globalThis as { __LATIF_MIGRATIONS__?: { name: string; sql: string }[] })
     .__LATIF_MIGRATIONS__;
   const applied = await migrate(process.env.DATABASE_URL ?? '', embedded);
   if (applied.length) Logger.log(`Applied migrations: ${applied.join(', ')}`, 'Serverless');
+  if (await purgeOnce(process.env.DATABASE_URL ?? '', process.env.PURGE_DATA_ONCE)) {
+    Logger.warn('All app data wiped (PURGE_DATA_ONCE)', 'Serverless');
+  }
   const { AppModule } = await import('./app.module');
   const { configureApp, setupSwagger } = await import('./bootstrap');
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {

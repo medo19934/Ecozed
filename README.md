@@ -79,7 +79,9 @@ Live: web https://latif-kids.netlify.app · mobile app (web build) https://latif
 - **Web site**: Next.js runtime (`netlify.toml` at the repo root). Env: `API_URL=https://latif-kids-api.netlify.app/api/v1`.
 - **App site**: `expo export -p web` with `EXPO_PUBLIC_API_URL=https://latif-kids-api.netlify.app`, SPA fallback.
 - Deploy all three: `WEB_SITE_ID=<id> scripts/deploy-netlify.sh`.
-- `PUBLIC_DEMO=true` = role cards + email/phone sign-in **without verification** and demo data. Anyone can open any account: never use it with real families' data. For real use set `PUBLIC_DEMO=false` and configure Google sign-in.
+- **Live mode is real** (`PUBLIC_DEMO=false`): sign in with email or phone + password. The general admin account comes from `SUPER_ADMIN_EMAILS` + `SUPER_ADMIN_PASSWORD` (must be changed on first sign-in). Admins create staff/parent logins and get a one-time password to hand over (copy / WhatsApp); parents can also self-register. `PURGE_DATA_ONCE=<value>` wipes all app data once per value (used to leave the demo).
+- `PUBLIC_DEMO=true` (demo only): role cards + email/phone sign-in **without password** and demo data. Never with real families' data.
+- **Android APK**: `.github/workflows/android-apk.yml` builds a release APK on every mobile change and publishes it under GitHub → Releases (`latif-kids.apk`).
 
 ## Tests
 

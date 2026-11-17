@@ -64,3 +64,40 @@ export async function migrate(
   }
   return applied;
 }
+
+/**
+ * One-time data wipe (e.g. leaving the public demo for real use): when PURGE_DATA_ONCE is set,
+ * empties every app table once per distinct value (recorded in "_latif_flags"). Schema is kept;
+ * branches are recreated on start.
+ */
+export async function purgeOnce(
+  connectionString: string,
+  key: string | undefined,
+): Promise<boolean> {
+  if (!key) return false;
+  const client = new Client({ connectionString });
+  await client.connect();
+  try {
+    await client.query('SELECT pg_advisory_lock(727275)');
+    await client.query(
+      'CREATE TABLE IF NOT EXISTS "_latif_flags" (name text PRIMARY KEY, at timestamptz NOT NULL DEFAULT now())',
+    );
+    const done = await client.query('SELECT 1 FROM "_latif_flags" WHERE name = $1', [
+      `purge:${key}`,
+    ]);
+    if (done.rowCount) return false;
+    const tables = (
+      await client.query<{ tablename: string }>(
+        "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename NOT IN ('_latif_migrations', '_latif_flags', '_prisma_migrations')",
+      )
+    ).rows.map((r) => `"${r.tablename}"`);
+    await client.query('BEGIN');
+    if (tables.length) await client.query(`TRUNCATE ${tables.join(', ')} CASCADE`);
+    await client.query('INSERT INTO "_latif_flags" (name) VALUES ($1)', [`purge:${key}`]);
+    await client.query('COMMIT');
+    return true;
+  } finally {
+    await client.query('SELECT pg_advisory_unlock(727275)').catch(() => undefined);
+    await client.end();
+  }
+}
