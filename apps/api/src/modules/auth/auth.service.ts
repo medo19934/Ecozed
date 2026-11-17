@@ -84,7 +84,11 @@ export class AuthService {
       where: isEmail ? { email: identifier } : { phone: identifier },
     });
     if (!demo) {
-      const ok = await verifyPassword(password ?? '', user?.passwordHash ?? null);
+      // Forgive spaces copied around the password (e.g. from a WhatsApp message).
+      const ok =
+        (await verifyPassword(password ?? '', user?.passwordHash ?? null)) ||
+        (password !== password?.trim() &&
+          (await verifyPassword(password?.trim() ?? '', user?.passwordHash ?? null)));
       if (!user || !ok) {
         await this.audit.log({
           action: 'auth.login_failed',

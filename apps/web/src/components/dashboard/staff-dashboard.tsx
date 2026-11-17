@@ -1,7 +1,9 @@
 'use client';
 
 import type { AuthUser, DashboardSummary } from '@latif/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { useErrorMessage } from '@/lib/use-error-message';
 import {
   Baby,
   BookOpen,
@@ -9,6 +11,7 @@ import {
   MonitorSmartphone,
   School,
   Shapes,
+  Sparkles,
   UserPlus,
   Users,
   type LucideIcon,
@@ -88,6 +91,17 @@ export function StaffDashboard({ user }: { user: AuthUser }) {
   const s = summary.data;
   const branch = user.memberships.find((m) => m.daycareId === user.daycareId)?.daycareName;
   const admin = user.role === 'SUPER_ADMIN' || user.role === 'MANAGER';
+  const qc = useQueryClient();
+  const errorMessage = useErrorMessage();
+  const sample = useMutation({
+    mutationFn: () => api.post('/test-data'),
+    onSuccess: () => {
+      void qc.invalidateQueries();
+      toast.success(t('sampleLoaded'));
+    },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  const empty = admin && scope === 'branch' && s !== undefined && s.children === 0;
 
   return (
     <>
@@ -111,6 +125,25 @@ export function StaffDashboard({ user }: { user: AuthUser }) {
         }
       />
       <div className="grid gap-6">
+        {empty && (
+          <Card className="flex flex-col gap-4 border-dashed bg-brand-gradient/5 p-5 sm:flex-row sm:items-center">
+            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand-gradient text-white">
+              <Sparkles className="size-6" />
+            </span>
+            <div className="flex-1">
+              <p className="font-semibold">{t('emptyTitle', { branch: branch ?? '' })}</p>
+              <p className="text-sm text-muted-foreground">{t('emptyHint')}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline">
+                <Link href="/children">{t('emptyAddChild')}</Link>
+              </Button>
+              <Button onClick={() => sample.mutate()} disabled={sample.isPending}>
+                <Sparkles /> {t('loadSample')}
+              </Button>
+            </div>
+          </Card>
+        )}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
           <Kpi
             icon={Baby}

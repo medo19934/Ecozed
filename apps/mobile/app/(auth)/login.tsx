@@ -44,6 +44,7 @@ export default function LoginScreen() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [fullName, setFullName] = useState('');
   const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [google, setGoogle] = useState(false);
   type Branch = { slug: string; name: string; nameEn: string | null };
   const [branches, setBranches] = useState<Branch[]>([]);
@@ -311,11 +312,20 @@ export default function LoginScreen() {
                 label={t('auth.password')}
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
+                secureTextEntry={!showPw}
                 autoCapitalize="none"
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 style={{ writingDirection: 'ltr', textAlign: 'left' }}
               />
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setShowPw((v) => !v)}
+                className="-mt-3 self-end py-1"
+              >
+                <Text className="text-sm font-medium text-brand">
+                  {t(showPw ? 'auth.hidePassword' : 'auth.showPassword')}
+                </Text>
+              </Pressable>
               {error ? (
                 <Text accessibilityRole="alert" className="text-start text-sm text-danger">
                   {error}

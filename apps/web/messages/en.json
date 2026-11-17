@@ -161,7 +161,12 @@
     "openKiosk": "Open attendance kiosk",
     "takeAttendance": "Take attendance",
     "addChild": "Add child",
-    "addStaff": "Add staff"
+    "addStaff": "Add staff",
+    "emptyTitle": "{branch} is ready to start",
+    "emptyHint": "No data yet. Add classes, staff and children, or load TEST sample data to try every feature — you can remove it later in Settings.",
+    "emptyAddChild": "Add child",
+    "loadSample": "Load sample data",
+    "sampleLoaded": "Sample data loaded"
   },
   "parent": {
     "greeting": "Hello, {name}",

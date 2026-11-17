@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { localDate } from '@latif/shared';
+import { dbDate } from '../attendance/attendance.util';
 import { requireTenantId } from '../../prisma/tenancy';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -86,6 +88,7 @@ export class TestDataService {
     }
 
     const now = new Date();
+    const childIds: string[] = [];
     for (let i = 0; i < 12; i++) {
       const classIndex = i % 3;
       const ageMonths = [24, 38, 60][classIndex]! + (i % 4);
@@ -101,6 +104,7 @@ export class TestDataService {
           isTest: true,
         } as never,
       });
+      childIds.push(child.id);
       await this.prisma.scoped.childGuardian.create({
         data: {
           childId: child.id,
@@ -206,6 +210,43 @@ export class TestDataService {
         },
       });
     }
+    // Today's attendance (fills the dashboard donut): most present, a few absent / on vacation / left.
+    const today = dbDate(localDate());
+    for (const [i, childId] of childIds.entries()) {
+      if (i % 6 === 5) continue; // no record yet
+      const status = i % 6 === 4 ? 'ABSENT' : i % 6 === 3 ? 'VACATION' : 'ATTENDED';
+      await this.prisma.raw.childAttendance.upsert({
+        where: { childId_date: { childId, date: today } },
+        update: {},
+        create: {
+          daycareId,
+          childId,
+          date: today,
+          status,
+          checkInAt: status === 'ATTENDED' ? new Date(Date.now() - (3 + i) * 600_000) : null,
+          checkOutAt: status === 'ATTENDED' && i % 6 === 2 ? new Date() : null,
+          droppedOffBy: status === 'ATTENDED' ? 'الأم' : null,
+          method: 'MANUAL',
+        },
+      });
+    }
+    // A welcome announcement in Messages.
+    const thread = await this.prisma.raw.messageThread.create({
+      data: { daycareId, kind: 'ANNOUNCEMENT', title: 'TEST · أهلًا بكم في لطيف كيدز' },
+    });
+    const author = await this.prisma.raw.membership.findFirst({
+      where: { daycareId, isTest: true },
+    });
+    if (author) {
+      await this.prisma.raw.message.create({
+        data: {
+          daycareId,
+          threadId: thread.id,
+          senderId: author.userId,
+          body: 'هذه رسالة تجريبية (TEST). يمكن حذف كل البيانات التجريبية من الإعدادات.',
+        },
+      });
+    }
     await this.audit.log({ action: 'test_data.create', entity: 'Daycare', entityId: daycareId });
     return this.status();
   }
@@ -219,6 +260,16 @@ export class TestDataService {
     });
     await this.prisma.raw.calendarEvent.deleteMany({
       where: { daycareId, title: { startsWith: 'TEST ·' } },
+    });
+    const testKids = await this.prisma.raw.child.findMany({
+      where: { daycareId, isTest: true },
+      select: { id: true },
+    });
+    await this.prisma.raw.messageThread.deleteMany({
+      where: {
+        daycareId,
+        OR: [{ title: { startsWith: 'TEST ·' } }, { childId: { in: testKids.map((k) => k.id) } }],
+      },
     });
     await this.prisma.raw.unit.deleteMany({ where: { daycareId, isTest: true } });
     await this.prisma.raw.child.deleteMany({ where: { daycareId, isTest: true } });
