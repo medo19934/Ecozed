@@ -3,19 +3,19 @@ import { requireTenantId } from '../../prisma/tenancy';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 
-const FIRST = [
-  'ليان',
-  'سارة',
-  'يوسف',
-  'عمر',
-  'جود',
-  'ريم',
-  'فيصل',
-  'نورة',
-  'خالد',
-  'لمى',
-  'سلمان',
-  'هيا',
+const KIDS: [string, 'MALE' | 'FEMALE'][] = [
+  ['ليان', 'FEMALE'],
+  ['يوسف', 'MALE'],
+  ['سارة', 'FEMALE'],
+  ['عمر', 'MALE'],
+  ['جود', 'FEMALE'],
+  ['فيصل', 'MALE'],
+  ['ريم', 'FEMALE'],
+  ['خالد', 'MALE'],
+  ['نورة', 'FEMALE'],
+  ['سلمان', 'MALE'],
+  ['لمى', 'FEMALE'],
+  ['تركي', 'MALE'],
 ];
 const LAST = ['العتيبي', 'القحطاني', 'الشهري', 'الدوسري', 'الحربي', 'الزهراني'];
 const TEACHERS = ['أ. هدى', 'أ. منيرة', 'أ. أمل', 'أ. ريما'];
@@ -92,8 +92,8 @@ export class TestDataService {
       const last = LAST[i % LAST.length]!;
       const child = await this.prisma.scoped.child.create({
         data: {
-          fullName: `TEST ${FIRST[i]} ${last}`,
-          gender: i % 2 ? 'MALE' : 'FEMALE',
+          fullName: `TEST ${KIDS[i]![0]} ${last}`,
+          gender: KIDS[i]![1],
           birthDate: birth,
           classroomId: classIds[classIndex],
           allergies: i % 5 === 0 ? 'فول سوداني' : null,

@@ -41,10 +41,15 @@ async function handle(request: NextRequest, ctx: RouteContext<'/bff/api/[...path
     }
   }
 
-  const res = new NextResponse(upstream.body, {
-    status: upstream.status,
-    headers: { 'content-type': upstream.headers.get('content-type') ?? 'application/json' },
+  const out = new Headers({
+    'content-type': upstream.headers.get('content-type') ?? 'application/json',
   });
+  for (const h of ['content-disposition', 'content-length']) {
+    const v = upstream.headers.get(h);
+    if (v) out.set(h, v);
+  }
+  out.set('cache-control', 'private, no-store');
+  const res = new NextResponse(upstream.body, { status: upstream.status, headers: out });
   if (refreshed) setSessionCookies(res, refreshed);
   else if (upstream.status === 401) clearSessionCookies(res);
   return res;

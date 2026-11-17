@@ -1,12 +1,18 @@
 'use client';
 
-import { CLOSED_WEEKDAYS, WORK_WEEK, type AuthUser } from '@latif/shared';
+import { CLOSED_WEEKDAYS, WORK_WEEK, type AuthUser, type ParentChildDto } from '@latif/shared';
+import { useQuery } from '@tanstack/react-query';
 import { Baby, Clock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { ChildAvatar } from '@/components/children/child-avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { api } from '@/lib/api-client';
+import { useFormatAge } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useLocale } from 'next-intl';
 
 /** Saturday → Friday strip for the current week (Friday closed). */
 function WeekStrip() {
@@ -47,6 +53,55 @@ function WeekStrip() {
   );
 }
 
+function MyChildren() {
+  const t = useTranslations('parentChildren');
+  const tk = useTranslations('children');
+  const age = useFormatAge();
+  const locale = useLocale();
+  const kids = useQuery({
+    queryKey: ['parent', 'children'],
+    queryFn: () => api.get<ParentChildDto[]>('/parent/children'),
+  });
+  return (
+    <section className="space-y-3">
+      <h3 className="font-semibold">{t('title')}</h3>
+      {kids.isLoading ? (
+        <Skeleton className="h-24" />
+      ) : !kids.data?.length ? (
+        <p className="rounded-[20px] border border-dashed bg-card p-5 text-sm text-muted-foreground">
+          {t('empty')}
+        </p>
+      ) : (
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {kids.data.map((k) => (
+            <li key={k.id}>
+              <Card className="py-4">
+                <CardContent className="flex items-center gap-4">
+                  <ChildAvatar
+                    src={k.hasPhoto ? `/parent/children/${k.id}/photo` : null}
+                    name={k.fullName}
+                    gender={k.gender}
+                    className="size-14"
+                  />
+                  <div className="min-w-0 space-y-0.5">
+                    <p className="font-semibold">{k.fullName}</p>
+                    <p className="text-sm text-muted-foreground">{age(k.birthDate)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(locale === 'en' && k.branch.nameEn) || k.branch.name}
+                      {' · '}
+                      {k.classroom?.name ?? tk('noClass')}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export function ParentHome({ user }: { user: AuthUser }) {
   const t = useTranslations('parent');
   const tc = useTranslations('common');
@@ -58,6 +113,7 @@ export function ParentHome({ user }: { user: AuthUser }) {
           <p className="text-white/85">{t('intro')}</p>
         </CardContent>
       </Card>
+      <MyChildren />
       <section className="space-y-3">
         <h3 className="font-semibold">{t('thisWeek')}</h3>
         <WeekStrip />

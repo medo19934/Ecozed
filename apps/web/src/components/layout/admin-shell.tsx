@@ -7,7 +7,9 @@ import { LocaleSwitcher } from '@/components/locale-switcher';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useRouter } from '@/i18n/navigation';
+import { usePathname, useRouter } from '@/i18n/navigation';
+import { ShieldX } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import { ApiError } from '@/lib/api-client';
 import { useSession } from '@/lib/use-session';
 import { cn } from '@/lib/utils';
@@ -23,6 +25,8 @@ const EXPAND_KEY = 'lk:sidebar-expanded';
 export function AdminShell({ children }: { children: ReactNode }) {
   const t = useTranslations('nav');
   const router = useRouter();
+  const pathname = usePathname();
+  const tc = useTranslations('errors');
   const session = useSession();
   // Icon rail by default (logo on top); users can expand it.
   const [collapsed, setCollapsed] = useState(true);
@@ -50,7 +54,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     });
 
   const user = session.data;
-  const items = navFor(user?.role);
+  const items = navFor(user);
 
   return (
     <div className="flex min-h-dvh">
@@ -98,7 +102,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
           {user ? <UserMenu user={user} /> : <Skeleton className="h-10 w-36" />}
         </header>
 
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          {user &&
+          !items.some(
+            (i) => !i.soon && (pathname === i.href || pathname.startsWith(`${i.href}/`)),
+          ) ? (
+            <EmptyState icon={ShieldX} title={tc('forbidden')} />
+          ) : (
+            children
+          )}
+        </main>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import type { Role } from '@latif/shared';
+import type { AuthUser, StaffPermission } from '@latif/shared';
 import {
   BarChart3,
   Baby,
@@ -41,14 +41,16 @@ export interface NavItem {
   /** Not built yet — rendered disabled with a "Soon" badge. Flip off as phases land. */
   soon?: boolean;
   unreadDot?: boolean;
+  /** Hidden unless the user holds this permission (API enforces it anyway). */
+  permission?: StaffPermission;
 }
 
 const STAFF_NAV: NavItem[] = [
   { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard },
   { key: 'attendance', href: '/attendance', icon: ClipboardCheck, soon: true },
-  { key: 'children', href: '/children', icon: Baby, soon: true },
-  { key: 'staff', href: '/staff', icon: Users, soon: true },
-  { key: 'classes', href: '/classes', icon: School, soon: true },
+  { key: 'children', href: '/children', icon: Baby },
+  { key: 'staff', href: '/staff', icon: Users, permission: 'canAddStaff' },
+  { key: 'classes', href: '/classes', icon: School },
   { key: 'units', href: '/units', icon: BookOpen, soon: true },
   { key: 'calendar', href: '/calendar', icon: CalendarDays, soon: true },
   { key: 'admissions', href: '/admissions', icon: UserPlus, soon: true },
@@ -56,7 +58,7 @@ const STAFF_NAV: NavItem[] = [
   { key: 'messages', href: '/messages', icon: MessageSquare, soon: true, unreadDot: true },
   { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen, soon: true },
   { key: 'reports', href: '/reports', icon: BarChart3, soon: true },
-  { key: 'settings', href: '/settings', icon: Settings, soon: true },
+  { key: 'settings', href: '/settings', icon: Settings, permission: 'canManageSettings' },
 ];
 
 const PARENT_NAV: NavItem[] = [
@@ -67,5 +69,7 @@ const PARENT_NAV: NavItem[] = [
   { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen, soon: true },
 ];
 
-export const navFor = (role: Role | undefined): NavItem[] =>
-  role === 'PARENT' ? PARENT_NAV : STAFF_NAV;
+export const navFor = (user: AuthUser | undefined): NavItem[] =>
+  user?.role === 'PARENT'
+    ? PARENT_NAV
+    : STAFF_NAV.filter((i) => !i.permission || Boolean(user?.permissions.includes(i.permission)));

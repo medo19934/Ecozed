@@ -25,13 +25,13 @@ SPEC.md "Revision 1" (from `docs/latif-kids-hub-reference.pdf`) overrides the or
 
 ## Phase 2 — Branch setup & core records
 
-- [ ] Branch profile (super admin edits all; manager own): name ar/en, logo upload (S3/MinIO), phone, address, map pin + geofence radius warning
-- [ ] Feature toggles per branch (messages, QR attendance, geofenced staff attendance, Daily Story AI — off by default)
-- [ ] Staff: admin creates staff by email (role manager/teacher/assistant, branch, class), permission toggles enforced; profile panel + Files tab (private, upload/download/soft-delete, deleted-files bin)
-- [ ] Classes CRUD (capacity, age range, teachers); teachers see only their class
-- [ ] Children CRUD (guardians linked to parent accounts, allergies, medical, pickup, archive/restore, search/filter/pagination) + child profile
-- [ ] Parent: linked children list on home; visibility enforced (own children only)
-- [ ] Admin-only "TEST data" button (clearly labelled) — no seed demo data
+- [x] Branch profile (super admin edits all; manager own): name ar/en, logo upload (local/S3/MinIO), phone, address, map pin + geofence radius warning
+- [x] Feature toggles per branch (messages, QR attendance, geofenced staff attendance, Daily Story AI — off by default)
+- [x] Staff: admin creates staff by email (role manager/teacher/assistant, branch, class), permission toggles enforced; profile panel + Files tab (private, upload/download/soft-delete, deleted-files bin)
+- [x] Classes CRUD (capacity, age range, teachers); teachers see only their class
+- [x] Children CRUD (guardians linked to parent accounts, allergies, medical, pickup, archive/restore, search/filter/pagination) + child profile
+- [x] Parent: linked children list on home (web + mobile); visibility enforced (own children only); teacher mobile "Today" lists own class
+- [x] Admin-only "TEST data" button (clearly labelled) — no seed demo data
 
 ## Phase 3 — Dashboard & Attendance
 
@@ -87,3 +87,7 @@ SPEC.md "Revision 1" (from `docs/latif-kids-hub-reference.pdf`) overrides the or
 - shadcn registry unreachable from the sandbox → components hand-written in shadcn style (`components.json` kept).
 - Expo SDK 58, NativeWind 4 + Tailwind 3 (mobile), React 19.3 across web+mobile. Tokens in SecureStore. Arabic default; switching language reloads to apply native RTL.
 - e2e tests run against `latif_kids_test` (`prisma migrate deploy`, unique fixtures, no destructive reset).
+- Storage: `STORAGE_DRIVER=local` (dev disk, `apps/api/storage/`, git-ignored) or `s3` (MinIO/AWS). Files are never public: served through authenticated API routes (web via BFF, mobile with bearer header).
+- Guardians link to parent accounts by email/phone both when staff save a child and on every parent sign-in; a linked parent gets a PARENT membership in that branch. `/parent/children` filters by `guardians.userId` (crosses branches).
+- Branch map: lat/lng fields + "use my location" + Google Maps embed preview (no API key). A full Places/pin picker needs `NEXT_PUBLIC_GOOGLE_MAPS_KEY` (later).
+- Web route guard: pages not in the user's nav render "no permission"; the API is the real enforcement.

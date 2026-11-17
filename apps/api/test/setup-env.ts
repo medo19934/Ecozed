@@ -1,3 +1,6 @@
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 // Runs in each e2e worker before modules load.
 process.env.NODE_ENV = 'test';
 process.env.SUPER_ADMIN_EMAILS = 'boss@latif.test';
@@ -8,7 +11,4 @@ process.env.DATABASE_URL =
 process.env.JWT_ACCESS_SECRET ??= 'test-access-secret';
 process.env.JWT_REFRESH_SECRET ??= 'test-refresh-secret';
 process.env.STORAGE_DRIVER = 'local';
-process.env.STORAGE_LOCAL_DIR = require('node:path').join(
-  require('node:os').tmpdir(),
-  'latif-e2e-storage',
-);
+process.env.STORAGE_LOCAL_DIR = join(tmpdir(), 'latif-e2e-storage');
