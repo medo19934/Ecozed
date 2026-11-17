@@ -243,7 +243,10 @@
     "invalid_credentials": "Wrong email/phone or password.",
     "account_exists": "An account with this email or phone already exists. Sign in, or ask your branch for a password.",
     "wrong_password": "Current password is wrong.",
-    "password_too_short": "Password must be at least 8 characters."
+    "password_too_short": "Password must be at least 8 characters.",
+    "subscription_canceled": "This subscription is canceled.",
+    "already_paid": "Already paid.",
+    "invalid_date": "Invalid date."
   },
   "settings": {
     "title": "Settings",
@@ -282,7 +285,8 @@
     "testCreate": "Add TEST data",
     "testClear": "Remove TEST data",
     "testCounts": "Currently: {classes} classes · {staff} staff · {children} children",
-    "testConfirm": "Remove all TEST data from this branch?"
+    "testConfirm": "Remove all TEST data from this branch?",
+    "adminsTab": "General admins"
   },
   "classes": {
     "title": "Classes",
@@ -718,5 +722,165 @@
     "rule": "At least 8 characters.",
     "confirm": "Confirm password",
     "mismatch": "Passwords don't match"
+  },
+  "subscriptions": {
+    "title": "Subscriptions",
+    "add": "Add subscription",
+    "search": "Search by child name",
+    "all": "All",
+    "child": "Child",
+    "choose": "Choose…",
+    "plan": "Plan",
+    "noPlan": "No plan",
+    "value": "Value (SAR)",
+    "start": "Start date",
+    "end": "End date",
+    "paymentStatus": "Payment status",
+    "paymentMethod": "Payment method",
+    "statusCol": "Status",
+    "actions": "Actions",
+    "empty": "No subscriptions",
+    "markPaid": "Mark paid",
+    "markedPaid": "Payment recorded",
+    "remind": "Remind to pay",
+    "archiveChild": "Archive child",
+    "cancel": "Cancel subscription",
+    "done": {
+      "remind": "Reminder sent to the parent in Messages",
+      "cancel": "Subscription canceled",
+      "archive-child": "Child archived"
+    },
+    "pay": {
+      "PAID": "Paid",
+      "UNPAID": "Unpaid"
+    },
+    "method": {
+      "CASH": "Cash",
+      "CARD": "Card (mada)",
+      "TRANSFER": "Bank transfer"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "ENDED": "Ended",
+      "CANCELED": "Canceled"
+    },
+    "cards": {
+      "total": "Total subscriptions",
+      "paid": "Paid",
+      "unpaid": "Unpaid",
+      "canceled": "Canceled"
+    },
+    "filters": {
+      "class": "Class",
+      "account": "Account status",
+      "plan": "Plan",
+      "payment": "Payment status",
+      "status": "Subscription status"
+    },
+    "periodsFilter": {
+      "all": "All",
+      "today": "Today",
+      "week": "Last week",
+      "month": "Last month",
+      "year": "Last year"
+    },
+    "plans": "Plans",
+    "addPlan": "Add plan",
+    "editPlan": "Edit plan",
+    "deletePlan": "Delete plan?",
+    "noPlans": "No plans yet.",
+    "planName": "Plan name",
+    "price": "Price (SAR)",
+    "period": "Period",
+    "services": "Services",
+    "servicesHint": "Type a service and press Enter (meals, transport…)",
+    "periods": {
+      "MONTHLY": "Monthly",
+      "TERM": "Term",
+      "YEARLY": "Yearly"
+    },
+    "activeCount": "{n} active",
+    "reminders": "Reminders",
+    "noReminders": "No reminders sent yet.",
+    "unpaidTotal": "Unpaid amounts: {amount}",
+    "mineTitle": "My subscriptions",
+    "mineEmpty": "No subscriptions for your children yet.",
+    "payOnSite": "Pay at the branch."
+  },
+  "dailyReports": {
+    "title": "Daily reports",
+    "date": "Date",
+    "class": "Class",
+    "allClasses": "All classes",
+    "progress": "{done} of {total} shared",
+    "staffEmpty": "No children in your classes.",
+    "parentEmpty": "The branch hasn't shared daily reports yet.",
+    "shared": "Shared",
+    "draft": "Draft",
+    "mealsTitle": "Meals",
+    "nap": "Nap (minutes)",
+    "toilet": "Toilet (times)",
+    "mood": "Mood",
+    "activities": "Activities",
+    "notes": "Notes",
+    "share": "Share with family",
+    "sharedToast": "Report shared with the family",
+    "napValue": "Nap: {n} min",
+    "toiletValue": "Toilet: {n} times",
+    "meals": {
+      "BREAKFAST": "Breakfast",
+      "SNACK": "Snack",
+      "LUNCH": "Lunch"
+    },
+    "amounts": {
+      "ALL": "All",
+      "MOST": "Most",
+      "SOME": "Some",
+      "NONE": "None"
+    },
+    "moods": {
+      "HAPPY": "Happy",
+      "CALM": "Calm",
+      "TIRED": "Tired",
+      "SAD": "Sad",
+      "UPSET": "Upset"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "export": "Export CSV",
+    "from": "From",
+    "to": "To",
+    "noData": "No data in this period.",
+    "attendance": "Daily attendance",
+    "date": "Date",
+    "attended": "Attended",
+    "absent": "Absent",
+    "vacation": "Vacation",
+    "payments": "Payments",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "paidCount": "Paid ({n})",
+    "unpaidCount": "Unpaid ({n})",
+    "admissions": "Admission requests",
+    "total": "Total",
+    "underReview": "Under review",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "occupancy": "Class occupancy",
+    "class": "Class",
+    "children": "Children",
+    "capacity": "Capacity"
+  },
+  "admins": {
+    "addTitle": "Add general admin",
+    "addHint": "General admins see every branch and all data. Enter the email or phone of an existing account (such as yours) to promote it, or a new one to create it with a temporary password.",
+    "identifier": "Email or phone",
+    "name": "Name (new account)",
+    "add": "Add",
+    "granted": "Account promoted to general admin",
+    "listTitle": "General admins",
+    "removeTitle": "Remove general admin?",
+    "removeHint": "{name} will no longer see all branches."
   }
 }

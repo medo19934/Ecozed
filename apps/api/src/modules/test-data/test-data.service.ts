@@ -230,6 +230,56 @@ export class TestDataService {
         },
       });
     }
+    // A fee plan with this month's subscriptions (some unpaid), and today's shared daily reports.
+    const plan = await this.prisma.scoped.plan.create({
+      data: {
+        name: 'TEST · خطة شهرية',
+        price: 1800,
+        period: 'MONTHLY',
+        services: ['وجبات', 'أنشطة'],
+        isTest: true,
+      } as never,
+    });
+    const monthStart = `${localDate().slice(0, 8)}01`;
+    const monthEnd = new Date(
+      Date.UTC(Number(monthStart.slice(0, 4)), Number(monthStart.slice(5, 7)), 0),
+    )
+      .toISOString()
+      .slice(0, 10);
+    for (const [i, childId] of childIds.entries()) {
+      const paid = i % 3 !== 0;
+      await this.prisma.scoped.subscription.create({
+        data: {
+          childId,
+          planId: plan.id,
+          value: 1800,
+          startDate: dbDate(monthStart),
+          endDate: dbDate(monthEnd),
+          paymentStatus: paid ? 'PAID' : 'UNPAID',
+          paymentMethod: paid ? (['CASH', 'CARD', 'TRANSFER'] as const)[i % 3] : null,
+          paidAt: paid ? new Date() : null,
+          isTest: true,
+        } as never,
+      });
+      if (i % 2 === 0) {
+        await this.prisma.scoped.dailyReport.create({
+          data: {
+            childId,
+            date: today,
+            meals: [
+              { meal: 'BREAKFAST', amount: 'ALL' },
+              { meal: 'LUNCH', amount: i % 4 ? 'MOST' : 'ALL' },
+            ],
+            napMinutes: 45 + (i % 3) * 15,
+            toilet: 2,
+            mood: (['HAPPY', 'CALM', 'TIRED'] as const)[i % 3],
+            activities: 'رسم، قصة، لعب في الساحة',
+            sharedAt: new Date(),
+            isTest: true,
+          } as never,
+        });
+      }
+    }
     // A welcome announcement in Messages.
     const thread = await this.prisma.raw.messageThread.create({
       data: { daycareId, kind: 'ANNOUNCEMENT', title: 'TEST · أهلًا بكم في لطيف كيدز' },
@@ -272,6 +322,7 @@ export class TestDataService {
       },
     });
     await this.prisma.raw.unit.deleteMany({ where: { daycareId, isTest: true } });
+    await this.prisma.raw.plan.deleteMany({ where: { daycareId, isTest: true } });
     await this.prisma.raw.child.deleteMany({ where: { daycareId, isTest: true } });
     await this.prisma.raw.classroom.deleteMany({ where: { daycareId, isTest: true } });
     await this.prisma.raw.membership.deleteMany({ where: { daycareId, isTest: true } });

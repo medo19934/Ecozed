@@ -1,4 +1,11 @@
-import { CalendarDays, ClipboardCheck, MessageCircle, Sun, UserRound } from 'lucide-react-native';
+import {
+  CalendarDays,
+  ClipboardCheck,
+  MessageCircle,
+  NotebookPen,
+  Sun,
+  UserRound,
+} from 'lucide-react-native';
 import { AreaTabs } from '@/components/area-tabs';
 
 export default function TeacherLayout() {
@@ -10,6 +17,7 @@ export default function TeacherLayout() {
         { name: 'attendance', titleKey: 'tabs.attendance', icon: ClipboardCheck },
         { name: 'calendar', titleKey: 'tabs.calendar', icon: CalendarDays },
         { name: 'messages', titleKey: 'tabs.messages', icon: MessageCircle },
+        { name: 'reports', titleKey: 'tabs.reports', icon: NotebookPen },
         { name: 'profile', titleKey: 'tabs.profile', icon: UserRound },
       ]}
     />

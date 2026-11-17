@@ -85,6 +85,11 @@ export const api = {
       method: 'POST',
       body: body === undefined ? undefined : JSON.stringify(body),
     }),
+  put: <T>(path: string, body?: unknown) =>
+    request<T>(path, {
+      method: 'PUT',
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }),
   /** Multipart upload of a local file (`uri` from a picker or recorder). */
   upload: async <T>(
     path: string,

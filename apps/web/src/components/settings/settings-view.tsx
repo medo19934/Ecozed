@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AdminsPanel } from './admins-panel';
 import { api, fileUrl } from '@/lib/api-client';
 import { isBranchAdmin } from '@/lib/use-can';
 import { useErrorMessage } from '@/lib/use-error-message';
@@ -403,6 +404,7 @@ export function SettingsView() {
             <TabsTrigger value="profile">{t('profileTab')}</TabsTrigger>
             <TabsTrigger value="features">{t('featuresTab')}</TabsTrigger>
             {isBranchAdmin(user) && <TabsTrigger value="test">{t('testTab')}</TabsTrigger>}
+            {user?.isSuperAdmin && <TabsTrigger value="admins">{t('adminsTab')}</TabsTrigger>}
           </TabsList>
           <TabsContent value="profile">
             <ProfileTab branch={branch.data} />
@@ -413,6 +415,11 @@ export function SettingsView() {
           {isBranchAdmin(user) && (
             <TabsContent value="test">
               <TestDataTab />
+            </TabsContent>
+          )}
+          {user?.isSuperAdmin && (
+            <TabsContent value="admins">
+              <AdminsPanel />
             </TabsContent>
           )}
         </Tabs>

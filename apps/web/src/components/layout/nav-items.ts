@@ -57,10 +57,15 @@ const STAFF_NAV: NavItem[] = [
   { key: 'units', href: '/units', icon: BookOpen },
   { key: 'calendar', href: '/calendar', icon: CalendarDays },
   { key: 'admissions', href: '/admissions', icon: UserPlus, permission: 'canManageEnrollment' },
-  { key: 'subscriptions', href: '/subscriptions', icon: CreditCard, soon: true },
+  {
+    key: 'subscriptions',
+    href: '/subscriptions',
+    icon: CreditCard,
+    permission: 'canManagePayments',
+  },
   { key: 'messages', href: '/messages', icon: MessageSquare, unreadDot: true },
-  { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen, soon: true },
-  { key: 'reports', href: '/reports', icon: BarChart3, soon: true },
+  { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen },
+  { key: 'reports', href: '/reports', icon: BarChart3, permission: 'canViewReports' },
   { key: 'settings', href: '/settings', icon: Settings, permission: 'canManageSettings' },
 ];
 
@@ -69,7 +74,8 @@ const PARENT_NAV: NavItem[] = [
   { key: 'enrollChild', href: '/enroll', icon: UserPlus },
   { key: 'calendar', href: '/calendar', icon: CalendarDays },
   { key: 'messages', href: '/messages', icon: MessageSquare, unreadDot: true },
-  { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen, soon: true },
+  { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen },
+  { key: 'subscriptions', href: '/subscriptions', icon: CreditCard },
 ];
 
 export const navFor = (user: AuthUser | undefined): NavItem[] =>
