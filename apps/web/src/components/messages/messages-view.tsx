@@ -231,7 +231,6 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
               {m.attachment &&
                 (m.attachment.mime.startsWith('image/') ? (
                   <a href={fileUrl(`/messages/threads/${id}/files/${m.id}`)} target="_blank" rel="noreferrer">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={fileUrl(`/messages/threads/${id}/files/${m.id}`)} alt={m.attachment.name} className="mt-1 max-h-60 rounded-xl" />
                   </a>
                 ) : (
