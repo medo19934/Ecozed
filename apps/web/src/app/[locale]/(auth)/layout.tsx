@@ -13,7 +13,7 @@ export default async function AuthLayout({ children, params }: LayoutProps<'/[lo
         <LocaleSwitcher />
       </header>
       <main className="flex flex-1 items-center justify-center py-10">
-        <div className="w-full max-w-md">{children}</div>
+        <div className="w-full max-w-xl">{children}</div>
       </main>
     </div>
   );

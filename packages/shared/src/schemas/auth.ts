@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { LOCALES } from '../constants';
-import { EmailSchema, PhoneSchema } from './common';
+import { EmailSchema, PhoneSchema, normalizePhone } from './common';
 
 export const LocaleSchema = z.enum(LOCALES);
 
@@ -21,14 +21,6 @@ export type RefreshTokenInput = z.infer<typeof RefreshTokenSchema>;
 export const SwitchDaycareSchema = z.object({ daycareId: z.uuid() });
 export type SwitchDaycareInput = z.infer<typeof SwitchDaycareSchema>;
 
-/** Saudi-friendly phone normalisation: "05XXXXXXXX" / "5XXXXXXXX" → "+9665XXXXXXXX". */
-export const normalizePhone = (raw: string): string => {
-  const v = raw.replace(/[\s-]/g, '');
-  if (/^05\d{8}$/.test(v)) return `+966${v.slice(1)}`;
-  if (/^5\d{8}$/.test(v)) return `+966${v}`;
-  if (/^00\d+$/.test(v)) return `+${v.slice(2)}`;
-  return v;
-};
 
 /** Sign in with an email or a phone number (public demo mode: no password, no code). */
 export const IdentifierLoginSchema = z.object({

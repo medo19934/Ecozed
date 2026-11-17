@@ -237,7 +237,7 @@ export function ChildFormDialog({ child, children }: { child?: ChildDetail; chil
                     id={`g-${i}-phone`}
                     dir="ltr"
                     inputMode="tel"
-                    placeholder="+9665XXXXXXXX"
+                    placeholder="05XXXXXXXX"
                     value={g.phone}
                     onChange={(e) => setG(i, { phone: e.target.value })}
                   />

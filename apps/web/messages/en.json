@@ -67,7 +67,8 @@
     "fullscreen": "Toggle fullscreen",
     "breadcrumb": "Breadcrumb",
     "notifications": "Notifications",
-    "noNotifications": "You're all caught up."
+    "noNotifications": "You're all caught up.",
+    "parents": "Parents"
   },
   "branch": {
     "label": "Branch",
@@ -96,8 +97,22 @@
     "errors": {
       "invalid_google_token": "Google sign-in failed. Please try again.",
       "google_not_configured": "Google sign-in isn't configured on the server.",
-      "account_disabled": "This account has been disabled. Contact your branch."
-    }
+      "account_disabled": "This account has been disabled. Contact your branch.",
+      "user_not_found": "No account with this email or phone."
+    },
+    "publicSubtitle": "Pick your card to enter instantly, or sign in with your email or phone number.",
+    "generalAdmin": "General administration",
+    "branchOf": "{name}",
+    "roles": {
+      "SUPER_ADMIN": "General admin (all branches)",
+      "MANAGER": "Branch manager",
+      "STAFF": "Teacher",
+      "PARENT": "Parent"
+    },
+    "identifierTitle": "Sign in with email or phone",
+    "identifier": "Email or phone number",
+    "identifierHint": "Staff: the email your manager registered. Parents: the email or phone saved for your child.",
+    "signIn": "Sign in"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -419,7 +434,7 @@
   },
   "kiosk": {
     "title": "Check-in / Check-out",
-    "scanHint": "Scan this code from the Latif Kids app",
+    "scanHint": "Scan this code with your phone camera or the Latif Kids app",
     "or": "or",
     "pinHint": "Enter your personal 6-digit PIN",
     "next": "Next",
@@ -431,7 +446,11 @@
     "disabled": "QR attendance is turned off for this branch. Turn it on in Settings → Features.",
     "fullscreen": "Fullscreen",
     "exit": "Back to dashboard",
-    "digit": "Digit {n}"
+    "digit": "Digit {n}",
+    "scanInvalid": "Invalid scan link. Scan the code on the branch screen again.",
+    "scanning": "Recording attendance…",
+    "nothingToRecord": "Nothing to record for your account in this branch.",
+    "toApp": "Go to the app"
   },
   "pin": {
     "menu": "My attendance PIN",
@@ -580,5 +599,61 @@
     "noTeachers": "No teachers yet.",
     "searchPlaceholder": "Search units",
     "anyAge": "Any age"
+  },
+  "messages": {
+    "title": "Messages",
+    "new": "New message",
+    "tabs": {
+      "all": "All",
+      "staff": "Staff",
+      "parents": "Parents"
+    },
+    "search": "Search conversations",
+    "empty": "No conversations yet",
+    "pick": "Pick a conversation",
+    "noMessages": "No messages yet",
+    "attachment": "📎 Attachment",
+    "notFound": "Conversation not found",
+    "back": "Back",
+    "read": "Read",
+    "sent": "Sent",
+    "attach": "Attach file",
+    "placeholder": "Type a message…",
+    "send": "Send",
+    "readOnly": "This announcement is read-only",
+    "kinds": {
+      "CHILD": "About a child",
+      "STAFF": "Staff colleague",
+      "ANNOUNCEMENT": "Announcement"
+    },
+    "child": "Child",
+    "colleague": "Colleague",
+    "choose": "Choose…",
+    "announcementTitle": "Announcement title",
+    "audience": "Audience",
+    "wholeBranch": "All parents in the branch",
+    "start": "Start conversation"
+  },
+  "parents": {
+    "title": "Parents",
+    "subtitle": "Parents sign in with the email or phone saved here and only see their own children.",
+    "add": "Add parent",
+    "addHint": "Pick their children; they appear in the parent's account as soon as they sign in with that email or phone.",
+    "search": "Search by name, phone or child",
+    "empty": "No parents yet",
+    "name": "Name",
+    "contact": "Contact",
+    "children": "Children",
+    "account": "Account",
+    "active": "Active",
+    "invited": "Not signed in yet",
+    "relationship": "Relationship",
+    "relationshipHint": "Mother, father…",
+    "email": "Email",
+    "phone": "Phone",
+    "pickChildren": "Children",
+    "pickChildrenError": "Pick at least one child",
+    "noChildren": "Add a child first from the Children page.",
+    "added": "Parent added"
   }
 }

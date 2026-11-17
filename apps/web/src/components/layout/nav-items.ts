@@ -5,6 +5,7 @@ import {
   BookOpen,
   CalendarDays,
   ClipboardCheck,
+  Contact,
   CreditCard,
   House,
   LayoutDashboard,
@@ -22,6 +23,7 @@ export type NavKey =
   | 'home'
   | 'attendance'
   | 'children'
+  | 'parents'
   | 'staff'
   | 'classes'
   | 'units'
@@ -49,13 +51,14 @@ const STAFF_NAV: NavItem[] = [
   { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard },
   { key: 'attendance', href: '/attendance', icon: ClipboardCheck },
   { key: 'children', href: '/children', icon: Baby },
+  { key: 'parents', href: '/parents', icon: Contact },
   { key: 'staff', href: '/staff', icon: Users, permission: 'canAddStaff' },
   { key: 'classes', href: '/classes', icon: School },
   { key: 'units', href: '/units', icon: BookOpen },
   { key: 'calendar', href: '/calendar', icon: CalendarDays },
   { key: 'admissions', href: '/admissions', icon: UserPlus, permission: 'canManageEnrollment' },
   { key: 'subscriptions', href: '/subscriptions', icon: CreditCard, soon: true },
-  { key: 'messages', href: '/messages', icon: MessageSquare, soon: true, unreadDot: true },
+  { key: 'messages', href: '/messages', icon: MessageSquare, unreadDot: true },
   { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen, soon: true },
   { key: 'reports', href: '/reports', icon: BarChart3, soon: true },
   { key: 'settings', href: '/settings', icon: Settings, permission: 'canManageSettings' },
@@ -65,7 +68,7 @@ const PARENT_NAV: NavItem[] = [
   { key: 'home', href: '/dashboard', icon: House },
   { key: 'enrollChild', href: '/enroll', icon: UserPlus },
   { key: 'calendar', href: '/calendar', icon: CalendarDays },
-  { key: 'messages', href: '/messages', icon: MessageSquare, soon: true },
+  { key: 'messages', href: '/messages', icon: MessageSquare, unreadDot: true },
   { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen, soon: true },
 ];
 

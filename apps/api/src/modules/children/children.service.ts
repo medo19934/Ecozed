@@ -1,10 +1,12 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type {
+  AddParentInput,
   ChildDetail,
   ChildInput,
   ChildListItem,
   ChildListQuery,
   Paginated,
+  ParentListItem,
 } from '@latif/shared';
 import { paginate } from '@latif/shared';
 import type { AuthContext } from '../../common/decorators/auth.decorators';
@@ -156,6 +158,80 @@ export class ChildrenService {
     if (!c.photoKey) throw new NotFoundException();
     const buffer = await this.storage.read(c.photoKey);
     return { buffer, mime: sniffImage(buffer) };
+  }
+
+  /** Parents (guardians) of the children this user can see, grouped by email/phone. */
+  async parents(auth: AuthContext, search?: string): Promise<ParentListItem[]> {
+    const rows = await this.prisma.scoped.childGuardian.findMany({
+      where: {
+        child: { AND: [await this.visibility(auth), { deletedAt: null }] },
+        ...(search
+          ? {
+              OR: [
+                { fullName: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search.toLowerCase() } },
+                { phone: { contains: search } },
+                { child: { fullName: { contains: search, mode: 'insensitive' } } },
+              ],
+            }
+          : {}),
+      },
+      include: { child: { select: { id: true, fullName: true, classroom: { select: { name: true } } } } },
+      orderBy: { fullName: 'asc' },
+      take: 500,
+    });
+    const map = new Map<string, ParentListItem>();
+    for (const g of rows) {
+      const key = g.email ?? g.phone ?? g.id;
+      const item: ParentListItem = map.get(key) ?? {
+        key,
+        fullName: g.fullName,
+        relationship: g.relationship,
+        email: g.email,
+        phone: g.phone,
+        linked: false,
+        children: [],
+      };
+      item.linked ||= Boolean(g.userId);
+      item.email ??= g.email;
+      item.phone ??= g.phone;
+      if (!item.children.some((c) => c.id === g.child.id))
+        item.children.push({ id: g.child.id, fullName: g.child.fullName, classroom: g.child.classroom?.name ?? null });
+      map.set(key, item);
+    }
+    return [...map.values()];
+  }
+
+  /** Adds the same guardian to each chosen child (skips children that already have them). */
+  async addParent(auth: AuthContext, input: AddParentInput): Promise<ParentListItem> {
+    const ids = [...new Set(input.childIds)];
+    const children = await this.prisma.scoped.child.findMany({
+      where: { AND: [await this.visibility(auth), { id: { in: ids } }] },
+      include: { guardians: true },
+    });
+    if (children.length !== ids.length) throw new NotFoundException();
+    for (const c of children) {
+      const dup = c.guardians.some(
+        (g) => (input.email && g.email === input.email) || (input.phone && g.phone === input.phone),
+      );
+      if (dup) continue;
+      await this.prisma.scoped.childGuardian.create({
+        data: {
+          childId: c.id,
+          fullName: input.fullName,
+          relationship: input.relationship,
+          email: input.email ?? null,
+          phone: input.phone ?? null,
+          isPrimary: c.guardians.length === 0,
+        } as never,
+      });
+      await this.links.linkChildGuardians(c.id);
+    }
+    await this.audit.log({ action: 'parent.add', entity: 'ChildGuardian', metadata: { childIds: ids } });
+    const key = input.email ?? input.phone ?? '';
+    const found = (await this.parents(auth)).find((p) => p.key === key);
+    if (!found) throw new NotFoundException();
+    return found;
   }
 
   private async loadAny(id: string): Promise<Row> {

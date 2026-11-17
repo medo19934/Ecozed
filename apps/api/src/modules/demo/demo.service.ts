@@ -70,6 +70,16 @@ export class DemoService {
   }
 
   async seed(): Promise<void> {
+    // Demo branches show every feature (except paid AI), also when the data already exists.
+    for (const branch of await this.prisma.raw.daycare.findMany({ where: { deletedAt: null } })) {
+      for (const key of ['messages', 'childQrAttendance', 'staffGeofencedAttendance']) {
+        await this.prisma.raw.daycareFeature.upsert({
+          where: { daycareId_key: { daycareId: branch.id, key } },
+          create: { daycareId: branch.id, key, enabled: true },
+          update: { enabled: true },
+        });
+      }
+    }
     if (await this.prisma.raw.user.findFirst({ where: { email: DEMO_ADMIN } })) return;
     const db = this.prisma.raw;
     await db.user.create({ data: { email: DEMO_ADMIN, fullName: 'الإدارة العامة', isSuperAdmin: true } });

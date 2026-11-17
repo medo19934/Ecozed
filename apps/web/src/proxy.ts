@@ -15,6 +15,12 @@ const PROTECTED = [
   '/messages',
   '/attendance',
   '/kiosk',
+  '/scan',
+  '/parents',
+  '/calendar',
+  '/units',
+  '/admissions',
+  '/enroll',
 ];
 const AUTH_PAGES = ['/login'];
 

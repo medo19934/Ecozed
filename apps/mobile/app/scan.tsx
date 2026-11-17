@@ -25,12 +25,14 @@ export default function ScanScreen() {
   >(null);
   const locked = useRef(false);
 
-  const onScan = async (data: string) => {
+  const onScan = async (raw: string) => {
+    // The kiosk QR is a web link (…/scan?t=TOKEN); older codes are the bare token.
+    const data = raw.startsWith('lk1.') ? raw : (/[?&]t=([^&#]+)/.exec(raw)?.[1] ?? '');
     if (locked.current || !data.startsWith('lk1.')) return;
     locked.current = true;
     setBusy(true);
     try {
-      const r = await api.post<KioskResult>('/attendance/kiosk/scan', { token: data });
+      const r = await api.post<KioskResult>('/attendance/kiosk/scan', { token: decodeURIComponent(data) });
       setResult({ ok: true, data: r });
       void qc.invalidateQueries({ queryKey: ['attendance'] });
     } catch (e) {

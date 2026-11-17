@@ -53,6 +53,8 @@ export const api = {
 export const sessionApi = {
   google: <T>(idToken: string, locale: string) =>
     request<T>('/bff/auth/google', { method: 'POST', body: json({ idToken, locale }) }),
+  login: <T>(identifier: string, locale: string) =>
+    request<T>('/bff/auth/login', { method: 'POST', body: json({ identifier, locale }) }),
   devLogin: <T>(email: string) =>
     request<T>('/bff/auth/dev-login', { method: 'POST', body: json({ email }) }),
   switchDaycare: <T>(daycareId: string) =>

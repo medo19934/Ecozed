@@ -392,3 +392,15 @@ export interface MessageContacts {
   classes: { id: string; name: string }[];
   canAnnounce: boolean;
 }
+
+export interface ParentListItem {
+  /** Stable key: email or phone. */
+  key: string;
+  fullName: string;
+  relationship: string;
+  email: string | null;
+  phone: string | null;
+  /** Has signed in (linked to a user account). */
+  linked: boolean;
+  children: { id: string; fullName: string; classroom: string | null }[];
+}

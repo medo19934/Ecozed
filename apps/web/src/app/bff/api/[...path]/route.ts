@@ -7,6 +7,7 @@ import { ACCESS_COOKIE } from '@/lib/session-cookies';
 const BLOCKED = new Set([
   'auth/google',
   'auth/dev-login',
+  'auth/login',
   'auth/refresh',
   'auth/logout',
   'auth/switch-daycare',

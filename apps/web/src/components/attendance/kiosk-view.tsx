@@ -101,7 +101,9 @@ export function KioskView() {
 
   useEffect(() => {
     if (!token.data) return;
-    void QRCode.toDataURL(token.data.token, {
+    // A web link: any phone camera opens /scan, which records the check-in (the app scanner accepts it too).
+    const link = `${window.location.origin}/${locale}/scan?t=${encodeURIComponent(token.data.token)}`;
+    void QRCode.toDataURL(link, {
       width: 520,
       margin: 1,
       errorCorrectionLevel: 'M',

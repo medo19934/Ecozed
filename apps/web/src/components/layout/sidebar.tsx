@@ -1,7 +1,9 @@
 'use client';
 
 import { isRtl } from '@latif/shared';
+import { useQuery } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
+import { api } from '@/lib/api-client';
 import { BrandLogo } from '@/components/brand-logo';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip } from '@/components/ui/tooltip';
@@ -22,6 +24,14 @@ export function SidebarNav({
   const tc = useTranslations('common');
   const pathname = usePathname();
   const tipSide = isRtl(useLocale()) ? 'left' : 'right';
+  const hasMessages = items.some((i) => i.unreadDot && !i.soon);
+  const unread = useQuery({
+    queryKey: ['messages', 'unread'],
+    queryFn: () => api.get<{ unread: number }>('/messages/unread'),
+    enabled: hasMessages,
+    refetchInterval: 15_000,
+  });
+  const hasUnread = (unread.data?.unread ?? 0) > 0;
 
   return (
     <div className="flex h-full flex-col">
@@ -40,7 +50,7 @@ export function SidebarNav({
               <>
                 <span className="relative">
                   <Icon className="size-5 shrink-0" aria-hidden />
-                  {item.unreadDot && !item.soon && (
+                  {item.unreadDot && !item.soon && hasUnread && (
                     <span className="absolute -end-0.5 -top-0.5 size-2 rounded-full bg-destructive ring-2 ring-sidebar" />
                   )}
                 </span>

@@ -54,3 +54,21 @@ export const ChildListQuerySchema = PaginationQuerySchema.extend({
   gender: GenderSchema.optional(),
 });
 export type ChildListQuery = z.infer<typeof ChildListQuerySchema>;
+
+/** Staff add a parent: a guardian row on each chosen child; the parent then signs in with that email/phone. */
+export const AddParentSchema = z
+  .object({
+    fullName: z.string().trim().min(2).max(120),
+    relationship: z.string().trim().min(1).max(40),
+    phone: z
+      .union([PhoneSchema, z.literal('').transform(() => null)])
+      .nullable()
+      .optional(),
+    email: z
+      .union([z.string().trim().toLowerCase().pipe(z.email()), z.literal('').transform(() => null)])
+      .nullable()
+      .optional(),
+    childIds: z.array(z.uuid()).min(1).max(20),
+  })
+  .refine((g) => g.phone || g.email, { message: 'guardian_contact_required', path: ['email'] });
+export type AddParentInput = z.infer<typeof AddParentSchema>;
