@@ -12,6 +12,7 @@ export default tseslint.config(
       '**/.expo/**',
       '**/coverage/**',
       'legacy/**',
+      '**/generated/**',
     ],
   },
   js.configs.recommended,
@@ -22,6 +23,15 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/consistent-type-imports': 'error',
     },
+  },
+  {
+    // Nest DI relies on emitDecoratorMetadata: constructor param types must stay value imports.
+    files: ['apps/api/**/*.ts'],
+    rules: { '@typescript-eslint/consistent-type-imports': 'off' },
+  },
+  {
+    files: ['**/*.js', '**/*.cjs'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
   prettier,
 );

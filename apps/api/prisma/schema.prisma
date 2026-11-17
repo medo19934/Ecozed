@@ -1,0 +1,170 @@
+// Latif Kids — core schema (Phase 1).
+// Tenancy rule: every business table has `daycareId` and is listed in
+// src/prisma/tenancy.ts (TENANT_MODELS). A test enforces this.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  SUPER_ADMIN
+  OWNER
+  MANAGER
+  STAFF
+  PARENT
+}
+
+enum StaffType {
+  TEACHER
+  ASSISTANT
+  ADMIN
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INVITED
+  ARCHIVED
+}
+
+enum OtpPurpose {
+  LOGIN
+  RESET_PASSWORD
+  VERIFY
+}
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  fullName      String
+  email         String?   @unique
+  phone         String?   @unique
+  passwordHash  String?
+  locale        String    @default("ar")
+  avatarUrl     String?
+  isSuperAdmin  Boolean   @default(false)
+  lastDaycareId String?   @db.Uuid
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  memberships   Membership[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+}
+
+model Daycare {
+  id               String    @id @default(uuid()) @db.Uuid
+  name             String
+  slug             String    @unique
+  logoUrl          String?
+  phone            String?
+  email            String?
+  city             String?
+  address          String?
+  latitude         Float?
+  longitude        Float?
+  geofenceRadiusM  Int       @default(150)
+  currency         String    @default("SAR")
+  timezone         String    @default("Asia/Riyadh")
+  defaultLocale    String    @default("ar")
+  useHijri         Boolean   @default(false)
+  trialEndsAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  memberships Membership[]
+  features    DaycareFeature[]
+  auditLogs   AuditLog[]
+}
+
+/// A user's role inside one daycare (tenant). Staff permission flags live here.
+model Membership {
+  id          String           @id @default(uuid()) @db.Uuid
+  daycareId   String           @db.Uuid
+  userId      String           @db.Uuid
+  role        Role
+  staffType   StaffType?
+  status      MembershipStatus @default(ACTIVE)
+  /// StaffPermission flags (see @latif/shared). Owner/Manager implicitly have all.
+  permissions String[]         @default([])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+
+  daycare Daycare @relation(fields: [daycareId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, daycareId])
+  @@index([daycareId, role])
+}
+
+/// Per-daycare feature toggles (messages, QR attendance, in-app payment, geofenced staff attendance).
+model DaycareFeature {
+  id        String   @id @default(uuid()) @db.Uuid
+  daycareId String   @db.Uuid
+  key       String
+  enabled   Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  daycare Daycare @relation(fields: [daycareId], references: [id], onDelete: Cascade)
+
+  @@unique([daycareId, key])
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  daycareId  String?   @db.Uuid
+  tokenHash  String    @unique
+  familyId   String    @db.Uuid
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  userAgent  String?
+  ip         String?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+}
+
+model OtpCode {
+  id         String     @id @default(uuid()) @db.Uuid
+  identifier String
+  purpose    OtpPurpose
+  codeHash   String
+  attempts   Int        @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime   @default(now())
+
+  @@index([identifier, purpose])
+}
+
+/// Sensitive-action audit trail. daycareId is null for platform-level events.
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  daycareId String?  @db.Uuid
+  actorId   String?  @db.Uuid
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  daycare Daycare? @relation(fields: [daycareId], references: [id], onDelete: SetNull)
+  actor   User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([daycareId, createdAt])
+  @@index([entity, entityId])
+}
