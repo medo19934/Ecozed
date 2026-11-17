@@ -128,7 +128,10 @@
     "hidePassword": "Hide password",
     "createAccount": "Create account",
     "loginHelp": "Staff and parents registered by a branch: use the password the branch sent you. Forgot it? Contact your branch.",
-    "registerHelp": "After creating your account you can request enrollment. The branch links your children to your account."
+    "registerHelp": "After creating your account you can request enrollment. The branch links your children to your account.",
+    "pickRole": "Pick your card, then sign in with your email or phone and password.",
+    "allBranches": "All branches",
+    "changeRole": "Change"
   },
   "dashboard": {
     "title": "Dashboard",

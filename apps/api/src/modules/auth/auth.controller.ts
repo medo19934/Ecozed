@@ -34,10 +34,12 @@ export class AuthController {
   /** Public settings the sign-in screens need. */
   @Public()
   @Get('options')
-  options() {
+  async options() {
     return {
       publicDemo: this.config.get('PUBLIC_DEMO'),
       google: this.config.get('GOOGLE_CLIENT_IDS').length > 0,
+      // Branch names for the role cards on the sign-in screens.
+      branches: await this.auth.publicBranches(),
     };
   }
 

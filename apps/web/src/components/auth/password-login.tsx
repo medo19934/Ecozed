@@ -15,7 +15,7 @@ import { usePostLogin } from '@/lib/use-post-login';
 import { cn } from '@/lib/utils';
 
 /** Email or phone + password; parents can create their own account. */
-export function PasswordLogin() {
+export function PasswordLogin({ allowRegister = true }: { allowRegister?: boolean }) {
   const t = useTranslations('auth');
   const locale = useLocale();
   const errorMessage = useErrorMessage();
@@ -56,21 +56,23 @@ export function PasswordLogin() {
 
   return (
     <div className="grid gap-5">
-      <div className="flex gap-1 rounded-xl bg-muted p-1">
-        {(['login', 'register'] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => setMode(m)}
-            className={cn(
-              'flex-1 rounded-lg px-3 py-2 text-sm',
-              mode === m ? 'bg-card font-semibold shadow-xs' : 'text-muted-foreground',
-            )}
-          >
-            {t(m === 'login' ? 'tabLogin' : 'tabRegister')}
-          </button>
-        ))}
-      </div>
+      {allowRegister && (
+        <div className="flex gap-1 rounded-xl bg-muted p-1">
+          {(['login', 'register'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              className={cn(
+                'flex-1 rounded-lg px-3 py-2 text-sm',
+                mode === m ? 'bg-card font-semibold shadow-xs' : 'text-muted-foreground',
+              )}
+            >
+              {t(m === 'login' ? 'tabLogin' : 'tabRegister')}
+            </button>
+          ))}
+        </div>
+      )}
       <form
         className="grid gap-4"
         onSubmit={(e) => {

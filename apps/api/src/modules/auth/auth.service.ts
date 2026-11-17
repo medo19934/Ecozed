@@ -185,6 +185,14 @@ export class AuthService {
     return { ok: true };
   }
 
+  publicBranches() {
+    return this.prisma.raw.daycare.findMany({
+      where: { deletedAt: null },
+      select: { slug: true, name: true, nameEn: true },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
   /** Local development sign-in without Google (AUTH_DEV_LOGIN=true only). */
   async devLogin(email: string): Promise<AuthResponse> {
     if (!this.config.get('AUTH_DEV_LOGIN') || this.config.isProd) throw new NotFoundException();

@@ -5,7 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 import { DevLogin } from '@/components/auth/dev-login';
 import { GoogleSignIn } from '@/components/auth/google-sign-in';
-import { PasswordLogin } from '@/components/auth/password-login';
+import { RoleLogin, type PublicBranch } from '@/components/auth/role-login';
 import { QuickLogin } from '@/components/auth/quick-login';
 import { initLocale } from '@/i18n/locale';
 import { callApi } from '@/lib/bff';
@@ -20,16 +20,30 @@ export async function generateMetadata(): Promise<Metadata> {
 async function loadOptions(): Promise<{
   publicDemo: boolean;
   google: boolean;
+  branches: PublicBranch[];
   accounts: DemoAccount[];
 }> {
   try {
     const o = await callApi('/auth/options');
-    const { publicDemo, google } = (await o.json()) as { publicDemo: boolean; google: boolean };
-    if (!publicDemo) return { publicDemo: false, google, accounts: [] };
+    const {
+      publicDemo,
+      google,
+      branches = [],
+    } = (await o.json()) as {
+      publicDemo: boolean;
+      google: boolean;
+      branches?: PublicBranch[];
+    };
+    if (!publicDemo) return { publicDemo: false, google, branches, accounts: [] };
     const a = await callApi('/auth/demo-accounts');
-    return { publicDemo, google, accounts: a.ok ? ((await a.json()) as DemoAccount[]) : [] };
+    return {
+      publicDemo,
+      google,
+      branches,
+      accounts: a.ok ? ((await a.json()) as DemoAccount[]) : [],
+    };
   } catch {
-    return { publicDemo: false, google: false, accounts: [] };
+    return { publicDemo: false, google: false, branches: [], accounts: [] };
   }
 }
 
@@ -37,7 +51,7 @@ export default async function LoginPage({ params }: PageProps<'/[locale]/login'>
   await initLocale(params);
   const t = await getTranslations('auth');
   const devLogin = process.env.NEXT_PUBLIC_AUTH_DEV_LOGIN === 'true';
-  const { publicDemo, google, accounts } = await loadOptions();
+  const { publicDemo, google, branches, accounts } = await loadOptions();
 
   return (
     <div className="overflow-hidden rounded-[20px] bg-card shadow-soft">
@@ -55,7 +69,7 @@ export default async function LoginPage({ params }: PageProps<'/[locale]/login'>
         ) : (
           <>
             <Suspense>
-              <PasswordLogin />
+              <RoleLogin branches={branches} />
             </Suspense>
             {google && (
               <Suspense>

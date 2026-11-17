@@ -45,13 +45,18 @@ export default function LoginScreen() {
   const [fullName, setFullName] = useState('');
   const [password, setPassword] = useState('');
   const [google, setGoogle] = useState(false);
+  type Branch = { slug: string; name: string; nameEn: string | null };
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [role, setRole] = useState<{ role: keyof typeof ICONS; branch?: Branch } | null>(null);
+  const branchName = (b: Branch) => (i18n.language === 'en' && b.nameEn ? b.nameEn : b.name);
 
   useEffect(() => {
     api
-      .publicGet<{ publicDemo: boolean; google: boolean }>('/auth/options')
+      .publicGet<{ publicDemo: boolean; google: boolean; branches?: Branch[] }>('/auth/options')
       .then(async (o) => {
         setPublicDemo(o.publicDemo);
         setGoogle(o.google);
+        setBranches(o.branches ?? []);
         if (o.publicDemo) setAccounts(await api.publicGet<DemoAccount[]>('/auth/demo-accounts'));
       })
       .catch(() => setPublicDemo(false));
@@ -193,28 +198,97 @@ export default function LoginScreen() {
                 }
               />
             </Card>
+          ) : !role ? (
+            <Card className="gap-5">
+              <Text className="text-start text-sm text-ink-muted">{t('auth.pickRole')}</Text>
+              {[
+                {
+                  key: 'admin',
+                  title: t('auth.generalAdmin'),
+                  roles: ['SUPER_ADMIN' as const],
+                  branch: undefined as Branch | undefined,
+                },
+                ...branches.map((b) => ({
+                  key: b.slug,
+                  title: branchName(b),
+                  roles: ['MANAGER', 'STAFF', 'PARENT'] as const,
+                  branch: b,
+                })),
+              ].map((g) => (
+                <View key={g.key} className="gap-2">
+                  <Text className="text-start text-sm font-semibold text-ink-muted">{g.title}</Text>
+                  <View className="flex-row gap-2">
+                    {g.roles.map((r) => {
+                      const Icon = ICONS[r];
+                      return (
+                        <Pressable
+                          key={r}
+                          accessibilityRole="button"
+                          onPress={() => {
+                            setRole({ role: r, branch: g.branch });
+                            setMode('login');
+                            setError(undefined);
+                          }}
+                          className="flex-1 items-center gap-1.5 rounded-2xl border border-line bg-white p-3"
+                        >
+                          <View className="h-11 w-11 items-center justify-center rounded-xl bg-brand">
+                            <Icon color="#fff" size={20} />
+                          </View>
+                          <Text className="text-center text-sm font-semibold text-ink">
+                            {t(`auth.roles.${r}`)}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              ))}
+            </Card>
           ) : (
             <Card className="gap-5">
-              <View className="flex-row gap-1 rounded-2xl bg-surface p-1">
-                {(['login', 'register'] as const).map((m) => (
-                  <Pressable
-                    key={m}
-                    accessibilityRole="tab"
-                    accessibilityState={{ selected: mode === m }}
-                    onPress={() => {
-                      setMode(m);
-                      setError(undefined);
-                    }}
-                    className={`min-h-11 flex-1 items-center justify-center rounded-xl ${mode === m ? 'bg-white' : ''}`}
-                  >
-                    <Text
-                      className={`text-sm ${mode === m ? 'font-semibold text-ink' : 'text-ink-muted'}`}
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setRole(null)}
+                className="flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-3"
+              >
+                <View className="h-11 w-11 items-center justify-center rounded-xl bg-brand">
+                  {(() => {
+                    const Icon = ICONS[role.role];
+                    return <Icon color="#fff" size={20} />;
+                  })()}
+                </View>
+                <View className="flex-1">
+                  <Text className="text-start text-base font-semibold text-ink">
+                    {t(`auth.roles.${role.role}`)}
+                  </Text>
+                  <Text className="text-start text-xs text-ink-muted">
+                    {role.branch ? branchName(role.branch) : t('auth.allBranches')}
+                  </Text>
+                </View>
+                <Text className="text-sm font-medium text-brand">{t('auth.changeRole')}</Text>
+              </Pressable>
+              {role.role === 'PARENT' && (
+                <View className="flex-row gap-1 rounded-2xl bg-surface p-1">
+                  {(['login', 'register'] as const).map((m) => (
+                    <Pressable
+                      key={m}
+                      accessibilityRole="tab"
+                      accessibilityState={{ selected: mode === m }}
+                      onPress={() => {
+                        setMode(m);
+                        setError(undefined);
+                      }}
+                      className={`min-h-11 flex-1 items-center justify-center rounded-xl ${mode === m ? 'bg-white' : ''}`}
                     >
-                      {t(m === 'login' ? 'auth.tabLogin' : 'auth.tabRegister')}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
+                      <Text
+                        className={`text-sm ${mode === m ? 'font-semibold text-ink' : 'text-ink-muted'}`}
+                      >
+                        {t(m === 'login' ? 'auth.tabLogin' : 'auth.tabRegister')}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
               {mode === 'register' && (
                 <Field
                   label={t('auth.fullName')}
