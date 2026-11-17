@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import {
+  FEATURE_DEFAULTS,
   FeatureToggle,
   type AuthResponse,
   type AuthUser,
@@ -27,12 +28,7 @@ import { GOOGLE_VERIFIER, type GoogleIdentity, type GoogleVerifier } from './goo
 import { hashPassword, verifyPassword } from './password';
 import { TokenService } from './token.service';
 
-export const DEFAULT_FEATURES: Record<FeatureToggle, boolean> = {
-  [FeatureToggle.MESSAGES]: true,
-  [FeatureToggle.CHILD_QR_ATTENDANCE]: true,
-  [FeatureToggle.STAFF_GEOFENCED_ATTENDANCE]: false,
-  [FeatureToggle.DAILY_STORY_AI]: false,
-};
+export const DEFAULT_FEATURES: Record<FeatureToggle, boolean> = FEATURE_DEFAULTS;
 
 @Injectable()
 export class AuthService {
@@ -103,7 +99,7 @@ export class AuthService {
         });
       }
     }
-    if (user?.deletedAt) {
+    if (user?.deletedAt || user?.disabledAt) {
       throw new UnauthorizedException({ message: 'Account disabled', code: 'account_disabled' });
     }
     if (!user) {
@@ -285,7 +281,7 @@ export class AuthService {
   /** Builds the AuthUser view for the given active branch. */
   async me(userId: string, daycareId: string | null): Promise<AuthUser> {
     const user = await this.prisma.raw.user.findFirst({
-      where: { id: userId, deletedAt: null },
+      where: { id: userId, deletedAt: null, disabledAt: null },
       include: {
         memberships: {
           where: { status: 'ACTIVE', deletedAt: null, daycare: { deletedAt: null } },
@@ -318,13 +314,16 @@ export class AuthService {
       ? 'SUPER_ADMIN'
       : ((membership?.role as Role | undefined) ?? 'PARENT');
     const features = active
-      ? Object.fromEntries(
-          (
-            await this.prisma.raw.daycareFeature.findMany({
-              where: { daycareId: active.daycareId },
-            })
-          ).map((f) => [f.key, f.enabled]),
-        )
+      ? {
+          ...FEATURE_DEFAULTS,
+          ...Object.fromEntries(
+            (
+              await this.prisma.raw.daycareFeature.findMany({
+                where: { daycareId: active.daycareId },
+              })
+            ).map((f) => [f.key, f.enabled]),
+          ),
+        }
       : {};
 
     return {

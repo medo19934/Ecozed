@@ -7,6 +7,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { AccessGuard } from './common/guards/access.guard';
 import { AuthGuard } from './common/guards/auth.guard';
 import { AppConfig } from './config/app-config.service';
+import { UsersModule } from './modules/users/users.module';
 import { AdminsModule } from './modules/admins/admins.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { DailyReportsModule } from './modules/daily-reports/daily-reports.module';
@@ -49,6 +50,7 @@ import { PrismaModule } from './prisma/prisma.module';
     SubscriptionsModule,
     DailyReportsModule,
     AdminsModule,
+    UsersModule,
     ReportsModule,
     StorageModule,
     DemoModule,

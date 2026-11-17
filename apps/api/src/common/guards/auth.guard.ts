@@ -42,9 +42,13 @@ export class AuthGuard implements CanActivate {
 
     const user = await this.prisma.raw.user.findFirst({
       where: { id: payload.sub, deletedAt: null },
-      select: { id: true, isSuperAdmin: true },
+      select: { id: true, isSuperAdmin: true, disabledAt: true },
     });
     if (!user) throw new UnauthorizedException('User not found');
+    // Deactivated: locked out on the very next request (no waiting for the token to expire).
+    if (user.disabledAt) {
+      throw new UnauthorizedException({ code: 'account_disabled', message: 'Account disabled' });
+    }
 
     let auth: AuthContext = {
       userId: user.id,

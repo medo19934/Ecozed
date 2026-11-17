@@ -12,6 +12,7 @@ import {
 import type { AuthContext } from '../../common/decorators/auth.decorators';
 import { pageArgs, requireBranch } from '../../common/utils/scope';
 import type { Prisma } from '../../generated/prisma/client';
+import { branchesWithModuleOff } from '../../common/utils/modules';
 import { PrismaService } from '../../prisma/prisma.service';
 import { dbDate } from '../attendance/attendance.util';
 import { AuditService } from '../audit/audit.service';
@@ -287,8 +288,13 @@ export class SubscriptionsService {
 
   /** Parent: own children's subscriptions (read-only, all branches). */
   async mine(userId: string): Promise<SubscriptionDto[]> {
+    const off = await branchesWithModuleOff(this.prisma, 'subscriptions');
     const rows = await this.prisma.raw.subscription.findMany({
-      where: { deletedAt: null, child: { deletedAt: null, guardians: { some: { userId } } } },
+      where: {
+        deletedAt: null,
+        daycareId: { notIn: off },
+        child: { deletedAt: null, guardians: { some: { userId } } },
+      },
       include,
       orderBy: { startDate: 'desc' },
       take: 50,

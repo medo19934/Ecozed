@@ -10,9 +10,15 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CalendarEventSchema, CalendarQuerySchema, StaffPermission } from '@latif/shared';
+import {
+  FeatureToggle,
+  CalendarEventSchema,
+  CalendarQuerySchema,
+  StaffPermission,
+} from '@latif/shared';
 import { createZodDto } from 'nestjs-zod';
 import {
+  RequireFeature,
   CurrentAuth,
   RequirePermissions,
   type AuthContext,
@@ -25,6 +31,7 @@ class QueryDto extends createZodDto(CalendarQuerySchema) {}
 /** Everyone reads their own scope; admin + manager (canManageCurriculum) add. */
 @ApiTags('calendar')
 @ApiBearerAuth()
+@RequireFeature(FeatureToggle.CALENDAR)
 @Controller('calendar')
 export class CalendarController {
   constructor(private readonly calendar: CalendarService) {}

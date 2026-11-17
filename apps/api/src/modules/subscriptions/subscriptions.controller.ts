@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
+  FeatureToggle,
   CreateSubscriptionSchema,
   MarkPaidSchema,
   PlanSchema,
@@ -20,6 +21,7 @@ import {
 } from '@latif/shared';
 import { createZodDto } from 'nestjs-zod';
 import {
+  RequireFeature,
   CurrentAuth,
   RequirePermissions,
   Roles,
@@ -34,6 +36,7 @@ class PaidDto extends createZodDto(MarkPaidSchema) {}
 
 @ApiTags('subscriptions')
 @ApiBearerAuth()
+@RequireFeature(FeatureToggle.SUBSCRIPTIONS)
 @Controller('subscriptions')
 export class SubscriptionsController {
   constructor(private readonly subs: SubscriptionsService) {}
@@ -50,6 +53,7 @@ export class SubscriptionsController {
 @ApiBearerAuth()
 @Roles('SUPER_ADMIN', 'MANAGER', 'STAFF')
 @RequirePermissions(StaffPermission.CAN_MANAGE_PAYMENTS)
+@RequireFeature(FeatureToggle.SUBSCRIPTIONS)
 @Controller('subscriptions')
 export class SubscriptionsAdminController {
   constructor(private readonly subs: SubscriptionsService) {}

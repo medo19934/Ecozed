@@ -42,6 +42,8 @@ model User {
   passwordHash       String?
   /// Set for admin-issued temporary passwords: the user must choose a new one after signing in.
   mustChangePassword Boolean   @default(false)
+  /// Deactivated by an admin: no sign-in and no data access; all records are kept.
+  disabledAt         DateTime?
   locale             String    @default("ar")
   avatarUrl          String?
   isSuperAdmin       Boolean   @default(false)

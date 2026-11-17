@@ -15,6 +15,7 @@ import type {
 import type { AuthContext } from '../../common/decorators/auth.decorators';
 import type { MessageThread, Prisma } from '../../generated/prisma/client';
 import { AppConfig } from '../../config/app-config.service';
+import { branchesWithModuleOff } from '../../common/utils/modules';
 import { PrismaService } from '../../prisma/prisma.service';
 import { decodeFileName } from '../../common/utils/files';
 import { MESSAGE_MIME, StorageService, type UploadedBlob } from '../storage/storage.service';
@@ -140,7 +141,13 @@ export class MessagesService {
   }
 
   /** Threads the user may read. */
+  /** Threads the user may see, minus branches where Messaging is switched off. */
   private async visibleWhere(auth: AuthContext): Promise<Prisma.MessageThreadWhereInput> {
+    const off = await branchesWithModuleOff(this.prisma, 'messages');
+    return { AND: [await this.visibleWhereAll(auth), { daycareId: { notIn: off } }] };
+  }
+
+  private async visibleWhereAll(auth: AuthContext): Promise<Prisma.MessageThreadWhereInput> {
     const memberships = await this.prisma.raw.membership.findMany({
       where: { userId: auth.userId, status: 'ACTIVE', deletedAt: null },
       select: { daycareId: true, role: true, id: true },

@@ -5,7 +5,12 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { FeatureToggle, Role, StaffPermission } from '@latif/shared';
+import {
+  FEATURE_DEFAULTS,
+  type FeatureToggle,
+  type Role,
+  type StaffPermission,
+} from '@latif/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   FEATURES,
@@ -46,11 +51,20 @@ export class AccessGuard implements CanActivate {
       throw new ForbiddenException('Missing permission');
     }
     if (features?.length) {
-      if (!auth.daycareId) throw new ForbiddenException('No active daycare');
-      const enabled = await this.prisma.raw.daycareFeature.count({
-        where: { daycareId: auth.daycareId, key: { in: features }, enabled: true },
+      // No active branch (e.g. a parent without linked children): no branch module to check.
+      if (!auth.daycareId) return true;
+      // A module without a saved switch uses its default (FEATURE_DEFAULTS).
+      const rows = await this.prisma.raw.daycareFeature.findMany({
+        where: { daycareId: auth.daycareId, key: { in: features } },
       });
-      if (enabled !== features.length) throw new ForbiddenException('Feature disabled');
+      const on = (k: FeatureToggle) =>
+        rows.find((r) => r.key === k)?.enabled ?? FEATURE_DEFAULTS[k];
+      if (!features.every(on)) {
+        throw new ForbiddenException({
+          code: 'feature_disabled',
+          message: 'This module is switched off for the branch',
+        });
+      }
     }
     return true;
   }

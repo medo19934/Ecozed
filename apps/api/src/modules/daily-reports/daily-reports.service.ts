@@ -3,6 +3,7 @@ import { localDate, type DailyReportDto, type DailyReportInput } from '@latif/sh
 import type { AuthContext } from '../../common/decorators/auth.decorators';
 import { isBranchAdmin, requireBranch } from '../../common/utils/scope';
 import type { Prisma } from '../../generated/prisma/client';
+import { branchesWithModuleOff } from '../../common/utils/modules';
 import { PrismaService } from '../../prisma/prisma.service';
 import { dbDate } from '../attendance/attendance.util';
 import { AuditService } from '../audit/audit.service';
@@ -179,9 +180,11 @@ export class DailyReportsService {
 
   /** Parent: shared reports of own children (latest first). */
   async mine(userId: string): Promise<DailyReportDto[]> {
+    const off = await branchesWithModuleOff(this.prisma, 'dailyReports');
     const rows = await this.prisma.raw.dailyReport.findMany({
       where: {
         sharedAt: { not: null },
+        daycareId: { notIn: off },
         child: { deletedAt: null, guardians: { some: { userId } } },
       },
       include: { child: { include: { classroom: { select: { name: true } } } } },

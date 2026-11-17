@@ -8,6 +8,7 @@ import type { CalendarEventDto, CalendarEventInput, CalendarQuery } from '@latif
 import type { AuthContext } from '../../common/decorators/auth.decorators';
 import { isBranchAdmin } from '../../common/utils/scope';
 import type { CalendarEvent, Prisma } from '../../generated/prisma/client';
+import { branchesWithModuleOff } from '../../common/utils/modules';
 import { PrismaService } from '../../prisma/prisma.service';
 import { dbDate, isoDate } from '../attendance/attendance.util';
 import { AuditService } from '../audit/audit.service';
@@ -68,6 +69,13 @@ export class CalendarService {
       where: {
         AND: [
           await this.visibility(auth),
+          // Branches with the Calendar module off (organisation-wide items stay).
+          {
+            OR: [
+              { daycareId: null },
+              { daycareId: { notIn: await branchesWithModuleOff(this.prisma, 'calendar') } },
+            ],
+          },
           { deletedAt: null, startDate: { lte: dbDate(q.to) }, endDate: { gte: dbDate(q.from) } },
           q.type ? { type: q.type } : {},
           q.classroomId

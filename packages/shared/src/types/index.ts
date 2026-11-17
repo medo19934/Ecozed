@@ -492,3 +492,29 @@ export interface DailyReportDto {
   sharedAt: string | null;
   updatedAt: string | null;
 }
+
+/** A person in a branch, as Settings > Users shows them. */
+export interface ManagedUser {
+  membershipId: string;
+  userId: string;
+  fullName: string;
+  email: string | null;
+  phone: string | null;
+  role: 'MANAGER' | 'STAFF' | 'PARENT';
+  branch: { id: string; name: string };
+  status: 'ACTIVE' | 'DISABLED';
+  classes: { id: string; name: string }[];
+  children: { id: string; fullName: string; relationship: string; classroom: string | null }[];
+  lastLoginAt: string | null;
+  hasPassword: boolean;
+}
+
+export interface UserAuditEntry {
+  id: string;
+  action: string;
+  at: string;
+  actor: string | null;
+  target: string | null;
+  branch: string | null;
+  details: Record<string, unknown> | null;
+}

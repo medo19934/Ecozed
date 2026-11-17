@@ -42,9 +42,25 @@ export const FeatureToggle = {
   STAFF_GEOFENCED_ATTENDANCE: 'staffGeofencedAttendance',
   /** AI "Daily Story" in messages — off by default (costs AI credits). */
   DAILY_STORY_AI: 'dailyStoryAi',
+  DAILY_REPORTS: 'dailyReports',
+  SUBSCRIPTIONS: 'subscriptions',
+  CALENDAR: 'calendar',
+  UNITS: 'units',
 } as const;
 export type FeatureToggle = (typeof FeatureToggle)[keyof typeof FeatureToggle];
 export const FeatureToggleSchema = z.enum(values(FeatureToggle));
+
+/** Value used when a branch has no saved switch for a module (modules are on unless switched off). */
+export const FEATURE_DEFAULTS: Record<FeatureToggle, boolean> = {
+  messages: true,
+  childQrAttendance: true,
+  staffGeofencedAttendance: false,
+  dailyStoryAi: false,
+  dailyReports: true,
+  subscriptions: true,
+  calendar: true,
+  units: true,
+};
 
 export const StaffType = { TEACHER: 'TEACHER', ASSISTANT: 'ASSISTANT', ADMIN: 'ADMIN' } as const;
 export type StaffType = (typeof StaffType)[keyof typeof StaffType];

@@ -1,14 +1,20 @@
 import { Body, Controller, Get, HttpCode, Put, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { DailyReportSchema } from '@latif/shared';
+import { FeatureToggle, DailyReportSchema } from '@latif/shared';
 import { createZodDto } from 'nestjs-zod';
-import { CurrentAuth, Roles, type AuthContext } from '../../common/decorators/auth.decorators';
+import {
+  RequireFeature,
+  CurrentAuth,
+  Roles,
+  type AuthContext,
+} from '../../common/decorators/auth.decorators';
 import { DailyReportsService } from './daily-reports.service';
 
 class ReportDto extends createZodDto(DailyReportSchema) {}
 
 @ApiTags('daily-reports')
 @ApiBearerAuth()
+@RequireFeature(FeatureToggle.DAILY_REPORTS)
 @Controller('daily-reports')
 export class DailyReportsController {
   constructor(private readonly reports: DailyReportsService) {}

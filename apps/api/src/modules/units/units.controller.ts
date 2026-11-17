@@ -10,9 +10,15 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { StaffPermission, UnitItemSchema, UnitListQuerySchema, UnitSchema } from '@latif/shared';
+import {
+  FeatureToggle,
+  StaffPermission,
+  UnitItemSchema,
+  UnitListQuerySchema,
+  UnitSchema,
+} from '@latif/shared';
 import { createZodDto } from 'nestjs-zod';
-import { RequirePermissions, Roles } from '../../common/decorators/auth.decorators';
+import { RequireFeature, RequirePermissions, Roles } from '../../common/decorators/auth.decorators';
 import { UnitsService } from './units.service';
 
 class UnitDtoIn extends createZodDto(UnitSchema) {}
@@ -23,6 +29,7 @@ class ListDto extends createZodDto(UnitListQuerySchema) {}
 @ApiTags('units')
 @ApiBearerAuth()
 @Roles('SUPER_ADMIN', 'MANAGER', 'STAFF')
+@RequireFeature(FeatureToggle.UNITS)
 @Controller('units')
 export class UnitsController {
   constructor(private readonly units: UnitsService) {}

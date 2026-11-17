@@ -12,13 +12,19 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import {
+  FeatureToggle,
   MessagePageQuerySchema,
   OpenThreadSchema,
   ThreadListQuerySchema,
   type OpenThreadInput,
 } from '@latif/shared';
 import { createZodDto, ZodValidationPipe } from 'nestjs-zod';
-import { CurrentAuth, Public, type AuthContext } from '../../common/decorators/auth.decorators';
+import {
+  RequireFeature,
+  CurrentAuth,
+  Public,
+  type AuthContext,
+} from '../../common/decorators/auth.decorators';
 import { fileResponse } from '../../common/utils/files';
 import { MAX_UPLOAD_BYTES, type UploadedBlob } from '../storage/storage.service';
 import { MessagesService } from './messages.service';
@@ -28,6 +34,7 @@ class PageDto extends createZodDto(MessagePageQuerySchema) {}
 
 @ApiTags('messages')
 @ApiBearerAuth()
+@RequireFeature(FeatureToggle.MESSAGES)
 @Controller('messages')
 export class MessagesController {
   constructor(private readonly messages: MessagesService) {}
