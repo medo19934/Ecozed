@@ -36,6 +36,7 @@ const make = (
     audit as never,
     config as never,
     verifier,
+    { linkUser: jest.fn().mockResolvedValue(0) } as never,
   );
   const session = jest
     .spyOn(service as unknown as { session: () => Promise<unknown> }, 'session')

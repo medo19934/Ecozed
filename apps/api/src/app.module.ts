@@ -10,7 +10,15 @@ import { AppConfig } from './config/app-config.service';
 import { AppConfigModule } from './config/config.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { BranchesModule } from './modules/branches/branches.module';
+import { ChildrenModule } from './modules/children/children.module';
+import { ClassesModule } from './modules/classes/classes.module';
+import { DocumentsModule } from './modules/documents/documents.module';
 import { HealthModule } from './modules/health/health.module';
+import { ParentModule } from './modules/parent/parent.module';
+import { StaffModule } from './modules/staff/staff.module';
+import { StorageModule } from './modules/storage/storage.module';
+import { TestDataModule } from './modules/test-data/test-data.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -25,8 +33,16 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
     PrismaModule,
     AuditModule,
+    StorageModule,
+    DocumentsModule,
     HealthModule,
     AuthModule,
+    BranchesModule,
+    ClassesModule,
+    StaffModule,
+    ChildrenModule,
+    ParentModule,
+    TestDataModule,
   ],
   providers: [
     { provide: APP_PIPE, useClass: ZodValidationPipe },

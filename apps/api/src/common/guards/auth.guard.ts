@@ -52,6 +52,7 @@ export class AuthGuard implements CanActivate {
       role: user.isSuperAdmin ? 'SUPER_ADMIN' : null,
       permissions: effectivePermissions(user.isSuperAdmin ? 'SUPER_ADMIN' : null, []),
       isSuperAdmin: user.isSuperAdmin,
+      membershipId: null,
     };
 
     if (payload.daycareId) {
@@ -71,12 +72,13 @@ export class AuthGuard implements CanActivate {
             deletedAt: null,
             daycare: { deletedAt: null },
           },
-          select: { daycareId: true, role: true, permissions: true },
+          select: { id: true, daycareId: true, role: true, permissions: true },
         });
         if (!m) throw new UnauthorizedException('Membership revoked');
         auth = {
           ...auth,
           daycareId: m.daycareId,
+          membershipId: m.id,
           role: m.role,
           permissions: effectivePermissions(m.role, m.permissions),
         };

@@ -21,6 +21,8 @@ export interface AuthContext {
   role: Role | null;
   permissions: StaffPermission[];
   isSuperAdmin: boolean;
+  /** Membership in the active branch (null for super admins / parents without children). */
+  membershipId: string | null;
 }
 
 export const CurrentAuth = createParamDecorator(

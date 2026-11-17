@@ -30,6 +30,7 @@ export const StaffPermission = {
   CAN_MANAGE_PAYMENTS: 'canManagePayments',
   CAN_VIEW_REPORTS: 'canViewReports',
   CAN_MANAGE_SETTINGS: 'canManageSettings',
+  CAN_MANAGE_CLASSES: 'canManageClasses',
 } as const;
 export type StaffPermission = (typeof StaffPermission)[keyof typeof StaffPermission];
 export const StaffPermissionSchema = z.enum(values(StaffPermission));

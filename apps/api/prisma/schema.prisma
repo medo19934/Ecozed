@@ -50,51 +50,63 @@ model User {
   memberships   Membership[]
   refreshTokens RefreshToken[]
   auditLogs     AuditLog[]
+  guardianOf    ChildGuardian[]
 }
 
 /// A branch of the organisation (tenant boundary). Super admins see all branches.
 model Daycare {
-  id               String    @id @default(uuid()) @db.Uuid
-  name             String
-  nameEn           String?
-  slug             String    @unique
-  logoUrl          String?
-  phone            String?
-  email            String?
-  city             String?
-  address          String?
-  latitude         Float?
-  longitude        Float?
-  geofenceRadiusM  Int       @default(150)
-  currency         String    @default("SAR")
-  timezone         String    @default("Asia/Riyadh")
-  defaultLocale    String    @default("ar")
-  useHijri         Boolean   @default(false)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  deletedAt        DateTime?
+  id              String    @id @default(uuid()) @db.Uuid
+  name            String
+  nameEn          String?
+  slug            String    @unique
+  /// Storage key of the branch logo (served via GET /branches/current/logo).
+  logoKey         String?
+  phone           String?
+  email           String?
+  city            String?
+  address         String?
+  latitude        Float?
+  longitude       Float?
+  geofenceRadiusM Int       @default(150)
+  currency        String    @default("SAR")
+  timezone        String    @default("Asia/Riyadh")
+  defaultLocale   String    @default("ar")
+  useHijri        Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
 
   memberships Membership[]
   features    DaycareFeature[]
   auditLogs   AuditLog[]
+  classrooms  Classroom[]
+  children    Child[]
 }
 
 /// A user's role inside one daycare (tenant). Staff permission flags live here.
 model Membership {
-  id          String           @id @default(uuid()) @db.Uuid
-  daycareId   String           @db.Uuid
-  userId      String           @db.Uuid
-  role        Role
-  staffType   StaffType?
-  status      MembershipStatus @default(ACTIVE)
+  id            String           @id @default(uuid()) @db.Uuid
+  daycareId     String           @db.Uuid
+  userId        String           @db.Uuid
+  role          Role
+  staffType     StaffType?
+  status        MembershipStatus @default(ACTIVE)
   /// StaffPermission flags (see @latif/shared). Managers implicitly have all.
-  permissions String[]         @default([])
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  deletedAt   DateTime?
+  permissions   String[]         @default([])
+  /// Staff profile (per branch).
+  specialties   String[]         @default([])
+  qualification String?
+  address       String?
+  joinDate      DateTime?        @db.Date
+  /// Created by the admin-only TEST data button.
+  isTest        Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  deletedAt     DateTime?
 
-  daycare Daycare @relation(fields: [daycareId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  daycare    Daycare        @relation(fields: [daycareId], references: [id], onDelete: Cascade)
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classLinks ClassTeacher[]
 
   @@unique([userId, daycareId])
   @@index([daycareId, role])
@@ -114,16 +126,16 @@ model DaycareFeature {
 }
 
 model RefreshToken {
-  id         String    @id @default(uuid()) @db.Uuid
-  userId     String    @db.Uuid
-  daycareId  String?   @db.Uuid
-  tokenHash  String    @unique
-  familyId   String    @db.Uuid
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  userAgent  String?
-  ip         String?
-  createdAt  DateTime  @default(now())
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  daycareId String?   @db.Uuid
+  tokenHash String    @unique
+  familyId  String    @db.Uuid
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  ip        String?
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -149,4 +161,121 @@ model AuditLog {
 
   @@index([daycareId, createdAt])
   @@index([entity, entityId])
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum RecordStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum DocumentOwner {
+  BRANCH
+  STAFF
+  CHILD
+}
+
+model Classroom {
+  id           String    @id @default(uuid()) @db.Uuid
+  daycareId    String    @db.Uuid
+  name         String
+  capacity     Int       @default(20)
+  minAgeMonths Int?
+  maxAgeMonths Int?
+  color        String?
+  isTest       Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  daycare  Daycare        @relation(fields: [daycareId], references: [id], onDelete: Cascade)
+  teachers ClassTeacher[]
+  children Child[]
+
+  @@index([daycareId])
+}
+
+/// Teacher ↔ class assignment. Teachers only see children of their classes.
+model ClassTeacher {
+  id           String @id @default(uuid()) @db.Uuid
+  daycareId    String @db.Uuid
+  classroomId  String @db.Uuid
+  membershipId String @db.Uuid
+
+  classroom  Classroom  @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@unique([classroomId, membershipId])
+  @@index([daycareId])
+}
+
+model Child {
+  id           String       @id @default(uuid()) @db.Uuid
+  daycareId    String       @db.Uuid
+  classroomId  String?      @db.Uuid
+  fullName     String
+  gender       Gender
+  birthDate    DateTime     @db.Date
+  photoKey     String?
+  allergies    String?
+  medicalNotes String?
+  /// Authorised pickup people: [{ name, relationship, phone }]
+  pickupPeople Json         @default("[]")
+  status       RecordStatus @default(ACTIVE)
+  isTest       Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+
+  daycare   Daycare         @relation(fields: [daycareId], references: [id], onDelete: Cascade)
+  classroom Classroom?      @relation(fields: [classroomId], references: [id], onDelete: SetNull)
+  guardians ChildGuardian[]
+
+  @@index([daycareId, status])
+  @@index([daycareId, classroomId])
+}
+
+/// A guardian of a child. Linked to a parent account (userId) by email/phone.
+model ChildGuardian {
+  id           String   @id @default(uuid()) @db.Uuid
+  daycareId    String   @db.Uuid
+  childId      String   @db.Uuid
+  userId       String?  @db.Uuid
+  fullName     String
+  relationship String
+  phone        String?
+  email        String?
+  isPrimary    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([daycareId])
+  @@index([email])
+  @@index([userId])
+}
+
+/// Private files (staff files now; child/branch documents later). Soft delete = bin.
+model Document {
+  id           String        @id @default(uuid()) @db.Uuid
+  daycareId    String        @db.Uuid
+  ownerType    DocumentOwner
+  ownerId      String        @db.Uuid
+  name         String
+  category     String?
+  storageKey   String
+  mimeType     String
+  size         Int
+  expiresAt    DateTime?     @db.Date
+  uploadedById String?       @db.Uuid
+  createdAt    DateTime      @default(now())
+  deletedAt    DateTime?
+
+  @@index([daycareId, ownerType, ownerId])
 }

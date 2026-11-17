@@ -6,13 +6,29 @@ import { RequestContext } from '../common/context/request-context';
  * `daycareId` from the request context into every query on these models.
  * Keep in sync with schema.prisma (enforced by tenancy.spec.ts).
  */
-export const TENANT_MODELS = new Set<string>(['Membership', 'DaycareFeature', 'AuditLog']);
+export const TENANT_MODELS = new Set<string>([
+  'Membership',
+  'DaycareFeature',
+  'AuditLog',
+  'Classroom',
+  'ClassTeacher',
+  'Child',
+  'ChildGuardian',
+  'Document',
+]);
 
 /** Models that carry `daycareId` but are intentionally NOT auto-scoped. */
 export const TENANT_EXEMPT_MODELS = new Set<string>(['RefreshToken']);
 
 /** Models with `deletedAt` (soft delete). */
-export const SOFT_DELETE_MODELS = new Set<string>(['User', 'Daycare', 'Membership']);
+export const SOFT_DELETE_MODELS = new Set<string>([
+  'User',
+  'Daycare',
+  'Membership',
+  'Classroom',
+  'Child',
+  'Document',
+]);
 
 const READ_OPS = new Set([
   'findFirst',

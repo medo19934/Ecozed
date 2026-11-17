@@ -10,6 +10,7 @@ export interface RequestContextStore {
   role?: Role | null;
   permissions?: StaffPermission[];
   isSuperAdmin?: boolean;
+  membershipId?: string | null;
 }
 
 const als = new AsyncLocalStorage<RequestContextStore>();

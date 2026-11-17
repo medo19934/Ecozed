@@ -7,3 +7,8 @@ process.env.DATABASE_URL =
   'postgresql://latif:latif@localhost:5432/latif_kids_test?schema=public';
 process.env.JWT_ACCESS_SECRET ??= 'test-access-secret';
 process.env.JWT_REFRESH_SECRET ??= 'test-refresh-secret';
+process.env.STORAGE_DRIVER = 'local';
+process.env.STORAGE_LOCAL_DIR = require('node:path').join(
+  require('node:os').tmpdir(),
+  'latif-e2e-storage',
+);

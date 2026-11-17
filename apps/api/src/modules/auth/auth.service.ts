@@ -13,6 +13,7 @@ import { AppConfig } from '../../config/app-config.service';
 import { csv } from '../../config/env';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { GuardianLinkService } from '../children/guardian-link.service';
 import { GOOGLE_VERIFIER, type GoogleIdentity, type GoogleVerifier } from './google-verifier';
 import { TokenService } from './token.service';
 
@@ -31,6 +32,7 @@ export class AuthService {
     private readonly audit: AuditService,
     private readonly config: AppConfig,
     @Inject(GOOGLE_VERIFIER) private readonly googleVerifier: GoogleVerifier,
+    private readonly guardianLinks: GuardianLinkService,
   ) {}
 
   private meta() {
@@ -52,6 +54,8 @@ export class AuthService {
   async google(input: GoogleAuthInput): Promise<AuthResponse> {
     const identity = await this.googleVerifier.verify(input.idToken);
     const user = await this.upsertFromGoogle(identity, input.locale);
+    // Children added by staff before the parent signed up get linked now.
+    await this.guardianLinks.linkUser(user);
     return this.session(user.id, user.lastDaycareId);
   }
 
@@ -63,6 +67,7 @@ export class AuthService {
       email,
       name: email.split('@')[0]!,
     });
+    await this.guardianLinks.linkUser(user);
     return this.session(user.id, user.lastDaycareId);
   }
 

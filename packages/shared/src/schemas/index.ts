@@ -1,2 +1,6 @@
 export * from './common';
 export * from './auth';
+export * from './branch';
+export * from './staff';
+export * from './classes';
+export * from './children';
