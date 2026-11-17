@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Latif Kids",
+    "slug": "latif-kids",
+    "scheme": "latifkids",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": true, "bundleIdentifier": "app.latifkids.mobile" },
+    "android": { "package": "app.latifkids.mobile", "edgeToEdgeEnabled": true },
+    "web": { "bundler": "metro", "output": "single" },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      ["expo-localization", { "supportsRTL": true }],
+      ["expo-splash-screen", { "backgroundColor": "#6366f1" }]
+    ],
+    "extra": { "supportsRTL": true },
+    "experiments": { "typedRoutes": true }
+  }
+}

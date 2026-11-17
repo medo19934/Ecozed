@@ -12,15 +12,15 @@ Legend: `[ ]` todo · `[x]` done. Work one phase at a time; commit after each.
 
 ## Phase 1 — Foundations (shared + API core + app shells)
 
-- [ ] packages/shared: enums (roles, statuses), base zod schemas, pagination types, constants
-- [ ] api: NestJS bootstrap, config module, Swagger, health check
-- [ ] api: Prisma schema core (Daycare, User, Membership, StaffPermission, FeatureToggle, AuditLog, RefreshToken)
-- [ ] api: tenancy guard + Prisma extension (daycareId scoping, soft delete)
-- [ ] api: auth (email/phone+password, JWT access/refresh, OTP, forgot password), RBAC guards + permission flags
-- [ ] web: Next.js + Tailwind + shadcn/ui, next-intl (ar RTL default / en), theme tokens (indigo→violet)
-- [ ] web: auth pages (login, parent OTP, forgot password), admin layout (collapsible sidebar, breadcrumbs, user/lang menu, fullscreen)
-- [ ] mobile: Expo Router + NativeWind + i18next RTL, role-based login, tab shells (parent/teacher)
-- [ ] Unit tests for auth service; e2e auth flow
+- [x] packages/shared: enums (roles, statuses), base zod schemas, pagination types, constants
+- [x] api: NestJS bootstrap, config module, Swagger, health check
+- [x] api: Prisma schema core (Daycare, User, Membership w/ permission flags, DaycareFeature, AuditLog, RefreshToken, OtpCode)
+- [x] api: tenancy guard + Prisma extension (daycareId scoping, soft delete)
+- [x] api: auth (email/phone+password, JWT access/refresh, OTP, forgot password), RBAC guards + permission flags
+- [x] web: Next.js + Tailwind + shadcn/ui, next-intl (ar RTL default / en), theme tokens (indigo→violet)
+- [x] web: auth pages (login, parent OTP, forgot password), admin layout (collapsible sidebar, breadcrumbs, user/lang menu, fullscreen)
+- [x] mobile: Expo Router + NativeWind + i18next RTL, role-based login, tab shells (parent/teacher)
+- [x] Unit tests for auth service; e2e auth flow
 
 ## Phase 2 — Daycare setup & core records
 
@@ -80,3 +80,14 @@ Legend: `[ ]` todo · `[x]` done. Work one phase at a time; commit after each.
 - [ ] Service unit test coverage; Playwright smoke test for web
 - [ ] Audit log coverage for sensitive actions; pagination everywhere check
 - [ ] README run steps, .env.example complete, CI workflow (lint/typecheck/test)
+
+## Decisions & notes
+
+- NestJS pinned to v11: v12 is ESM-only and `nestjs-zod` (shared zod DTOs → Swagger) supports ≤11.
+- Prisma 7 (`prisma-client` generator, `@prisma/adapter-pg`, `prisma.config.ts`). Client in `apps/api/src/generated` (git-ignored).
+- `PrismaService.scoped` = tenant + soft-delete client (use in features); `.raw` = auth/system only. New tenant models must be added to `TENANT_MODELS` (a test enforces it).
+- Web auth = BFF: `/bff/auth/*` route handlers store JWTs in httpOnly cookies; `/bff/api/*` proxies to the API with auto refresh. Next 16 uses `src/proxy.ts` (not middleware).
+- shadcn registry unreachable from CI sandbox → components hand-written in shadcn style (`components.json` kept).
+- Expo SDK 58, NativeWind 4 + Tailwind 3 (mobile), React 19.3 across web+mobile. Tokens in SecureStore. Arabic default; switching language reloads to apply native RTL.
+- e2e tests run against `latif_kids_test` (`prisma migrate deploy`, unique fixtures, no destructive reset).
+- OTP delivery is a logging stub (`OTP_SENDER`); `OTP_DEV_ECHO=true` returns codes in dev/test responses.

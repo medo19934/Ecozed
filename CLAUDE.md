@@ -34,14 +34,16 @@ legacy/       old Ecozed e-commerce app — not in workspace, do not touch
 - Validate input with shared zod schemas on both client and server.
 - Files: kebab-case; React components PascalCase exports; no default exports except Next/Expo routes.
 - Conventional commits: `feat(api): ...`, `chore: ...`.
+- API: use `prisma.scoped` in feature services (`prisma.raw` only for auth/system); register new tenant models in `src/prisma/tenancy.ts`. Guards: `@Public`, `@Roles`, `@RequirePermissions`, `@RequireFeature`.
+- Web calls the API only via `/bff/api/*` (`api` in `src/lib/api-client.ts`); tokens never reach browser JS.
 
 ## Commands
 
 - `pnpm install` — install all
 - `pnpm infra:up` / `pnpm infra:down` — Postgres, Redis, MinIO via docker compose
 - `pnpm dev` — run all apps in parallel; `pnpm --filter @latif/api dev` for one
-- `pnpm build` · `pnpm lint` · `pnpm typecheck` · `pnpm test` · `pnpm format`
-- `pnpm --filter @latif/api prisma migrate dev` · `pnpm --filter @latif/api seed`
+- `pnpm build` · `pnpm lint` · `pnpm typecheck` · `pnpm test` · `pnpm test:e2e` · `pnpm format`
+- `pnpm --filter @latif/api db:migrate` · `pnpm --filter @latif/api seed` (demo logins: `*@latifkids.test` / `Password123!`)
 
 ## Rules
 
