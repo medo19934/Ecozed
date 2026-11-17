@@ -1,0 +1,9 @@
+{
+  "name": "@latif/web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Latif Kids admin web + marketing site (Next.js) — scaffolded in Phase 1",
+  "dependencies": {
+    "@latif/shared": "workspace:*"
+  }
+}

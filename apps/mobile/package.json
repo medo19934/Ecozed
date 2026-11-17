@@ -1,0 +1,9 @@
+{
+  "name": "@latif/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Latif Kids parent/teacher app (Expo) — scaffolded in Phase 1",
+  "dependencies": {
+    "@latif/shared": "workspace:*"
+  }
+}
