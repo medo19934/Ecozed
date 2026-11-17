@@ -239,11 +239,13 @@ model Child {
   updatedAt    DateTime     @updatedAt
   deletedAt    DateTime?
 
-  daycare    Daycare           @relation(fields: [daycareId], references: [id], onDelete: Cascade)
-  classroom  Classroom?        @relation(fields: [classroomId], references: [id], onDelete: SetNull)
-  guardians  ChildGuardian[]
-  attendance ChildAttendance[]
-  vacations  VacationRequest[]
+  daycare       Daycare           @relation(fields: [daycareId], references: [id], onDelete: Cascade)
+  classroom     Classroom?        @relation(fields: [classroomId], references: [id], onDelete: SetNull)
+  guardians     ChildGuardian[]
+  attendance    ChildAttendance[]
+  vacations     VacationRequest[]
+  subscriptions Subscription[]
+  dailyReports  DailyReport[]
 
   @@index([daycareId, status])
   @@index([daycareId, classroomId])
@@ -565,4 +567,110 @@ model ThreadRead {
   thread MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
 
   @@id([threadId, userId])
+}
+
+// ---------------- Subscriptions (on-site payments, no gateway) ----------------
+
+enum PlanPeriod {
+  MONTHLY
+  TERM
+  YEARLY
+}
+
+enum PaymentStatus {
+  PAID
+  UNPAID
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  ENDED
+  CANCELED
+}
+
+/// A fee plan of a branch (price in SAR).
+model Plan {
+  id        String     @id @default(uuid()) @db.Uuid
+  daycareId String     @db.Uuid
+  name      String
+  price     Decimal    @db.Decimal(10, 2)
+  period    PlanPeriod @default(MONTHLY)
+  /// Included services (meals, transport, …).
+  services  String[]   @default([])
+  isTest    Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+
+  subscriptions Subscription[]
+
+  @@index([daycareId])
+}
+
+model Subscription {
+  id             String             @id @default(uuid()) @db.Uuid
+  daycareId      String             @db.Uuid
+  childId        String             @db.Uuid
+  planId         String?            @db.Uuid
+  value          Decimal            @db.Decimal(10, 2)
+  startDate      DateTime           @db.Date
+  endDate        DateTime           @db.Date
+  paymentStatus  PaymentStatus      @default(UNPAID)
+  paymentMethod  PaymentMethod?
+  status         SubscriptionStatus @default(ACTIVE)
+  paidAt         DateTime?
+  lastRemindedAt DateTime?
+  reminders      Int                @default(0)
+  notes          String?
+  isTest         Boolean            @default(false)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  deletedAt      DateTime?
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  plan  Plan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@index([daycareId, status, paymentStatus])
+  @@index([childId])
+}
+
+// ---------------- Daily reports ----------------
+
+enum Mood {
+  HAPPY
+  CALM
+  TIRED
+  SAD
+  UPSET
+}
+
+/// One report per child per day, written by staff and shared with the family.
+model DailyReport {
+  id         String    @id @default(uuid()) @db.Uuid
+  daycareId  String    @db.Uuid
+  childId    String    @db.Uuid
+  date       DateTime  @db.Date
+  /// Meals: [{ meal: "BREAKFAST"|"SNACK"|"LUNCH", amount: "ALL"|"MOST"|"SOME"|"NONE" }]
+  meals      Json      @default("[]")
+  napMinutes Int?
+  toilet     Int?
+  mood       Mood?
+  activities String?
+  notes      String?
+  authorId   String?   @db.Uuid
+  sharedAt   DateTime?
+  isTest     Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, date])
+  @@index([daycareId, date])
 }

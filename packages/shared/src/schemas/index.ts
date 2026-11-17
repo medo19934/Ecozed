@@ -7,3 +7,4 @@ export * from './children';
 export * from './attendance';
 export * from './curriculum';
 export * from './messages';
+export * from './finance';

@@ -419,3 +419,63 @@ export interface ParentListItem {
   linked: boolean;
   children: { id: string; fullName: string; classroom: string | null }[];
 }
+
+export interface PlanDto {
+  id: string;
+  name: string;
+  price: number;
+  period: 'MONTHLY' | 'TERM' | 'YEARLY';
+  services: string[];
+  activeCount: number;
+}
+
+export interface SubscriptionDto {
+  id: string;
+  child: {
+    id: string;
+    fullName: string;
+    status: 'ACTIVE' | 'ARCHIVED';
+    classroom: string | null;
+    hasPhoto: boolean;
+  };
+  plan: { id: string; name: string } | null;
+  value: number;
+  startDate: string;
+  endDate: string;
+  paymentStatus: 'PAID' | 'UNPAID';
+  paymentMethod: 'CASH' | 'CARD' | 'TRANSFER' | null;
+  status: 'ACTIVE' | 'ENDED' | 'CANCELED';
+  paidAt: string | null;
+  lastRemindedAt: string | null;
+  reminders: number;
+  notes: string | null;
+}
+
+export interface SubscriptionSummary {
+  total: number;
+  paid: number;
+  unpaid: number;
+  canceled: number;
+  unpaidAmount: number;
+}
+
+export interface SubscriptionListResponse extends Paginated<SubscriptionDto> {
+  summary: SubscriptionSummary;
+  /** Recent reminders for the side panel. */
+  reminders: { subscriptionId: string; childName: string; at: string; count: number }[];
+}
+
+export interface DailyReportDto {
+  id: string | null;
+  child: { id: string; fullName: string; classroom: string | null; hasPhoto: boolean };
+  date: string;
+  meals: { meal: 'BREAKFAST' | 'SNACK' | 'LUNCH'; amount: 'ALL' | 'MOST' | 'SOME' | 'NONE' }[];
+  napMinutes: number | null;
+  toilet: number | null;
+  mood: 'HAPPY' | 'CALM' | 'TIRED' | 'SAD' | 'UPSET' | null;
+  activities: string | null;
+  notes: string | null;
+  author: string | null;
+  sharedAt: string | null;
+  updatedAt: string | null;
+}

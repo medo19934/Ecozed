@@ -22,6 +22,9 @@ export const TENANT_MODELS = new Set<string>([
   'AdmissionRequest',
   'Unit',
   'UnitItem',
+  'Plan',
+  'Subscription',
+  'DailyReport',
 ]);
 
 /** Models that carry `daycareId` but are intentionally NOT auto-scoped. */
@@ -36,6 +39,8 @@ export const TENANT_EXEMPT_MODELS = new Set<string>([
 
 /** Models with `deletedAt` (soft delete). */
 export const SOFT_DELETE_MODELS = new Set<string>([
+  'Plan',
+  'Subscription',
   'User',
   'Daycare',
   'Membership',

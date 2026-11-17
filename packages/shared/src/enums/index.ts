@@ -72,15 +72,14 @@ export const EnrollmentStatus = {
 export type EnrollmentStatus = (typeof EnrollmentStatus)[keyof typeof EnrollmentStatus];
 export const EnrollmentStatusSchema = z.enum(values(EnrollmentStatus));
 
-export const PaymentStatus = { PAID: 'PAID', UNPAID: 'UNPAID', OVERDUE: 'OVERDUE' } as const;
+export const PaymentStatus = { PAID: 'PAID', UNPAID: 'UNPAID' } as const;
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];
 export const PaymentStatusSchema = z.enum(values(PaymentStatus));
 
 export const SubscriptionStatus = {
   ACTIVE: 'ACTIVE',
-  EXPIRED: 'EXPIRED',
-  CANCELLED: 'CANCELLED',
-  ARCHIVED: 'ARCHIVED',
+  ENDED: 'ENDED',
+  CANCELED: 'CANCELED',
 } as const;
 export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus];
 export const SubscriptionStatusSchema = z.enum(values(SubscriptionStatus));
