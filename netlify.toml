@@ -1,0 +1,7 @@
+# Netlify site for the web app (Next.js runtime). The API is its own Netlify site: apps/api/netlify.toml.
+[build]
+  command = "pnpm --filter @latif/shared build && pnpm --filter @latif/web build"
+  publish = "apps/web/.next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

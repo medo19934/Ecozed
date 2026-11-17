@@ -1,0 +1,6 @@
+# Netlify site for the API (Nest as one Function + Netlify Database + Netlify Blobs).
+# Deploy (from apps/api): pnpm build && pnpm build:netlify && netlify deploy --prod --no-build \
+#   --dir "$PWD/netlify/public" --functions "$PWD/netlify/functions"
+[build]
+  publish = "netlify/public"
+  functions = "netlify/functions"

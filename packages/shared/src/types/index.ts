@@ -364,7 +364,12 @@ export interface ThreadDto {
   subtitle: string | null;
   branch: { id: string; name: string };
   child: { id: string; fullName: string; gender: 'MALE' | 'FEMALE'; hasPhoto: boolean } | null;
-  lastMessage: { body: string | null; hasAttachment: boolean; senderName: string; at: string } | null;
+  lastMessage: {
+    body: string | null;
+    hasAttachment: boolean;
+    senderName: string;
+    at: string;
+  } | null;
   unread: number;
   canPost: boolean;
 }

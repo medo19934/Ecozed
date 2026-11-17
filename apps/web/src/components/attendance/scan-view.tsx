@@ -42,7 +42,9 @@ export function ScanView() {
         ) : scan.isSuccess ? (
           <>
             <CircleCheck className="size-16 text-[#2fb36d]" />
-            {scan.data.items.length === 0 && <p className="text-lg font-semibold">{t('nothingToRecord')}</p>}
+            {scan.data.items.length === 0 && (
+              <p className="text-lg font-semibold">{t('nothingToRecord')}</p>
+            )}
             {scan.data.items.map((i) => (
               <p key={`${i.name}-${i.direction}`} className="text-lg font-semibold">
                 {i.name} — {i.direction === 'IN' ? t('inLabel') : t('outLabel')}

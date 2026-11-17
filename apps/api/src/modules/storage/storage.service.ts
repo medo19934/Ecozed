@@ -31,11 +31,15 @@ export interface UploadedBlob {
   originalname: string;
 }
 
-/** Private object storage: local disk (dev) or S3-compatible (MinIO/AWS). Never public URLs. */
+/** Private object storage: local disk (dev), S3-compatible (MinIO/AWS) or Netlify Blobs. Never public URLs. */
+/** Netlify Blobs store (only loaded when STORAGE_DRIVER=netlify; context comes from the function runtime). */
+const blobs = async () =>
+  (await import('@netlify/blobs')).getStore({ name: 'uploads', consistency: 'strong' });
+
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
-  private readonly driver: 'local' | 's3';
+  private readonly driver: 'local' | 's3' | 'netlify';
   private readonly root: string;
   private readonly bucket: string;
   private readonly s3?: S3Client;
@@ -69,7 +73,13 @@ export class StorageService {
       throw new BadRequestException({ message: 'File too large', code: 'file_too_large' });
     }
     const key = `${prefix}/${randomUUID()}`;
-    if (this.s3) {
+    if (this.driver === 'netlify') {
+      const ab = file.buffer.buffer.slice(
+        file.buffer.byteOffset,
+        file.buffer.byteOffset + file.buffer.byteLength,
+      );
+      await (await blobs()).set(key, ab as ArrayBuffer, { metadata: { mime: file.mimetype } });
+    } else if (this.s3) {
       await this.ensureBucket();
       await this.s3.send(
         new PutObjectCommand({
@@ -89,6 +99,11 @@ export class StorageService {
 
   async read(key: string): Promise<Buffer> {
     try {
+      if (this.driver === 'netlify') {
+        const data = await (await blobs()).get(key, { type: 'arrayBuffer' });
+        if (!data) throw new Error('missing');
+        return Buffer.from(data);
+      }
       if (this.s3) {
         const res = await this.s3.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
         return Buffer.from(await res.Body!.transformToByteArray());
@@ -101,7 +116,9 @@ export class StorageService {
 
   async remove(key: string): Promise<void> {
     try {
-      if (this.s3) await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
+      if (this.driver === 'netlify') await (await blobs()).delete(key);
+      else if (this.s3)
+        await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
       else await rm(this.localPath(key), { force: true });
     } catch (e) {
       this.logger.warn(`Failed to delete ${key}: ${(e as Error).message}`);

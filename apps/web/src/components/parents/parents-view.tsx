@@ -1,6 +1,11 @@
 'use client';
 
-import { AddParentSchema, type ChildListItem, type Paginated, type ParentListItem } from '@latif/shared';
+import {
+  AddParentSchema,
+  type ChildListItem,
+  type Paginated,
+  type ParentListItem,
+} from '@latif/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Contact, Mail, Phone, Plus, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -26,7 +31,8 @@ export function ParentsView() {
   const canAdd = useCan('canAddChild');
   const q = useQuery({
     queryKey: ['parents', search],
-    queryFn: () => api.get<ParentListItem[]>(`/parents${search ? `?search=${encodeURIComponent(search)}` : ''}`),
+    queryFn: () =>
+      api.get<ParentListItem[]>(`/parents${search ? `?search=${encodeURIComponent(search)}` : ''}`),
   });
   const rows = q.data ?? [];
 
@@ -48,7 +54,12 @@ export function ParentsView() {
       <Card className="p-4">
         <div className="relative mb-4 max-w-sm">
           <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="ps-9" placeholder={t('search')} value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            className="ps-9"
+            placeholder={t('search')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         {q.isPending ? (
           <Skeleton className="h-48" />
@@ -95,7 +106,9 @@ export function ParentsView() {
                     </div>
                   </Td>
                   <Td>
-                    <Badge variant={p.linked ? 'success' : 'warning'}>{p.linked ? t('active') : t('invited')}</Badge>
+                    <Badge variant={p.linked ? 'success' : 'warning'}>
+                      {p.linked ? t('active') : t('invited')}
+                    </Badge>
                   </Td>
                 </Tr>
               ))}
@@ -133,7 +146,10 @@ function AddParentDialog({ children }: { children: React.ReactNode }) {
     onError: (e) => toast.error(errorMessage(e)),
   });
   const toggle = (id: string) =>
-    setF((s) => ({ ...s, childIds: s.childIds.includes(id) ? s.childIds.filter((x) => x !== id) : [...s.childIds, id] }));
+    setF((s) => ({
+      ...s,
+      childIds: s.childIds.includes(id) ? s.childIds.filter((x) => x !== id) : [...s.childIds, id],
+    }));
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -150,21 +166,45 @@ function AddParentDialog({ children }: { children: React.ReactNode }) {
         >
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField id="p-name" label={t('name')} error={errors.fullName}>
-              <Input id="p-name" value={f.fullName} onChange={(e) => setF({ ...f, fullName: e.target.value })} />
+              <Input
+                id="p-name"
+                value={f.fullName}
+                onChange={(e) => setF({ ...f, fullName: e.target.value })}
+              />
             </FormField>
             <FormField id="p-rel" label={t('relationship')} error={errors.relationship}>
-              <Input id="p-rel" placeholder={t('relationshipHint')} value={f.relationship} onChange={(e) => setF({ ...f, relationship: e.target.value })} />
+              <Input
+                id="p-rel"
+                placeholder={t('relationshipHint')}
+                value={f.relationship}
+                onChange={(e) => setF({ ...f, relationship: e.target.value })}
+              />
             </FormField>
             <FormField id="p-email" label={t('email')} error={errors.email}>
-              <Input id="p-email" type="email" dir="ltr" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
+              <Input
+                id="p-email"
+                type="email"
+                dir="ltr"
+                value={f.email}
+                onChange={(e) => setF({ ...f, email: e.target.value })}
+              />
             </FormField>
             <FormField id="p-phone" label={t('phone')} error={errors.phone}>
-              <Input id="p-phone" type="tel" dir="ltr" placeholder="05XXXXXXXX" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
+              <Input
+                id="p-phone"
+                type="tel"
+                dir="ltr"
+                placeholder="05XXXXXXXX"
+                value={f.phone}
+                onChange={(e) => setF({ ...f, phone: e.target.value })}
+              />
             </FormField>
           </div>
           <fieldset className="grid gap-2">
             <legend className="mb-2 text-sm font-medium">{t('pickChildren')}</legend>
-            {errors.childIds && <p className="text-sm text-destructive">{t('pickChildrenError')}</p>}
+            {errors.childIds && (
+              <p className="text-sm text-destructive">{t('pickChildrenError')}</p>
+            )}
             <div className="grid max-h-56 gap-1 overflow-y-auto rounded-xl border p-2">
               {kids.isPending ? (
                 <Skeleton className="h-20" />
@@ -172,10 +212,20 @@ function AddParentDialog({ children }: { children: React.ReactNode }) {
                 <p className="p-2 text-sm text-muted-foreground">{t('noChildren')}</p>
               ) : (
                 kids.data!.items.map((c) => (
-                  <label key={c.id} className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-muted">
-                    <input type="checkbox" className="size-4 accent-primary" checked={f.childIds.includes(c.id)} onChange={() => toggle(c.id)} />
+                  <label
+                    key={c.id}
+                    className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-muted"
+                  >
+                    <input
+                      type="checkbox"
+                      className="size-4 accent-primary"
+                      checked={f.childIds.includes(c.id)}
+                      onChange={() => toggle(c.id)}
+                    />
                     <span className="flex-1">{c.fullName}</span>
-                    {c.classroom && <span className="text-xs text-muted-foreground">{c.classroom.name}</span>}
+                    {c.classroom && (
+                      <span className="text-xs text-muted-foreground">{c.classroom.name}</span>
+                    )}
                   </label>
                 ))
               )}

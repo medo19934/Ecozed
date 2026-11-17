@@ -70,6 +70,17 @@ eas build -p ios --profile preview              # needs an Apple developer accou
 
 Add the Android/iOS OAuth client IDs (`EXPO_PUBLIC_GOOGLE_*`) as EAS environment variables (`eas env:create`), and include them in the API's `GOOGLE_CLIENT_IDS`.
 
+## Netlify (public demo)
+
+Live: web https://latif-kids.netlify.app · mobile app (web build) https://latif-kids-app.netlify.app · API https://latif-kids-api.netlify.app/api/docs
+
+- **API site**: Nest runs inside one Netlify Function (`apps/api/src/serverless.ts` boots Nest on a loopback port per container and forwards requests). `pnpm --filter @latif/api build:netlify` bundles `dist/` into `apps/api/netlify/functions/api/server.cjs` with the SQL migrations embedded; they are applied on cold start (`_latif_migrations` table). Database = Netlify Database (`NETLIFY_DB_URL`, used when `DATABASE_URL` is unset). Files = Netlify Blobs (`STORAGE_DRIVER=netlify`).
+  Env: `NODE_ENV=production`, `PUBLIC_DEMO=true`, `STORAGE_DRIVER=netlify`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `CORS_ORIGINS=https://latif-kids-app.netlify.app,https://latif-kids.netlify.app`.
+- **Web site**: Next.js runtime (`netlify.toml` at the repo root). Env: `API_URL=https://latif-kids-api.netlify.app/api/v1`.
+- **App site**: `expo export -p web` with `EXPO_PUBLIC_API_URL=https://latif-kids-api.netlify.app`, SPA fallback.
+- Deploy all three: `WEB_SITE_ID=<id> scripts/deploy-netlify.sh`.
+- `PUBLIC_DEMO=true` = role cards + email/phone sign-in **without verification** and demo data. Anyone can open any account: never use it with real families' data. For real use set `PUBLIC_DEMO=false` and configure Google sign-in.
+
 ## Tests
 
 ```bash

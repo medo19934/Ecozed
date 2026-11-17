@@ -32,7 +32,9 @@ export default function ScanScreen() {
     locked.current = true;
     setBusy(true);
     try {
-      const r = await api.post<KioskResult>('/attendance/kiosk/scan', { token: decodeURIComponent(data) });
+      const r = await api.post<KioskResult>('/attendance/kiosk/scan', {
+        token: decodeURIComponent(data),
+      });
       setResult({ ok: true, data: r });
       void qc.invalidateQueries({ queryKey: ['attendance'] });
     } catch (e) {

@@ -1,7 +1,22 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { MessagePageQuerySchema, OpenThreadSchema, ThreadListQuerySchema, type OpenThreadInput } from '@latif/shared';
+import {
+  MessagePageQuerySchema,
+  OpenThreadSchema,
+  ThreadListQuerySchema,
+  type OpenThreadInput,
+} from '@latif/shared';
 import { createZodDto, ZodValidationPipe } from 'nestjs-zod';
 import { CurrentAuth, type AuthContext } from '../../common/decorators/auth.decorators';
 import { fileResponse } from '../../common/utils/files';
@@ -33,12 +48,19 @@ export class MessagesController {
   }
 
   @Post('threads')
-  open(@CurrentAuth() auth: AuthContext, @Body(new ZodValidationPipe(OpenThreadSchema)) dto: OpenThreadInput) {
+  open(
+    @CurrentAuth() auth: AuthContext,
+    @Body(new ZodValidationPipe(OpenThreadSchema)) dto: OpenThreadInput,
+  ) {
     return this.messages.open(auth, dto);
   }
 
   @Get('threads/:id')
-  list(@CurrentAuth() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string, @Query() q: PageDto) {
+  list(
+    @CurrentAuth() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() q: PageDto,
+  ) {
     return this.messages.messages(auth, id, q.before);
   }
 
@@ -52,11 +74,20 @@ export class MessagesController {
     @Body('body') body?: string,
     @UploadedFile() file?: UploadedBlob,
   ) {
-    return this.messages.send(auth, id, typeof body === 'string' ? body.slice(0, 4000) : undefined, file);
+    return this.messages.send(
+      auth,
+      id,
+      typeof body === 'string' ? body.slice(0, 4000) : undefined,
+      file,
+    );
   }
 
   @Get('threads/:id/files/:messageId')
-  async file(@CurrentAuth() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string, @Param('messageId', ParseUUIDPipe) messageId: string) {
+  async file(
+    @CurrentAuth() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('messageId', ParseUUIDPipe) messageId: string,
+  ) {
     const f = await this.messages.attachment(auth, id, messageId);
     return fileResponse(f.buffer, f.mime, f.name, f.mime.startsWith('image/'));
   }

@@ -81,9 +81,20 @@ export class AuthService {
           isSuperAdmin: isEmail && this.isSuperAdminEmail(identifier),
         },
       });
-      await this.audit.log({ action: 'auth.signup_parent', entity: 'User', entityId: user.id, actorId: user.id, daycareId: null });
+      await this.audit.log({
+        action: 'auth.signup_parent',
+        entity: 'User',
+        entityId: user.id,
+        actorId: user.id,
+        daycareId: null,
+      });
     }
-    await this.audit.log({ action: 'auth.login_identifier', entity: 'User', entityId: user.id, actorId: user.id });
+    await this.audit.log({
+      action: 'auth.login_identifier',
+      entity: 'User',
+      entityId: user.id,
+      actorId: user.id,
+    });
     await this.guardianLinks.linkUser(user);
     return this.session(user.id, user.lastDaycareId);
   }

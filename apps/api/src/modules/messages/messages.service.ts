@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type {
   MessageContacts,
   MessageDto,
@@ -38,16 +43,28 @@ export class MessagesService {
   }
 
   /** Staff role of the user in a branch (super admin counts as admin everywhere). */
-  private async staffRole(auth: AuthContext, daycareId: string): Promise<'ADMIN' | 'TEACHER' | null> {
+  private async staffRole(
+    auth: AuthContext,
+    daycareId: string,
+  ): Promise<'ADMIN' | 'TEACHER' | null> {
     if (auth.isSuperAdmin) return 'ADMIN';
     const m = await this.prisma.raw.membership.findFirst({
-      where: { userId: auth.userId, daycareId, status: 'ACTIVE', deletedAt: null, role: { in: ['MANAGER', 'STAFF'] } },
+      where: {
+        userId: auth.userId,
+        daycareId,
+        status: 'ACTIVE',
+        deletedAt: null,
+        role: { in: ['MANAGER', 'STAFF'] },
+      },
     });
     if (!m) return null;
     return m.role === 'MANAGER' ? 'ADMIN' : 'TEACHER';
   }
 
-  private async access(auth: AuthContext, t: MessageThread): Promise<{ read: boolean; post: boolean }> {
+  private async access(
+    auth: AuthContext,
+    t: MessageThread,
+  ): Promise<{ read: boolean; post: boolean }> {
     const staff = await this.staffRole(auth, t.daycareId);
     if (t.kind === 'STAFF') {
       const member = t.userA === auth.userId || t.userB === auth.userId;
@@ -88,12 +105,19 @@ export class MessagesService {
       select: { daycareId: true, role: true, id: true },
     });
     const adminBranches = auth.isSuperAdmin
-      ? (await this.prisma.raw.daycare.findMany({ where: { deletedAt: null }, select: { id: true } })).map((d) => d.id)
+      ? (
+          await this.prisma.raw.daycare.findMany({
+            where: { deletedAt: null },
+            select: { id: true },
+          })
+        ).map((d) => d.id)
       : memberships.filter((m) => m.role === 'MANAGER').map((m) => m.daycareId);
     const teacherBranches = memberships.filter((m) => m.role === 'STAFF').map((m) => m.daycareId);
     const teacherClasses = (
       await this.prisma.raw.classTeacher.findMany({
-        where: { membershipId: { in: memberships.filter((m) => m.role === 'STAFF').map((m) => m.id) } },
+        where: {
+          membershipId: { in: memberships.filter((m) => m.role === 'STAFF').map((m) => m.id) },
+        },
         select: { classroomId: true },
       })
     ).map((c) => c.classroomId);
@@ -102,7 +126,12 @@ export class MessagesService {
       select: { id: true, daycareId: true, classroomId: true },
     });
     const teacherKids = teacherClasses.length
-      ? (await this.prisma.raw.child.findMany({ where: { classroomId: { in: teacherClasses }, deletedAt: null }, select: { id: true } })).map((c) => c.id)
+      ? (
+          await this.prisma.raw.child.findMany({
+            where: { classroomId: { in: teacherClasses }, deletedAt: null },
+            select: { id: true },
+          })
+        ).map((c) => c.id)
       : [];
     const parentBranches = [...new Set(kids.map((k) => k.daycareId))];
     const parentClasses = kids.map((k) => k.classroomId).filter((c): c is string => Boolean(c));
@@ -129,14 +158,33 @@ export class MessagesService {
     const childIds = rows.map((r) => r.childId).filter((x): x is string => Boolean(x));
     const otherIds = rows.flatMap((r) => [r.userA, r.userB]).filter((x): x is string => Boolean(x));
     const [branches, children, users, reads, classes] = await Promise.all([
-      this.prisma.raw.daycare.findMany({ where: { id: { in: [...new Set(rows.map((r) => r.daycareId))] } }, select: { id: true, name: true } }),
+      this.prisma.raw.daycare.findMany({
+        where: { id: { in: [...new Set(rows.map((r) => r.daycareId))] } },
+        select: { id: true, name: true },
+      }),
       this.prisma.raw.child.findMany({
         where: { id: { in: childIds } },
-        select: { id: true, fullName: true, gender: true, photoKey: true, classroom: { select: { name: true } } },
+        select: {
+          id: true,
+          fullName: true,
+          gender: true,
+          photoKey: true,
+          classroom: { select: { name: true } },
+        },
       }),
-      this.prisma.raw.user.findMany({ where: { id: { in: otherIds } }, select: { id: true, fullName: true } }),
-      this.prisma.raw.threadRead.findMany({ where: { threadId: { in: ids }, userId: auth.userId } }),
-      this.prisma.raw.classroom.findMany({ where: { id: { in: rows.map((r) => r.classroomId).filter((x): x is string => Boolean(x)) } }, select: { id: true, name: true } }),
+      this.prisma.raw.user.findMany({
+        where: { id: { in: otherIds } },
+        select: { id: true, fullName: true },
+      }),
+      this.prisma.raw.threadRead.findMany({
+        where: { threadId: { in: ids }, userId: auth.userId },
+      }),
+      this.prisma.raw.classroom.findMany({
+        where: {
+          id: { in: rows.map((r) => r.classroomId).filter((x): x is string => Boolean(x)) },
+        },
+        select: { id: true, name: true },
+      }),
     ]);
     const map = <T extends { id: string }>(l: T[]) => new Map(l.map((x) => [x.id, x]));
     const b = map(branches);
@@ -147,29 +195,61 @@ export class MessagesService {
     const out: ThreadDto[] = [];
     for (const t of rows) {
       const [last, unread, acc] = await Promise.all([
-        this.prisma.raw.message.findFirst({ where: { threadId: t.id }, orderBy: { createdAt: 'desc' } }),
+        this.prisma.raw.message.findFirst({
+          where: { threadId: t.id },
+          orderBy: { createdAt: 'desc' },
+        }),
         this.prisma.raw.message.count({
-          where: { threadId: t.id, senderId: { not: auth.userId }, createdAt: { gt: readAt.get(t.id) ?? new Date(0) } },
+          where: {
+            threadId: t.id,
+            senderId: { not: auth.userId },
+            createdAt: { gt: readAt.get(t.id) ?? new Date(0) },
+          },
         }),
         this.access(auth, t),
       ]);
-      const sender = last ? await this.prisma.raw.user.findUnique({ where: { id: last.senderId }, select: { fullName: true } }) : null;
+      const sender = last
+        ? await this.prisma.raw.user.findUnique({
+            where: { id: last.senderId },
+            select: { fullName: true },
+          })
+        : null;
       const child = t.childId ? c.get(t.childId) : undefined;
-      const other = t.kind === 'STAFF' ? u.get(t.userA === auth.userId ? t.userB! : t.userA!) : undefined;
+      const other =
+        t.kind === 'STAFF' ? u.get(t.userA === auth.userId ? t.userB! : t.userA!) : undefined;
       out.push({
         id: t.id,
         kind: t.kind,
-        title: t.kind === 'CHILD' ? (child?.fullName ?? '') : t.kind === 'STAFF' ? (other?.fullName ?? '') : (t.title ?? ''),
+        title:
+          t.kind === 'CHILD'
+            ? (child?.fullName ?? '')
+            : t.kind === 'STAFF'
+              ? (other?.fullName ?? '')
+              : (t.title ?? ''),
         subtitle:
           t.kind === 'CHILD'
             ? (child?.classroom?.name ?? null)
             : t.kind === 'ANNOUNCEMENT'
-              ? (t.classroomId ? (cl.get(t.classroomId)?.name ?? null) : null)
+              ? t.classroomId
+                ? (cl.get(t.classroomId)?.name ?? null)
+                : null
               : null,
         branch: b.get(t.daycareId) ?? { id: t.daycareId, name: '' },
-        child: child ? { id: child.id, fullName: child.fullName, gender: child.gender, hasPhoto: Boolean(child.photoKey) } : null,
+        child: child
+          ? {
+              id: child.id,
+              fullName: child.fullName,
+              gender: child.gender,
+              hasPhoto: Boolean(child.photoKey),
+            }
+          : null,
         lastMessage: last
-          ? { body: last.body, hasAttachment: Boolean(last.attachmentKey), senderName: sender?.fullName ?? '', at: last.createdAt.toISOString() }
+          ? {
+              body: last.body,
+              hasAttachment: Boolean(last.attachmentKey),
+              senderName: sender?.fullName ?? '',
+              at: last.createdAt.toISOString(),
+            }
           : null,
         unread,
         canPost: acc.post,
@@ -180,12 +260,20 @@ export class MessagesService {
 
   // ---------------- API ----------------
 
-  async threads(auth: AuthContext, tab: 'all' | 'staff' | 'parents', search?: string): Promise<ThreadDto[]> {
+  async threads(
+    auth: AuthContext,
+    tab: 'all' | 'staff' | 'parents',
+    search?: string,
+  ): Promise<ThreadDto[]> {
     const rows = await this.prisma.raw.messageThread.findMany({
       where: {
         AND: [
           await this.visibleWhere(auth),
-          tab === 'staff' ? { kind: 'STAFF' } : tab === 'parents' ? { kind: { in: ['CHILD', 'ANNOUNCEMENT'] } } : {},
+          tab === 'staff'
+            ? { kind: 'STAFF' }
+            : tab === 'parents'
+              ? { kind: { in: ['CHILD', 'ANNOUNCEMENT'] } }
+              : {},
         ],
       },
       orderBy: { lastMessageAt: 'desc' },
@@ -193,17 +281,30 @@ export class MessagesService {
     });
     const dtos = await this.toThreads(auth, rows);
     const q = search?.trim().toLowerCase();
-    return q ? dtos.filter((d) => d.title.toLowerCase().includes(q) || d.branch.name.toLowerCase().includes(q)) : dtos;
+    return q
+      ? dtos.filter(
+          (d) => d.title.toLowerCase().includes(q) || d.branch.name.toLowerCase().includes(q),
+        )
+      : dtos;
   }
 
   async unreadTotal(auth: AuthContext): Promise<{ unread: number }> {
-    const rows = await this.prisma.raw.messageThread.findMany({ where: await this.visibleWhere(auth), select: { id: true } });
-    const reads = await this.prisma.raw.threadRead.findMany({ where: { userId: auth.userId, threadId: { in: rows.map((r) => r.id) } } });
+    const rows = await this.prisma.raw.messageThread.findMany({
+      where: await this.visibleWhere(auth),
+      select: { id: true },
+    });
+    const reads = await this.prisma.raw.threadRead.findMany({
+      where: { userId: auth.userId, threadId: { in: rows.map((r) => r.id) } },
+    });
     const readAt = new Map(reads.map((r) => [r.threadId, r.lastReadAt]));
     let unread = 0;
     for (const r of rows) {
       unread += await this.prisma.raw.message.count({
-        where: { threadId: r.id, senderId: { not: auth.userId }, createdAt: { gt: readAt.get(r.id) ?? new Date(0) } },
+        where: {
+          threadId: r.id,
+          senderId: { not: auth.userId },
+          createdAt: { gt: readAt.get(r.id) ?? new Date(0) },
+        },
       });
     }
     return { unread };
@@ -214,33 +315,64 @@ export class MessagesService {
     const staffRole = branch ? await this.staffRole(auth, branch) : null;
     let children: MessageContacts['children'] = [];
     if (staffRole && branch) {
-      const classIds = staffRole === 'TEACHER' ? await this.teacherClassIds(auth.userId, branch) : null;
+      const classIds =
+        staffRole === 'TEACHER' ? await this.teacherClassIds(auth.userId, branch) : null;
       const rows = await this.prisma.raw.child.findMany({
-        where: { daycareId: branch, deletedAt: null, status: 'ACTIVE', ...(classIds ? { classroomId: { in: classIds } } : {}) },
+        where: {
+          daycareId: branch,
+          deletedAt: null,
+          status: 'ACTIVE',
+          ...(classIds ? { classroomId: { in: classIds } } : {}),
+        },
         include: { classroom: { select: { name: true } }, daycare: { select: { name: true } } },
         orderBy: { fullName: 'asc' },
       });
-      children = rows.map((c) => ({ id: c.id, fullName: c.fullName, classroom: c.classroom?.name ?? null, branch: c.daycare.name }));
+      children = rows.map((c) => ({
+        id: c.id,
+        fullName: c.fullName,
+        classroom: c.classroom?.name ?? null,
+        branch: c.daycare.name,
+      }));
     } else {
       const rows = await this.prisma.raw.child.findMany({
         where: { deletedAt: null, status: 'ACTIVE', guardians: { some: { userId: auth.userId } } },
         include: { classroom: { select: { name: true } }, daycare: { select: { name: true } } },
       });
-      children = rows.map((c) => ({ id: c.id, fullName: c.fullName, classroom: c.classroom?.name ?? null, branch: c.daycare.name }));
+      children = rows.map((c) => ({
+        id: c.id,
+        fullName: c.fullName,
+        classroom: c.classroom?.name ?? null,
+        branch: c.daycare.name,
+      }));
     }
     const staff =
       staffRole && branch
         ? (
             await this.prisma.raw.membership.findMany({
-              where: { daycareId: branch, status: 'ACTIVE', deletedAt: null, role: { in: ['MANAGER', 'STAFF'] }, userId: { not: auth.userId } },
+              where: {
+                daycareId: branch,
+                status: 'ACTIVE',
+                deletedAt: null,
+                role: { in: ['MANAGER', 'STAFF'] },
+                userId: { not: auth.userId },
+              },
               include: { user: { select: { id: true, fullName: true, avatarUrl: true } } },
               orderBy: { user: { fullName: 'asc' } },
             })
-          ).map((m) => ({ userId: m.user.id, fullName: m.user.fullName, role: m.role, avatarUrl: m.user.avatarUrl }))
+          ).map((m) => ({
+            userId: m.user.id,
+            fullName: m.user.fullName,
+            role: m.role,
+            avatarUrl: m.user.avatarUrl,
+          }))
         : [];
     const classes =
       staffRole && branch
-        ? await this.prisma.raw.classroom.findMany({ where: { daycareId: branch, deletedAt: null }, select: { id: true, name: true }, orderBy: { name: 'asc' } })
+        ? await this.prisma.raw.classroom.findMany({
+            where: { daycareId: branch, deletedAt: null },
+            select: { id: true, name: true },
+            orderBy: { name: 'asc' },
+          })
         : [];
     return { children, staff, classes, canAnnounce: Boolean(staffRole) };
   }
@@ -249,9 +381,13 @@ export class MessagesService {
   async open(auth: AuthContext, input: OpenThreadInput): Promise<ThreadDto> {
     let thread: MessageThread;
     if (input.kind === 'CHILD') {
-      const child = await this.prisma.raw.child.findFirst({ where: { id: input.childId, deletedAt: null } });
+      const child = await this.prisma.raw.child.findFirst({
+        where: { id: input.childId, deletedAt: null },
+      });
       if (!child) throw new NotFoundException();
-      const existing = await this.prisma.raw.messageThread.findFirst({ where: { daycareId: child.daycareId, kind: 'CHILD', childId: child.id } });
+      const existing = await this.prisma.raw.messageThread.findFirst({
+        where: { daycareId: child.daycareId, kind: 'CHILD', childId: child.id },
+      });
       thread =
         existing ??
         ({ id: '', daycareId: child.daycareId, kind: 'CHILD', childId: child.id } as MessageThread);
@@ -259,29 +395,53 @@ export class MessagesService {
       if (!acc.read) throw new ForbiddenException();
       if (!existing) {
         thread = await this.prisma.raw.messageThread.create({
-          data: { daycareId: child.daycareId, kind: 'CHILD', childId: child.id, createdById: auth.userId },
+          data: {
+            daycareId: child.daycareId,
+            kind: 'CHILD',
+            childId: child.id,
+            createdById: auth.userId,
+          },
         });
       }
     } else if (input.kind === 'STAFF') {
       const branch = auth.daycareId;
       if (!branch || !(await this.staffRole(auth, branch))) throw new ForbiddenException();
       const other = await this.prisma.raw.membership.findFirst({
-        where: { daycareId: branch, userId: input.userId, status: 'ACTIVE', deletedAt: null, role: { in: ['MANAGER', 'STAFF'] } },
+        where: {
+          daycareId: branch,
+          userId: input.userId,
+          status: 'ACTIVE',
+          deletedAt: null,
+          role: { in: ['MANAGER', 'STAFF'] },
+        },
       });
-      if (!other || input.userId === auth.userId) throw new BadRequestException({ code: 'unknown_staff', message: 'Unknown staff member' });
+      if (!other || input.userId === auth.userId)
+        throw new BadRequestException({ code: 'unknown_staff', message: 'Unknown staff member' });
       const [userA, userB] = [auth.userId, input.userId].sort() as [string, string];
       thread =
-        (await this.prisma.raw.messageThread.findFirst({ where: { daycareId: branch, userA, userB } })) ??
-        (await this.prisma.raw.messageThread.create({ data: { daycareId: branch, kind: 'STAFF', userA, userB, createdById: auth.userId } }));
+        (await this.prisma.raw.messageThread.findFirst({
+          where: { daycareId: branch, userA, userB },
+        })) ??
+        (await this.prisma.raw.messageThread.create({
+          data: { daycareId: branch, kind: 'STAFF', userA, userB, createdById: auth.userId },
+        }));
     } else {
       const branch = auth.daycareId;
       if (!branch || !(await this.staffRole(auth, branch))) throw new ForbiddenException();
       if (input.classroomId) {
-        const ok = await this.prisma.raw.classroom.count({ where: { id: input.classroomId, daycareId: branch, deletedAt: null } });
+        const ok = await this.prisma.raw.classroom.count({
+          where: { id: input.classroomId, daycareId: branch, deletedAt: null },
+        });
         if (!ok) throw new BadRequestException({ code: 'unknown_class', message: 'Unknown class' });
       }
       thread = await this.prisma.raw.messageThread.create({
-        data: { daycareId: branch, kind: 'ANNOUNCEMENT', title: input.title, classroomId: input.classroomId ?? null, createdById: auth.userId },
+        data: {
+          daycareId: branch,
+          kind: 'ANNOUNCEMENT',
+          title: input.title,
+          classroomId: input.classroomId ?? null,
+          createdById: auth.userId,
+        },
       });
     }
     return (await this.toThreads(auth, [thread]))[0]!;
@@ -307,7 +467,13 @@ export class MessagesService {
     const list = rows.slice(0, page).reverse();
     const senders = await this.prisma.raw.user.findMany({
       where: { id: { in: [...new Set(list.map((m) => m.senderId))] } },
-      select: { id: true, fullName: true, avatarUrl: true, isSuperAdmin: true, memberships: { where: { daycareId: t.daycareId }, select: { role: true } } },
+      select: {
+        id: true,
+        fullName: true,
+        avatarUrl: true,
+        isSuperAdmin: true,
+        memberships: { where: { daycareId: t.daycareId }, select: { role: true } },
+      },
     });
     const s = new Map(senders.map((x) => [x.id, x]));
     // Latest read time of anyone other than me, for read ticks.
@@ -326,7 +492,12 @@ export class MessagesService {
       return {
         id: m.id,
         body: m.body,
-        attachment: m.attachmentKey ? { name: m.attachmentName ?? 'file', mime: m.attachmentMime ?? 'application/octet-stream' } : null,
+        attachment: m.attachmentKey
+          ? {
+              name: m.attachmentName ?? 'file',
+              mime: m.attachmentMime ?? 'application/octet-stream',
+            }
+          : null,
         sender: {
           id: m.senderId,
           fullName: u?.fullName ?? '',
@@ -334,19 +505,29 @@ export class MessagesService {
           role: u?.isSuperAdmin ? 'SUPER_ADMIN' : (u?.memberships[0]?.role ?? null),
         },
         mine: m.senderId === auth.userId,
-        read: m.senderId === auth.userId && Boolean(othersRead && othersRead.lastReadAt >= m.createdAt),
+        read:
+          m.senderId === auth.userId && Boolean(othersRead && othersRead.lastReadAt >= m.createdAt),
         createdAt: m.createdAt.toISOString(),
       };
     });
     return { thread: (await this.toThreads(auth, [t]))[0]!, messages, hasMore };
   }
 
-  async send(auth: AuthContext, id: string, body: string | undefined, file?: UploadedBlob): Promise<MessageDto> {
+  async send(
+    auth: AuthContext,
+    id: string,
+    body: string | undefined,
+    file?: UploadedBlob,
+  ): Promise<MessageDto> {
     const { t, acc } = await this.load(auth, id);
-    if (!acc.post) throw new ForbiddenException({ code: 'cannot_post', message: 'You cannot post here' });
+    if (!acc.post)
+      throw new ForbiddenException({ code: 'cannot_post', message: 'You cannot post here' });
     const text = body?.trim() || null;
-    if (!text && !file) throw new BadRequestException({ code: 'empty_message', message: 'Message is empty' });
-    const key = file ? await this.storage.save(`branches/${t.daycareId}/messages/${t.id}`, file, DOCUMENT_MIME) : null;
+    if (!text && !file)
+      throw new BadRequestException({ code: 'empty_message', message: 'Message is empty' });
+    const key = file
+      ? await this.storage.save(`branches/${t.daycareId}/messages/${t.id}`, file, DOCUMENT_MIME)
+      : null;
     const m = await this.prisma.raw.message.create({
       data: {
         daycareId: t.daycareId,
@@ -358,7 +539,10 @@ export class MessagesService {
         attachmentMime: file?.mimetype ?? null,
       },
     });
-    await this.prisma.raw.messageThread.update({ where: { id: t.id }, data: { lastMessageAt: m.createdAt } });
+    await this.prisma.raw.messageThread.update({
+      where: { id: t.id },
+      data: { lastMessageAt: m.createdAt },
+    });
     await this.prisma.raw.threadRead.upsert({
       where: { threadId_userId: { threadId: t.id, userId: auth.userId } },
       update: { lastReadAt: m.createdAt },
@@ -380,6 +564,10 @@ export class MessagesService {
     await this.load(auth, id);
     const m = await this.prisma.raw.message.findFirst({ where: { id: messageId, threadId: id } });
     if (!m?.attachmentKey) throw new NotFoundException();
-    return { buffer: await this.storage.read(m.attachmentKey), mime: m.attachmentMime!, name: m.attachmentName ?? 'file' };
+    return {
+      buffer: await this.storage.read(m.attachmentKey),
+      mime: m.attachmentMime!,
+      name: m.attachmentName ?? 'file',
+    };
   }
 }

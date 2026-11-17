@@ -15,3 +15,6 @@ next-env.d.ts
 .env.*
 !.env.example
 !.env.production.example
+apps/api/netlify/functions/api/server.cjs
+.netlify/
+apps/*/.netlify/

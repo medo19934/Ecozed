@@ -1,6 +1,15 @@
 import type { MessageContacts, MessageDto, ThreadDto, ThreadMessages } from '@latif/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowRight, Check, CheckCheck, Megaphone, Paperclip, Plus, SendHorizontal, Users } from 'lucide-react-native';
+import {
+  ArrowRight,
+  Check,
+  CheckCheck,
+  Megaphone,
+  Paperclip,
+  Plus,
+  SendHorizontal,
+  Users,
+} from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -26,13 +35,18 @@ const POLL_MS = 4000;
 const time = (iso: string) => {
   const d = new Date(iso);
   const sameDay = d.toDateString() === new Date().toDateString();
-  return new Intl.DateTimeFormat(i18n.language === 'ar' ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-GB', sameDay ? { hour: '2-digit', minute: '2-digit' } : { day: 'numeric', month: 'short' }).format(d);
+  return new Intl.DateTimeFormat(
+    i18n.language === 'ar' ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-GB',
+    sameDay ? { hour: '2-digit', minute: '2-digit' } : { day: 'numeric', month: 'short' },
+  ).format(d);
 };
 
 function ThreadAvatar({ thread }: { thread: ThreadDto }) {
   const Icon = thread.kind === 'ANNOUNCEMENT' ? Megaphone : thread.kind === 'STAFF' ? Users : null;
   return (
-    <View className={`h-12 w-12 items-center justify-center rounded-full ${thread.kind === 'ANNOUNCEMENT' ? 'bg-amber-100' : 'bg-brand-soft'}`}>
+    <View
+      className={`h-12 w-12 items-center justify-center rounded-full ${thread.kind === 'ANNOUNCEMENT' ? 'bg-amber-100' : 'bg-brand-soft'}`}
+    >
       {Icon ? (
         <Icon color={thread.kind === 'ANNOUNCEMENT' ? '#b45309' : '#5b6db4'} size={22} />
       ) : (
@@ -59,7 +73,8 @@ export function MessagesScreen() {
   const apiError = useApiError();
   const [error, setError] = useState<string>();
   const start = useMutation({
-    mutationFn: (childId: string) => api.post<ThreadDto>('/messages/threads', { kind: 'CHILD', childId }),
+    mutationFn: (childId: string) =>
+      api.post<ThreadDto>('/messages/threads', { kind: 'CHILD', childId }),
     onSuccess: (th) => {
       void qc.invalidateQueries({ queryKey: ['messages', 'threads'] });
       setActive(th.id);
@@ -77,7 +92,12 @@ export function MessagesScreen() {
       <ScreenHeader title={t('tabs.messages')} />
       <ScrollView
         contentContainerStyle={{ padding: 20, gap: 12 }}
-        refreshControl={<RefreshControl refreshing={threads.isRefetching} onRefresh={() => void threads.refetch()} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={threads.isRefetching}
+            onRefresh={() => void threads.refetch()}
+          />
+        }
       >
         {threads.isPending ? (
           <ActivityIndicator color="#5b6db4" />
@@ -92,10 +112,15 @@ export function MessagesScreen() {
                 <ThreadAvatar thread={th} />
                 <View className="flex-1 gap-0.5">
                   <View className="flex-row items-center gap-2">
-                    <Text numberOfLines={1} className="flex-1 text-start text-base font-semibold text-ink">
+                    <Text
+                      numberOfLines={1}
+                      className="flex-1 text-start text-base font-semibold text-ink"
+                    >
                       {th.title}
                     </Text>
-                    {th.lastMessage && <Text className="text-xs text-ink-muted">{time(th.lastMessage.at)}</Text>}
+                    {th.lastMessage && (
+                      <Text className="text-xs text-ink-muted">{time(th.lastMessage.at)}</Text>
+                    )}
                   </View>
                   <View className="flex-row items-center gap-2">
                     <Text numberOfLines={1} className="flex-1 text-start text-sm text-ink-muted">
@@ -116,7 +141,9 @@ export function MessagesScreen() {
         )}
         {fresh.length > 0 && (
           <View className="mt-2 gap-2">
-            <Text className="text-start text-sm font-semibold text-ink-muted">{t('msg.newChat')}</Text>
+            <Text className="text-start text-sm font-semibold text-ink-muted">
+              {t('msg.newChat')}
+            </Text>
             {fresh.slice(0, 20).map((c) => (
               <Pressable
                 key={c.id}
@@ -167,17 +194,36 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
   const thread = q.data?.thread;
 
   return (
-    <KeyboardAvoidingView className="flex-1 bg-surface" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View className="flex-row items-center gap-3 border-b border-line bg-white px-3 pb-3" style={{ paddingTop: insets.top + 8 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('msg.back')} onPress={onBack} className="h-11 w-11 items-center justify-center">
-          <ArrowRight color="#1f2433" size={22} style={{ transform: [{ scaleX: i18n.language === 'ar' ? 1 : -1 }] }} />
+    <KeyboardAvoidingView
+      className="flex-1 bg-surface"
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View
+        className="flex-row items-center gap-3 border-b border-line bg-white px-3 pb-3"
+        style={{ paddingTop: insets.top + 8 }}
+      >
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('msg.back')}
+          onPress={onBack}
+          className="h-11 w-11 items-center justify-center"
+        >
+          <ArrowRight
+            color="#1f2433"
+            size={22}
+            style={{ transform: [{ scaleX: i18n.language === 'ar' ? 1 : -1 }] }}
+          />
         </Pressable>
         {thread && <ThreadAvatar thread={thread} />}
         <View className="flex-1">
-          <Text numberOfLines={1} className="text-start text-base font-semibold text-ink">{thread?.title ?? ''}</Text>
+          <Text numberOfLines={1} className="text-start text-base font-semibold text-ink">
+            {thread?.title ?? ''}
+          </Text>
           {thread && (
             <Text numberOfLines={1} className="text-start text-xs text-ink-muted">
-              {[t(`msg.kinds.${thread.kind}`), thread.subtitle, thread.branch.name].filter(Boolean).join(' · ')}
+              {[t(`msg.kinds.${thread.kind}`), thread.subtitle, thread.branch.name]
+                .filter(Boolean)
+                .join(' · ')}
             </Text>
           )}
         </View>
@@ -190,20 +236,41 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
           data={q.data?.messages ?? []}
           keyExtractor={(m) => m.id}
           contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1 }}
-          ListEmptyComponent={<Text className="mt-10 text-center text-ink-muted">{t('msg.noMessages')}</Text>}
+          ListEmptyComponent={
+            <Text className="mt-10 text-center text-ink-muted">{t('msg.noMessages')}</Text>
+          }
           renderItem={({ item: m }) => (
-            <View className={`max-w-[82%] rounded-2xl px-4 py-2.5 ${m.mine ? 'self-start bg-brand' : 'self-end bg-white'}`}>
-              {!m.mine && <Text className="mb-0.5 text-start text-xs font-semibold text-brand">{m.sender.fullName}</Text>}
-              {m.body ? <Text className={`text-start text-base ${m.mine ? 'text-white' : 'text-ink'}`}>{m.body}</Text> : null}
+            <View
+              className={`max-w-[82%] rounded-2xl px-4 py-2.5 ${m.mine ? 'self-start bg-brand' : 'self-end bg-white'}`}
+            >
+              {!m.mine && (
+                <Text className="mb-0.5 text-start text-xs font-semibold text-brand">
+                  {m.sender.fullName}
+                </Text>
+              )}
+              {m.body ? (
+                <Text className={`text-start text-base ${m.mine ? 'text-white' : 'text-ink'}`}>
+                  {m.body}
+                </Text>
+              ) : null}
               {m.attachment && (
                 <View className="mt-1 flex-row items-center gap-1.5">
                   <Paperclip color={m.mine ? '#fff' : '#5b6db4'} size={14} />
-                  <Text className={`text-sm ${m.mine ? 'text-white' : 'text-brand'}`}>{m.attachment.name}</Text>
+                  <Text className={`text-sm ${m.mine ? 'text-white' : 'text-brand'}`}>
+                    {m.attachment.name}
+                  </Text>
                 </View>
               )}
               <View className="mt-1 flex-row items-center gap-1">
-                <Text className={`text-[11px] ${m.mine ? 'text-white/75' : 'text-ink-muted'}`}>{time(m.createdAt)}</Text>
-                {m.mine && (m.read ? <CheckCheck color="#fff" size={13} /> : <Check color="#fff" size={13} />)}
+                <Text className={`text-[11px] ${m.mine ? 'text-white/75' : 'text-ink-muted'}`}>
+                  {time(m.createdAt)}
+                </Text>
+                {m.mine &&
+                  (m.read ? (
+                    <CheckCheck color="#fff" size={13} />
+                  ) : (
+                    <Check color="#fff" size={13} />
+                  ))}
               </View>
             </View>
           )}
@@ -211,11 +278,17 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
       )}
       {error ? <Text className="px-4 text-start text-sm text-danger">{error}</Text> : null}
       {thread?.canPost === false ? (
-        <Text className="border-t border-line bg-white p-4 text-center text-sm text-ink-muted" style={{ paddingBottom: insets.bottom + 12 }}>
+        <Text
+          className="border-t border-line bg-white p-4 text-center text-sm text-ink-muted"
+          style={{ paddingBottom: insets.bottom + 12 }}
+        >
           {t('msg.readOnly')}
         </Text>
       ) : (
-        <View className="flex-row items-end gap-2 border-t border-line bg-white p-3" style={{ paddingBottom: insets.bottom + 12 }}>
+        <View
+          className="flex-row items-end gap-2 border-t border-line bg-white p-3"
+          style={{ paddingBottom: insets.bottom + 12 }}
+        >
           <TextInput
             value={body}
             onChangeText={setBody}
@@ -232,7 +305,11 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
             onPress={() => send.mutate()}
             className={`h-12 w-12 items-center justify-center rounded-full ${body.trim() ? 'bg-brand' : 'bg-line'}`}
           >
-            <SendHorizontal color="#fff" size={20} style={{ transform: [{ scaleX: i18n.language === 'ar' ? -1 : 1 }] }} />
+            <SendHorizontal
+              color="#fff"
+              size={20}
+              style={{ transform: [{ scaleX: i18n.language === 'ar' ? -1 : 1 }] }}
+            />
           </Pressable>
         </View>
       )}

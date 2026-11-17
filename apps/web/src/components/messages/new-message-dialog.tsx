@@ -38,7 +38,11 @@ export function NewMessageDialog({
     enabled: open,
   });
   const c = contacts.data;
-  const kinds: Kind[] = ['CHILD', ...(c && c.staff.length ? (['STAFF'] as const) : []), ...(c?.canAnnounce ? (['ANNOUNCEMENT'] as const) : [])];
+  const kinds: Kind[] = [
+    'CHILD',
+    ...(c && c.staff.length ? (['STAFF'] as const) : []),
+    ...(c?.canAnnounce ? (['ANNOUNCEMENT'] as const) : []),
+  ];
 
   const start = useMutation({
     mutationFn: () =>
@@ -112,7 +116,12 @@ export function NewMessageDialog({
           {kind === 'ANNOUNCEMENT' && (
             <>
               <FormField id="nm-title" label={t('announcementTitle')}>
-                <Input id="nm-title" value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} />
+                <Input
+                  id="nm-title"
+                  value={title}
+                  maxLength={120}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
               </FormField>
               <FormField id="nm-class" label={t('audience')}>
                 <Select id="nm-class" value={target} onChange={(e) => setTarget(e.target.value)}>

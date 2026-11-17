@@ -21,7 +21,6 @@ export type RefreshTokenInput = z.infer<typeof RefreshTokenSchema>;
 export const SwitchDaycareSchema = z.object({ daycareId: z.uuid() });
 export type SwitchDaycareInput = z.infer<typeof SwitchDaycareSchema>;
 
-
 /** Sign in with an email or a phone number (public demo mode: no password, no code). */
 export const IdentifierLoginSchema = z.object({
   identifier: z

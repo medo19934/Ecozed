@@ -164,7 +164,7 @@ export class ChildrenService {
   async parents(auth: AuthContext, search?: string): Promise<ParentListItem[]> {
     const rows = await this.prisma.scoped.childGuardian.findMany({
       where: {
-        child: { AND: [await this.visibility(auth), { deletedAt: null }] },
+        child: { AND: [await this.visibility(auth), { deletedAt: null, status: 'ACTIVE' }] },
         ...(search
           ? {
               OR: [
@@ -176,7 +176,9 @@ export class ChildrenService {
             }
           : {}),
       },
-      include: { child: { select: { id: true, fullName: true, classroom: { select: { name: true } } } } },
+      include: {
+        child: { select: { id: true, fullName: true, classroom: { select: { name: true } } } },
+      },
       orderBy: { fullName: 'asc' },
       take: 500,
     });
@@ -196,7 +198,11 @@ export class ChildrenService {
       item.email ??= g.email;
       item.phone ??= g.phone;
       if (!item.children.some((c) => c.id === g.child.id))
-        item.children.push({ id: g.child.id, fullName: g.child.fullName, classroom: g.child.classroom?.name ?? null });
+        item.children.push({
+          id: g.child.id,
+          fullName: g.child.fullName,
+          classroom: g.child.classroom?.name ?? null,
+        });
       map.set(key, item);
     }
     return [...map.values()];
@@ -227,7 +233,11 @@ export class ChildrenService {
       });
       await this.links.linkChildGuardians(c.id);
     }
-    await this.audit.log({ action: 'parent.add', entity: 'ChildGuardian', metadata: { childIds: ids } });
+    await this.audit.log({
+      action: 'parent.add',
+      entity: 'ChildGuardian',
+      metadata: { childIds: ids },
+    });
     const key = input.email ?? input.phone ?? '';
     const found = (await this.parents(auth)).find((p) => p.key === key);
     if (!found) throw new NotFoundException();

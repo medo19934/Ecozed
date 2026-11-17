@@ -1,10 +1,25 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import type { DemoAccount } from '@latif/shared';
-import { Baby, BriefcaseBusiness, Building2, GraduationCap, ShieldCheck, Sparkles } from 'lucide-react-native';
+import {
+  Baby,
+  BriefcaseBusiness,
+  Building2,
+  GraduationCap,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GoogleButton } from '@/components/google-button';
 import { BRAND_GRADIENT, Card, Field, PrimaryButton } from '@/components/ui';
@@ -14,7 +29,12 @@ import { useAuth } from '@/lib/auth';
 import { homeRouteFor } from '@/lib/roles';
 
 const DEV_LOGIN = process.env.EXPO_PUBLIC_AUTH_DEV_LOGIN === 'true';
-const ICONS = { SUPER_ADMIN: ShieldCheck, MANAGER: Building2, STAFF: GraduationCap, PARENT: Baby } as const;
+const ICONS = {
+  SUPER_ADMIN: ShieldCheck,
+  MANAGER: Building2,
+  STAFF: GraduationCap,
+  PARENT: Baby,
+} as const;
 
 export default function LoginScreen() {
   const { t } = useTranslation();
@@ -164,32 +184,34 @@ export default function LoginScreen() {
               <PrimaryButton
                 label={t('auth.signIn')}
                 loading={busy && !picked}
-                onPress={() => identifier.trim() && run(() => auth.login(identifier.trim(), i18n.language))}
+                onPress={() =>
+                  identifier.trim() && run(() => auth.login(identifier.trim(), i18n.language))
+                }
               />
             </Card>
           ) : (
-          <Card className="gap-5">
-            <GoogleButton onIdToken={onIdToken} busy={busy} />
-            {error ? (
-              <Text accessibilityRole="alert" className="text-start text-sm text-danger">
-                {error}
-              </Text>
-            ) : null}
-            <View className="gap-3">
-              <View className="flex-row items-start gap-3">
-                <Baby color="#5b6db4" size={18} />
-                <Text className="flex-1 text-start text-sm leading-5 text-ink-muted">
-                  {t('auth.parentsNote')}
+            <Card className="gap-5">
+              <GoogleButton onIdToken={onIdToken} busy={busy} />
+              {error ? (
+                <Text accessibilityRole="alert" className="text-start text-sm text-danger">
+                  {error}
                 </Text>
+              ) : null}
+              <View className="gap-3">
+                <View className="flex-row items-start gap-3">
+                  <Baby color="#5b6db4" size={18} />
+                  <Text className="flex-1 text-start text-sm leading-5 text-ink-muted">
+                    {t('auth.parentsNote')}
+                  </Text>
+                </View>
+                <View className="flex-row items-start gap-3">
+                  <BriefcaseBusiness color="#5b6db4" size={18} />
+                  <Text className="flex-1 text-start text-sm leading-5 text-ink-muted">
+                    {t('auth.staffNote')}
+                  </Text>
+                </View>
               </View>
-              <View className="flex-row items-start gap-3">
-                <BriefcaseBusiness color="#5b6db4" size={18} />
-                <Text className="flex-1 text-start text-sm leading-5 text-ink-muted">
-                  {t('auth.staffNote')}
-                </Text>
-              </View>
-            </View>
-          </Card>
+            </Card>
           )}
 
           {DEV_LOGIN && !publicDemo && (
@@ -225,7 +247,15 @@ function groups(accounts: DemoAccount[]) {
     const key = a.branch?.slug ?? 'admin';
     let g = out.find((x) => x.key === key);
     if (!g) {
-      g = { key, title: a.branch ? (i18n.language === 'en' && a.branch.nameEn ? a.branch.nameEn : a.branch.name) : null, items: [] };
+      g = {
+        key,
+        title: a.branch
+          ? i18n.language === 'en' && a.branch.nameEn
+            ? a.branch.nameEn
+            : a.branch.name
+          : null,
+        items: [],
+      };
       out.push(g);
     }
     g.items.push(a);

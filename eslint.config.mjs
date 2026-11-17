@@ -13,6 +13,8 @@ export default tseslint.config(
       '**/coverage/**',
       'legacy/**',
       '**/generated/**',
+      '**/.netlify/**',
+      'apps/api/netlify/functions/api/server.cjs',
     ],
   },
   js.configs.recommended,

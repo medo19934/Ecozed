@@ -56,8 +56,8 @@ SPEC.md "Revision 1" (from `docs/latif-kids-hub-reference.pdf`) overrides the or
 
 ## Phase 6 — Messages, Daily reports, Daily Story, Notifications
 
-- [ ] Inbox + chat (per-child threads, text/photo/file/voice, unread, read ticks), new conversation, announcements to branch/class, quick replies/templates
-- [ ] Socket.IO real time; scope: parent own children, teacher own class, manager own branch, admin all
+- [x] Inbox + chat (per-child threads, staff chats, text + photo/file attachments, unread, read ticks), new conversation, announcements to branch/class (web + app). Voice notes and quick replies/templates still to do
+- [ ] Socket.IO real time (now: 4 s polling — Netlify Functions have no websockets); scope: parent own children, teacher own class, manager own branch, admin all
 - [ ] Daily reports (teacher app): meals, nap, toilet, mood, activities, notes, photos; parent view
 - [ ] Daily Story AI (when toggle on): generate from day's records → teacher edits → Share with family (ar/en)
 - [ ] Notifications: bell, Expo push, quiet hours; triggers (attendance, message, payment reminder, admission status, calendar, story shared)
@@ -97,3 +97,9 @@ SPEC.md "Revision 1" (from `docs/latif-kids-hub-reference.pdf`) overrides the or
 - Added dep `qrcode` (web) to render the kiosk QR offline — no third-party QR service.
 - Calendar events with audience ALL have no branch (`daycareId` null); `CalendarEvent` is tenancy-exempt and every query filters explicitly by role (admin: branch + all; teacher: branch + all + own classes; parent: their children's branches/classes + all).
 - Admission email defaults to the requesting parent's Google email so the accepted child links to their account automatically.
+- Owner request (after phase 4): public demo mode `PUBLIC_DEMO=true` — login page shows role cards (general admin; per branch manager / teacher / parent) and an email-or-phone field, no verification; demo data seeded once per database (marked TEST). Google sign-in stays for `PUBLIC_DEMO=false`.
+- Phone numbers accept local `05XXXXXXXX` everywhere and are stored as `+9665XXXXXXXX`.
+- Parents page (web): list parents of the branch (teachers: their classes) and add a parent by email/phone linked to children; they sign in with that email/phone.
+- Kiosk QR encodes a web link (`/<locale>/scan?t=…`): any phone camera opens it and records the signed-in user's check-in/out; the app scanner accepts the link too.
+- Messages: `MessageThread` (CHILD / STAFF / ANNOUNCEMENT), `Message`, `ThreadRead`; access by role in `messages.service.ts`. Tenancy-exempt models with explicit filters.
+- Netlify hosting (see README → Netlify). Added deps: `@netlify/blobs` (API file storage on Netlify), `esbuild` (API function bundle), `@netlify/plugin-nextjs` (web build on Netlify).

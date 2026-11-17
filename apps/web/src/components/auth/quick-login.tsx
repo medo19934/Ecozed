@@ -1,7 +1,15 @@
 'use client';
 
 import type { AuthUser, DemoAccount } from '@latif/shared';
-import { Baby, Building2, GraduationCap, Loader2, LogIn, ShieldCheck, UserRound } from 'lucide-react';
+import {
+  Baby,
+  Building2,
+  GraduationCap,
+  Loader2,
+  LogIn,
+  ShieldCheck,
+  UserRound,
+} from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -12,7 +20,12 @@ import { sessionApi } from '@/lib/api-client';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { usePostLogin } from '@/lib/use-post-login';
 
-const ICON = { SUPER_ADMIN: ShieldCheck, MANAGER: Building2, STAFF: GraduationCap, PARENT: Baby } as const;
+const ICON = {
+  SUPER_ADMIN: ShieldCheck,
+  MANAGER: Building2,
+  STAFF: GraduationCap,
+  PARENT: Baby,
+} as const;
 
 /** Public mode: one tap per role card, or sign in with any email / phone number. */
 export function QuickLogin({ accounts }: { accounts: DemoAccount[] }) {
@@ -35,7 +48,9 @@ export function QuickLogin({ accounts }: { accounts: DemoAccount[] }) {
   };
 
   const admin = accounts.filter((a) => !a.branch);
-  const branches = [...new Map(accounts.filter((a) => a.branch).map((a) => [a.branch!.slug, a.branch!])).values()];
+  const branches = [
+    ...new Map(accounts.filter((a) => a.branch).map((a) => [a.branch!.slug, a.branch!])).values(),
+  ];
   const Card = ({ a, wide }: { a: DemoAccount; wide?: boolean }) => {
     const Icon = ICON[a.role as keyof typeof ICON] ?? UserRound;
     return (
@@ -50,7 +65,11 @@ export function QuickLogin({ accounts }: { accounts: DemoAccount[] }) {
         }
       >
         <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-gradient text-white">
-          {busy === a.email ? <Loader2 className="size-5 animate-spin" /> : <Icon className="size-5" />}
+          {busy === a.email ? (
+            <Loader2 className="size-5 animate-spin" />
+          ) : (
+            <Icon className="size-5" />
+          )}
         </span>
         <span className="w-full min-w-0">
           <span className="block font-semibold">{t(`roles.${a.role}`)}</span>
@@ -104,7 +123,11 @@ export function QuickLogin({ accounts }: { accounts: DemoAccount[] }) {
           />
         </FormField>
         <Button type="submit" disabled={!!busy}>
-          {busy === identifier.trim() ? <Loader2 className="animate-spin" /> : <LogIn className="rtl:-scale-x-100" />}
+          {busy === identifier.trim() ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <LogIn className="rtl:-scale-x-100" />
+          )}
           {t('signIn')}
         </Button>
       </form>

@@ -2,7 +2,13 @@ import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { CurrentAuth, Public, type AuthContext } from '../../common/decorators/auth.decorators';
-import { DevLoginDto, GoogleAuthDto, IdentifierLoginDto, RefreshTokenDto, SwitchDaycareDto } from './auth.dto';
+import {
+  DevLoginDto,
+  GoogleAuthDto,
+  IdentifierLoginDto,
+  RefreshTokenDto,
+  SwitchDaycareDto,
+} from './auth.dto';
 import { AuthService } from './auth.service';
 import { AppConfig } from '../../config/app-config.service';
 import { DemoService } from '../demo/demo.service';
@@ -27,7 +33,10 @@ export class AuthController {
   @Public()
   @Get('options')
   options() {
-    return { publicDemo: this.config.get('PUBLIC_DEMO'), google: this.config.get('GOOGLE_CLIENT_IDS').length > 0 };
+    return {
+      publicDemo: this.config.get('PUBLIC_DEMO'),
+      google: this.config.get('GOOGLE_CLIENT_IDS').length > 0,
+    };
   }
 
   /** Sign up or sign in with Google (ID token). */

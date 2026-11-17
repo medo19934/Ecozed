@@ -11,7 +11,7 @@ export const EnvSchema = z.object({
   JWT_REFRESH_TTL_DAYS: z.coerce.number().int().positive().default(30),
   CORS_ORIGINS: z.string().default('http://localhost:3000'),
   /** File storage: "local" (dev, STORAGE_LOCAL_DIR) or "s3" (MinIO / AWS S3). */
-  STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
+  STORAGE_DRIVER: z.enum(['local', 's3', 'netlify']).default('local'),
   STORAGE_LOCAL_DIR: z.string().default('./storage'),
   S3_ENDPOINT: z.string().optional(),
   S3_REGION: z.string().default('us-east-1'),

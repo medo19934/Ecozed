@@ -39,7 +39,10 @@ function useTime() {
   return (iso: string) => {
     const d = new Date(iso);
     const sameDay = d.toDateString() === new Date().toDateString();
-    return new Intl.DateTimeFormat(locale === 'ar' ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-GB', sameDay ? { hour: '2-digit', minute: '2-digit' } : { day: 'numeric', month: 'short' }).format(d);
+    return new Intl.DateTimeFormat(
+      locale === 'ar' ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-GB',
+      sameDay ? { hour: '2-digit', minute: '2-digit' } : { day: 'numeric', month: 'short' },
+    ).format(d);
   };
 }
 
@@ -77,7 +80,9 @@ export function MessagesView() {
   const threads = useQuery({
     queryKey: ['messages', 'threads', tab, search],
     queryFn: () =>
-      api.get<ThreadDto[]>(`/messages/threads?tab=${tab}${search ? `&search=${encodeURIComponent(search)}` : ''}`),
+      api.get<ThreadDto[]>(
+        `/messages/threads?tab=${tab}${search ? `&search=${encodeURIComponent(search)}` : ''}`,
+      ),
     refetchInterval: POLL_MS,
   });
   const list = threads.data ?? [];
@@ -102,7 +107,10 @@ export function MessagesView() {
                     key={k}
                     type="button"
                     onClick={() => setTab(k)}
-                    className={cn('flex-1 rounded-lg px-2 py-1.5 text-sm', tab === k ? 'bg-card font-semibold shadow-xs' : 'text-muted-foreground')}
+                    className={cn(
+                      'flex-1 rounded-lg px-2 py-1.5 text-sm',
+                      tab === k ? 'bg-card font-semibold shadow-xs' : 'text-muted-foreground',
+                    )}
                   >
                     {t(`tabs.${k}`)}
                   </button>
@@ -111,7 +119,12 @@ export function MessagesView() {
             )}
             <div className="relative">
               <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input className="ps-9" placeholder={t('search')} value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input
+                className="ps-9"
+                placeholder={t('search')}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
@@ -129,13 +142,20 @@ export function MessagesView() {
                   key={th.id}
                   type="button"
                   onClick={() => setActive(th.id)}
-                  className={cn('flex w-full items-center gap-3 border-b px-3 py-3 text-start hover:bg-muted/60', active === th.id && 'bg-secondary')}
+                  className={cn(
+                    'flex w-full items-center gap-3 border-b px-3 py-3 text-start hover:bg-muted/60',
+                    active === th.id && 'bg-secondary',
+                  )}
                 >
                   <ThreadIcon thread={th} />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
                       <span className="flex-1 truncate font-semibold">{th.title}</span>
-                      {th.lastMessage && <span className="shrink-0 text-xs text-muted-foreground">{time(th.lastMessage.at)}</span>}
+                      {th.lastMessage && (
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {time(th.lastMessage.at)}
+                        </span>
+                      )}
                     </span>
                     <span className="flex items-center gap-2">
                       <span className="flex-1 truncate text-sm text-muted-foreground">
@@ -144,7 +164,9 @@ export function MessagesView() {
                           : (th.subtitle ?? t('noMessages'))}
                       </span>
                       {th.unread > 0 && (
-                        <span className="grid min-w-5 place-items-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground">{th.unread}</span>
+                        <span className="grid min-w-5 place-items-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground">
+                          {th.unread}
+                        </span>
                       )}
                     </span>
                   </span>
@@ -189,7 +211,11 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
   const send = useMutation({
     mutationFn: (file?: File) =>
       file
-        ? api.upload<MessageDto>(`/messages/threads/${id}`, file, body.trim() ? { body: body.trim() } : {})
+        ? api.upload<MessageDto>(
+            `/messages/threads/${id}`,
+            file,
+            body.trim() ? { body: body.trim() } : {},
+          )
         : api.post<MessageDto>(`/messages/threads/${id}`, { body: body.trim() }),
     onSuccess: () => {
       setBody('');
@@ -205,47 +231,88 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-3 border-b p-3">
-        <Button variant="ghost" size="icon" className="lg:hidden" onClick={onBack} aria-label={t('back')}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden"
+          onClick={onBack}
+          aria-label={t('back')}
+        >
           <ArrowRight className="ltr:-scale-x-100" />
         </Button>
         <ThreadIcon thread={thread} />
         <div className="min-w-0">
           <p className="truncate font-semibold">{thread.title}</p>
           <p className="truncate text-xs text-muted-foreground">
-            {[t(`kinds.${thread.kind}`), thread.subtitle, thread.branch.name].filter(Boolean).join(' · ')}
+            {[t(`kinds.${thread.kind}`), thread.subtitle, thread.branch.name]
+              .filter(Boolean)
+              .join(' · ')}
           </p>
         </div>
       </header>
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-[#f2f4f5] p-4">
-        {messages.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">{t('noMessages')}</p>}
+        {messages.length === 0 && (
+          <p className="py-10 text-center text-sm text-muted-foreground">{t('noMessages')}</p>
+        )}
         {messages.map((m) => (
           <div key={m.id} className={cn('flex', m.mine ? 'justify-start' : 'justify-end')}>
-            <div className={cn('max-w-[80%] rounded-2xl px-4 py-2.5 shadow-xs', m.mine ? 'bg-brand-gradient text-white' : 'bg-card')}>
+            <div
+              className={cn(
+                'max-w-[80%] rounded-2xl px-4 py-2.5 shadow-xs',
+                m.mine ? 'bg-brand-gradient text-white' : 'bg-card',
+              )}
+            >
               {!m.mine && (
                 <p className="mb-0.5 text-xs font-semibold text-primary">
                   {m.sender.fullName}
-                  {m.sender.role && <span className="font-normal text-muted-foreground"> · {tr(m.sender.role as "MANAGER")}</span>}
+                  {m.sender.role && (
+                    <span className="font-normal text-muted-foreground">
+                      {' '}
+                      · {tr(m.sender.role as 'MANAGER')}
+                    </span>
+                  )}
                 </p>
               )}
               {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
               {m.attachment &&
                 (m.attachment.mime.startsWith('image/') ? (
-                  <a href={fileUrl(`/messages/threads/${id}/files/${m.id}`)} target="_blank" rel="noreferrer">
-                    <img src={fileUrl(`/messages/threads/${id}/files/${m.id}`)} alt={m.attachment.name} className="mt-1 max-h-60 rounded-xl" />
+                  <a
+                    href={fileUrl(`/messages/threads/${id}/files/${m.id}`)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <img
+                      src={fileUrl(`/messages/threads/${id}/files/${m.id}`)}
+                      alt={m.attachment.name}
+                      className="mt-1 max-h-60 rounded-xl"
+                    />
                   </a>
                 ) : (
                   <a
                     href={fileUrl(`/messages/threads/${id}/files/${m.id}`)}
                     target="_blank"
                     rel="noreferrer"
-                    className={cn('mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-sm underline', m.mine ? 'bg-white/15' : 'bg-muted')}
+                    className={cn(
+                      'mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-sm underline',
+                      m.mine ? 'bg-white/15' : 'bg-muted',
+                    )}
                   >
                     <FileText className="size-4" /> {m.attachment.name}
                   </a>
                 ))}
-              <p className={cn('mt-1 flex items-center gap-1 text-[11px]', m.mine ? 'text-white/75' : 'text-muted-foreground')}>
+              <p
+                className={cn(
+                  'mt-1 flex items-center gap-1 text-[11px]',
+                  m.mine ? 'text-white/75' : 'text-muted-foreground',
+                )}
+              >
                 {time(m.createdAt)}
-                {m.mine && (m.read ? <CheckCheck className="size-3.5" aria-label={t('read')} /> : <Check className="size-3.5" aria-label={t('sent')} />)}
+                {m.mine &&
+                  (m.read ? (
+                    <CheckCheck className="size-3.5" aria-label={t('read')} />
+                  ) : (
+                    <Check className="size-3.5" aria-label={t('sent')} />
+                  ))}
               </p>
             </div>
           </div>
@@ -271,7 +338,13 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
               e.target.value = '';
             }}
           />
-          <Button type="button" variant="ghost" size="icon" onClick={() => fileRef.current?.click()} aria-label={t('attach')}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => fileRef.current?.click()}
+            aria-label={t('attach')}
+          >
             <Paperclip />
           </Button>
           <Textarea
@@ -288,7 +361,12 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
               }
             }}
           />
-          <Button type="submit" size="icon" disabled={!body.trim() || send.isPending} aria-label={t('send')}>
+          <Button
+            type="submit"
+            size="icon"
+            disabled={!body.trim() || send.isPending}
+            aria-label={t('send')}
+          >
             <SendHorizontal className="rtl:-scale-x-100" />
           </Button>
         </form>
