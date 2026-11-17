@@ -506,3 +506,59 @@ model CalendarEvent {
   @@index([daycareId, startDate])
   @@index([audience, startDate])
 }
+
+enum ThreadKind {
+  CHILD
+  STAFF
+  ANNOUNCEMENT
+}
+
+/// A conversation. CHILD: a child's guardians + branch staff. STAFF: two staff members.
+/// ANNOUNCEMENT: staff → parents of a branch (or one class).
+model MessageThread {
+  id            String     @id @default(uuid()) @db.Uuid
+  daycareId     String     @db.Uuid
+  kind          ThreadKind
+  childId       String?    @db.Uuid
+  classroomId   String?    @db.Uuid
+  /// STAFF threads: the two user ids, sorted (unique pair per branch).
+  userA         String?    @db.Uuid
+  userB         String?    @db.Uuid
+  title         String?
+  createdById   String?    @db.Uuid
+  lastMessageAt DateTime   @default(now())
+  createdAt     DateTime   @default(now())
+
+  messages Message[]
+  reads    ThreadRead[]
+
+  @@unique([daycareId, kind, childId])
+  @@unique([daycareId, userA, userB])
+  @@index([daycareId, lastMessageAt])
+}
+
+model Message {
+  id             String   @id @default(uuid()) @db.Uuid
+  daycareId      String   @db.Uuid
+  threadId       String   @db.Uuid
+  senderId       String   @db.Uuid
+  body           String?
+  attachmentKey  String?
+  attachmentName String?
+  attachmentMime String?
+  createdAt      DateTime @default(now())
+
+  thread MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+}
+
+model ThreadRead {
+  threadId   String   @db.Uuid
+  userId     String   @db.Uuid
+  lastReadAt DateTime
+
+  thread MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@id([threadId, userId])
+}

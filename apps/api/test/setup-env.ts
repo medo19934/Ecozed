@@ -12,3 +12,4 @@ process.env.JWT_ACCESS_SECRET ??= 'test-access-secret';
 process.env.JWT_REFRESH_SECRET ??= 'test-refresh-secret';
 process.env.STORAGE_DRIVER = 'local';
 process.env.STORAGE_LOCAL_DIR = join(tmpdir(), 'latif-e2e-storage');
+process.env.PUBLIC_DEMO = 'true';

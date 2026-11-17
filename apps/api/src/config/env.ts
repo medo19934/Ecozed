@@ -22,6 +22,15 @@ export const EnvSchema = z.object({
   GOOGLE_CLIENT_IDS: z.string().default(''),
   /** Comma-separated emails that become super admins on Google sign-in. */
   SUPER_ADMIN_EMAILS: z.string().default(''),
+  /**
+   * Public demo: sign in with just an email or phone (no password, no code), demo role
+   * cards on the login page, and demo data in every branch. Anyone can enter any account —
+   * never enable with real families' data.
+   */
+  PUBLIC_DEMO: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
   /** Local dev only: enables POST /auth/dev-login (email, no Google). Never in production. */
   AUTH_DEV_LOGIN: z
     .enum(['true', 'false'])

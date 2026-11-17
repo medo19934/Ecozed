@@ -13,6 +13,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AdmissionsModule } from './modules/admissions/admissions.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
+import { DemoModule } from './modules/demo/demo.module';
+import { MessagesModule } from './modules/messages/messages.module';
 import { UnitsModule } from './modules/units/units.module';
 import { BranchesModule } from './modules/branches/branches.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
@@ -39,6 +41,7 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     AuditModule,
     StorageModule,
+    DemoModule,
     DocumentsModule,
     HealthModule,
     AuthModule,
@@ -53,6 +56,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AdmissionsModule,
     UnitsModule,
     CalendarModule,
+    MessagesModule,
   ],
   providers: [
     { provide: APP_PIPE, useClass: ZodValidationPipe },

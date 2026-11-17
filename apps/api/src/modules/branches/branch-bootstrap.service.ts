@@ -3,6 +3,7 @@ import { BRANCHES } from '@latif/shared';
 import { AppConfig } from '../../config/app-config.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { DEFAULT_FEATURES } from '../auth/auth.service';
+import { DemoService } from '../demo/demo.service';
 
 /**
  * Creates the organisation's branches (Al Malqa, Al Rayan, Olaya) and their default
@@ -16,10 +17,16 @@ export class BranchBootstrapService implements OnApplicationBootstrap {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: AppConfig,
+    private readonly demo: DemoService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
     if (this.config.get('NODE_ENV') === 'test') return;
+    await this.ensureBranches();
+    if (this.config.get('PUBLIC_DEMO')) await this.demo.seed();
+  }
+
+  async ensureBranches(): Promise<void> {
     if (await this.prisma.raw.daycare.count()) return;
     for (const b of BRANCHES) {
       const branch = await this.prisma.raw.daycare.create({

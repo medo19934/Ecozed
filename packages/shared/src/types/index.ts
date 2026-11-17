@@ -349,3 +349,46 @@ export interface CalendarEventDto {
   endTime: string | null;
   canEdit: boolean;
 }
+
+export interface DemoAccount {
+  email: string;
+  role: 'SUPER_ADMIN' | 'MANAGER' | 'STAFF' | 'PARENT';
+  name: string;
+  branch: { slug: string; name: string; nameEn: string | null } | null;
+}
+
+export interface ThreadDto {
+  id: string;
+  kind: 'CHILD' | 'STAFF' | 'ANNOUNCEMENT';
+  title: string;
+  subtitle: string | null;
+  branch: { id: string; name: string };
+  child: { id: string; fullName: string; gender: 'MALE' | 'FEMALE'; hasPhoto: boolean } | null;
+  lastMessage: { body: string | null; hasAttachment: boolean; senderName: string; at: string } | null;
+  unread: number;
+  canPost: boolean;
+}
+
+export interface MessageDto {
+  id: string;
+  body: string | null;
+  attachment: { name: string; mime: string } | null;
+  sender: { id: string; fullName: string; avatarUrl: string | null; role: string | null };
+  mine: boolean;
+  /** For my messages: someone else has read it. */
+  read: boolean;
+  createdAt: string;
+}
+
+export interface ThreadMessages {
+  thread: ThreadDto;
+  messages: MessageDto[];
+  hasMore: boolean;
+}
+
+export interface MessageContacts {
+  children: { id: string; fullName: string; classroom: string | null; branch: string }[];
+  staff: { userId: string; fullName: string; role: string; avatarUrl: string | null }[];
+  classes: { id: string; name: string }[];
+  canAnnounce: boolean;
+}

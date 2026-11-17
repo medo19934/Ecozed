@@ -59,6 +59,35 @@ export class AuthService {
     return this.session(user.id, user.lastDaycareId);
   }
 
+  /**
+   * Sign in (or sign up as a parent) with an email or phone number — PUBLIC_DEMO only.
+   * Existing staff/parents are matched by email or phone.
+   */
+  async identifierLogin(identifier: string, locale?: Locale): Promise<AuthResponse> {
+    if (!this.config.get('PUBLIC_DEMO')) throw new NotFoundException();
+    const isEmail = identifier.includes('@');
+    let user = await this.prisma.raw.user.findFirst({
+      where: isEmail ? { email: identifier } : { phone: identifier },
+    });
+    if (user?.deletedAt) {
+      throw new UnauthorizedException({ message: 'Account disabled', code: 'account_disabled' });
+    }
+    if (!user) {
+      user = await this.prisma.raw.user.create({
+        data: {
+          fullName: isEmail ? identifier.split('@')[0]! : identifier,
+          ...(isEmail ? { email: identifier } : { phone: identifier }),
+          locale: locale ?? 'ar',
+          isSuperAdmin: isEmail && this.isSuperAdminEmail(identifier),
+        },
+      });
+      await this.audit.log({ action: 'auth.signup_parent', entity: 'User', entityId: user.id, actorId: user.id, daycareId: null });
+    }
+    await this.audit.log({ action: 'auth.login_identifier', entity: 'User', entityId: user.id, actorId: user.id });
+    await this.guardianLinks.linkUser(user);
+    return this.session(user.id, user.lastDaycareId);
+  }
+
   /** Local development sign-in without Google (AUTH_DEV_LOGIN=true only). */
   async devLogin(email: string): Promise<AuthResponse> {
     if (!this.config.get('AUTH_DEV_LOGIN') || this.config.isProd) throw new NotFoundException();

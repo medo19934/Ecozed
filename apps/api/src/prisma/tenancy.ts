@@ -26,7 +26,13 @@ export const TENANT_MODELS = new Set<string>([
 
 /** Models that carry `daycareId` but are intentionally NOT auto-scoped. */
 /** CalendarEvent: daycareId is null for organisation-wide events; queried with explicit filters. */
-export const TENANT_EXEMPT_MODELS = new Set<string>(['RefreshToken', 'CalendarEvent']);
+export const TENANT_EXEMPT_MODELS = new Set<string>([
+  'RefreshToken',
+  'CalendarEvent',
+  // Messaging crosses branches for parents; MessagesService checks access explicitly.
+  'MessageThread',
+  'Message',
+]);
 
 /** Models with `deletedAt` (soft delete). */
 export const SOFT_DELETE_MODELS = new Set<string>([
