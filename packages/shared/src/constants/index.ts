@@ -9,8 +9,17 @@ export const isRtl = (locale: string): boolean =>
 export const DEFAULT_CURRENCY = 'SAR';
 export const DEFAULT_COUNTRY_CODE = '+966';
 export const DEFAULT_TIMEZONE = 'Asia/Riyadh';
-export const TRIAL_DAYS = 14;
+
+/** Week runs Saturday → Thursday; Friday is closed. JS getDay(): 0=Sun … 5=Fri, 6=Sat. */
+export const WEEK_START_DAY = 6;
+export const CLOSED_WEEKDAYS: readonly number[] = [5];
+export const WORK_WEEK: readonly number[] = [6, 0, 1, 2, 3, 4];
+
+/** The organisation's branches (seeded; edited by super admin). */
+export const BRANCHES = [
+  { slug: 'al-malqa', nameAr: 'فرع الملقا', nameEn: 'Al Malqa' },
+  { slug: 'al-rayan', nameAr: 'فرع الريان', nameEn: 'Al Rayan' },
+  { slug: 'olaya', nameAr: 'فرع العليا', nameEn: 'Olaya' },
+] as const;
 
 export const PAGINATION = { DEFAULT_PAGE_SIZE: 20, MAX_PAGE_SIZE: 100 } as const;
-export const OTP = { LENGTH: 6, TTL_SECONDS: 300, MAX_ATTEMPTS: 5 } as const;
-export const PASSWORD_MIN_LENGTH = 8;

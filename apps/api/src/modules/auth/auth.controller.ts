@@ -2,16 +2,7 @@ import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { CurrentAuth, Public, type AuthContext } from '../../common/decorators/auth.decorators';
-import {
-  ForgotPasswordDto,
-  LoginDto,
-  RefreshTokenDto,
-  RegisterDto,
-  RequestOtpDto,
-  ResetPasswordDto,
-  SwitchDaycareDto,
-  VerifyOtpDto,
-} from './auth.dto';
+import { DevLoginDto, GoogleAuthDto, RefreshTokenDto, SwitchDaycareDto } from './auth.dto';
 import { AuthService } from './auth.service';
 
 @ApiTags('auth')
@@ -19,47 +10,21 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
+  /** Sign up or sign in with Google (ID token). */
   @Public()
-  @Post('register')
-  register(@Body() dto: RegisterDto) {
-    return this.auth.register(dto);
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @HttpCode(200)
+  @Post('google')
+  google(@Body() dto: GoogleAuthDto) {
+    return this.auth.google(dto);
   }
 
+  /** Local development only (AUTH_DEV_LOGIN=true). Returns 404 otherwise. */
   @Public()
   @HttpCode(200)
-  @Post('login')
-  login(@Body() dto: LoginDto) {
-    return this.auth.login(dto);
-  }
-
-  @Public()
-  @Throttle({ otp: { limit: 5, ttl: 60_000 } })
-  @HttpCode(200)
-  @Post('otp/request')
-  requestOtp(@Body() dto: RequestOtpDto) {
-    return this.auth.requestOtp(dto);
-  }
-
-  @Public()
-  @HttpCode(200)
-  @Post('otp/verify')
-  verifyOtp(@Body() dto: VerifyOtpDto) {
-    return this.auth.verifyOtp(dto);
-  }
-
-  @Public()
-  @Throttle({ otp: { limit: 5, ttl: 60_000 } })
-  @HttpCode(200)
-  @Post('password/forgot')
-  forgot(@Body() dto: ForgotPasswordDto) {
-    return this.auth.forgotPassword(dto);
-  }
-
-  @Public()
-  @HttpCode(200)
-  @Post('password/reset')
-  reset(@Body() dto: ResetPasswordDto) {
-    return this.auth.resetPassword(dto);
+  @Post('dev-login')
+  devLogin(@Body() dto: DevLoginDto) {
+    return this.auth.devLogin(dto.email);
   }
 
   @Public()

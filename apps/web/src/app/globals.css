@@ -3,34 +3,35 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Latif Kids design tokens — indigo → violet brand, soft neutral surfaces. */
+/* Latif Kids design tokens — blue→violet brand (#5b6db4 → #7b649b), page #f2f4f5. */
 :root {
-  --radius: 1rem;
-  --background: oklch(0.975 0.004 270);
-  --foreground: oklch(0.24 0.03 275);
+  --radius: 1.25rem; /* 20px cards */
+  --background: #f2f4f5;
+  --foreground: #1f2433;
   --card: oklch(1 0 0);
   --card-foreground: var(--foreground);
   --popover: oklch(1 0 0);
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.51 0.23 277);
+  --primary: #5b6db4;
   --primary-foreground: oklch(0.99 0 0);
-  --brand-from: oklch(0.585 0.233 277.1); /* indigo-500 */
-  --brand-to: oklch(0.541 0.281 293); /* violet-600 */
-  --secondary: oklch(0.955 0.02 280);
-  --secondary-foreground: oklch(0.35 0.12 280);
-  --muted: oklch(0.96 0.006 270);
-  --muted-foreground: oklch(0.52 0.025 270);
-  --accent: oklch(0.95 0.03 285);
-  --accent-foreground: oklch(0.38 0.15 285);
-  --destructive: oklch(0.6 0.22 25);
-  --success: oklch(0.64 0.16 155);
-  --warning: oklch(0.76 0.16 70);
-  --border: oklch(0.92 0.008 270);
-  --input: oklch(0.9 0.01 270);
-  --ring: oklch(0.6 0.2 280);
+  --brand-from: #5b6db4;
+  --brand-to: #7b649b;
+  --secondary: #e9ecf6;
+  --secondary-foreground: #3f4d8a;
+  --muted: #eef0f3;
+  --muted-foreground: #6b7280;
+  --accent: #eceef8;
+  --accent-foreground: #3f4d8a;
+  --destructive: #e5484d;
+  --success: #2fb36d;
+  --warning: #f2a33a;
+  --border: #e5e8ec;
+  --input: #dde1e6;
+  --ring: #5b6db4;
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: var(--foreground);
-  --shadow-soft: 0 1px 2px oklch(0.3 0.05 275 / 0.04), 0 8px 24px -8px oklch(0.3 0.08 275 / 0.12);
+  --shadow-soft: 0 1px 2px rgb(31 36 51 / 0.04), 0 8px 24px -10px rgb(31 36 51 / 0.12);
+  --donut-attended: #9eca9e;
 }
 
 .dark {
@@ -72,6 +73,7 @@
   --color-destructive: var(--destructive);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-donut-attended: var(--donut-attended);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);

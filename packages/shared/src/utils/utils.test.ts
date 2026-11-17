@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ageParts, paginate } from './index';
-import { LoginSchema, RegisterSchema } from '../schemas';
+import { DevLoginSchema, GoogleAuthSchema } from '../schemas';
 
 describe('utils', () => {
   it('computes age parts', () => {
@@ -13,21 +13,11 @@ describe('utils', () => {
 });
 
 describe('auth schemas', () => {
-  it('accepts email or phone identifiers', () => {
-    expect(LoginSchema.safeParse({ identifier: 'A@B.co', password: 'x' }).success).toBe(true);
-    expect(LoginSchema.safeParse({ identifier: '+966501234567', password: 'x' }).success).toBe(
-      true,
-    );
-    expect(LoginSchema.safeParse({ identifier: 'nope', password: 'x' }).success).toBe(false);
+  it('requires a Google id token', () => {
+    expect(GoogleAuthSchema.safeParse({ idToken: 'x' }).success).toBe(false);
+    expect(GoogleAuthSchema.safeParse({ idToken: 'a'.repeat(40) }).success).toBe(true);
   });
-  it('defaults register locale to ar', () => {
-    const r = RegisterSchema.parse({
-      fullName: 'Sara',
-      email: 'sara@example.com',
-      phone: '+966501234567',
-      password: 'secret123',
-      daycareName: 'Little Stars',
-    });
-    expect(r.locale).toBe('ar');
+  it('normalises dev login email', () => {
+    expect(DevLoginSchema.parse({ email: ' A@B.co ' }).email).toBe('a@b.co');
   });
 });

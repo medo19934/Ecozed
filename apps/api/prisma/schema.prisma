@@ -14,7 +14,6 @@ datasource db {
 
 enum Role {
   SUPER_ADMIN
-  OWNER
   MANAGER
   STAFF
   PARENT
@@ -32,18 +31,13 @@ enum MembershipStatus {
   ARCHIVED
 }
 
-enum OtpPurpose {
-  LOGIN
-  RESET_PASSWORD
-  VERIFY
-}
-
 model User {
   id            String    @id @default(uuid()) @db.Uuid
   fullName      String
   email         String?   @unique
   phone         String?   @unique
-  passwordHash  String?
+  /// Google account subject ("sub"); set on first Google sign-in.
+  googleId      String?   @unique
   locale        String    @default("ar")
   avatarUrl     String?
   isSuperAdmin  Boolean   @default(false)
@@ -58,9 +52,11 @@ model User {
   auditLogs     AuditLog[]
 }
 
+/// A branch of the organisation (tenant boundary). Super admins see all branches.
 model Daycare {
   id               String    @id @default(uuid()) @db.Uuid
   name             String
+  nameEn           String?
   slug             String    @unique
   logoUrl          String?
   phone            String?
@@ -74,7 +70,6 @@ model Daycare {
   timezone         String    @default("Asia/Riyadh")
   defaultLocale    String    @default("ar")
   useHijri         Boolean   @default(false)
-  trialEndsAt      DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   deletedAt        DateTime?
@@ -92,7 +87,7 @@ model Membership {
   role        Role
   staffType   StaffType?
   status      MembershipStatus @default(ACTIVE)
-  /// StaffPermission flags (see @latif/shared). Owner/Manager implicitly have all.
+  /// StaffPermission flags (see @latif/shared). Managers implicitly have all.
   permissions String[]         @default([])
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
@@ -134,19 +129,6 @@ model RefreshToken {
 
   @@index([userId])
   @@index([familyId])
-}
-
-model OtpCode {
-  id         String     @id @default(uuid()) @db.Uuid
-  identifier String
-  purpose    OtpPurpose
-  codeHash   String
-  attempts   Int        @default(0)
-  expiresAt  DateTime
-  consumedAt DateTime?
-  createdAt  DateTime   @default(now())
-
-  @@index([identifier, purpose])
 }
 
 /// Sensitive-action audit trail. daycareId is null for platform-level events.

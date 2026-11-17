@@ -5,11 +5,10 @@ import { ACCESS_COOKIE } from '@/lib/session-cookies';
 
 /** Token-issuing endpoints must go through /bff/auth/* so tokens never reach browser JS. */
 const BLOCKED = new Set([
-  'auth/login',
-  'auth/register',
+  'auth/google',
+  'auth/dev-login',
   'auth/refresh',
   'auth/logout',
-  'auth/otp/verify',
   'auth/switch-daycare',
 ]);
 

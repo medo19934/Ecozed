@@ -3,9 +3,12 @@ import { z } from 'zod';
 const values = <T extends Record<string, string>>(o: T) =>
   Object.values(o) as [T[keyof T], ...T[keyof T][]];
 
+/**
+ * SUPER_ADMIN: all branches · MANAGER: branch manager (own branch) ·
+ * STAFF: teacher/assistant (own class) · PARENT: own linked children.
+ */
 export const Role = {
   SUPER_ADMIN: 'SUPER_ADMIN',
-  OWNER: 'OWNER',
   MANAGER: 'MANAGER',
   STAFF: 'STAFF',
   PARENT: 'PARENT',
@@ -14,12 +17,7 @@ export type Role = (typeof Role)[keyof typeof Role];
 export const RoleSchema = z.enum(values(Role));
 
 /** Roles that may use the admin web app. */
-export const ADMIN_ROLES: readonly Role[] = [
-  Role.SUPER_ADMIN,
-  Role.OWNER,
-  Role.MANAGER,
-  Role.STAFF,
-];
+export const ADMIN_ROLES: readonly Role[] = [Role.SUPER_ADMIN, Role.MANAGER, Role.STAFF];
 
 export const StaffPermission = {
   CAN_ADD_CHILD: 'canAddChild',
@@ -40,8 +38,9 @@ export const ALL_STAFF_PERMISSIONS = Object.values(StaffPermission);
 export const FeatureToggle = {
   MESSAGES: 'messages',
   CHILD_QR_ATTENDANCE: 'childQrAttendance',
-  PARENT_IN_APP_PAYMENT: 'parentInAppPayment',
   STAFF_GEOFENCED_ATTENDANCE: 'staffGeofencedAttendance',
+  /** AI "Daily Story" in messages — off by default (costs AI credits). */
+  DAILY_STORY_AI: 'dailyStoryAi',
 } as const;
 export type FeatureToggle = (typeof FeatureToggle)[keyof typeof FeatureToggle];
 export const FeatureToggleSchema = z.enum(values(FeatureToggle));
@@ -88,11 +87,3 @@ export const SubscriptionStatusSchema = z.enum(values(SubscriptionStatus));
 export const RecordStatus = { ACTIVE: 'ACTIVE', ARCHIVED: 'ARCHIVED' } as const;
 export type RecordStatus = (typeof RecordStatus)[keyof typeof RecordStatus];
 export const RecordStatusSchema = z.enum(values(RecordStatus));
-
-export const OtpPurpose = {
-  LOGIN: 'LOGIN',
-  RESET_PASSWORD: 'RESET_PASSWORD',
-  VERIFY: 'VERIFY',
-} as const;
-export type OtpPurpose = (typeof OtpPurpose)[keyof typeof OtpPurpose];
-export const OtpPurposeSchema = z.enum(values(OtpPurpose));

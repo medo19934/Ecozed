@@ -9,7 +9,7 @@ import {
   type TextInputProps,
 } from 'react-native';
 
-export const BRAND_GRADIENT = ['#6366f1', '#7c3aed'] as const;
+export const BRAND_GRADIENT = ['#5b6db4', '#7b649b'] as const;
 
 export function Screen({ children }: { children: ReactNode }) {
   return <View className="flex-1 bg-surface">{children}</View>;

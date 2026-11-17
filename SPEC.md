@@ -1,6 +1,49 @@
 # Latif Kids — Product Specification
 
-> Original daycare/nursery management SaaS. Brand: "Latif Kids" (placeholder). Palette: indigo → violet gradient. Icons: lucide.
+> **Read the "Revision 1" section first — it overrides the original spec below wherever they conflict.**
+> Visual/functional reference: `docs/latif-kids-hub-reference.pdf` (use Latif Kids name/logo only).
+
+# Revision 1 (owner decisions — overrides the original spec)
+
+## Organisation, not SaaS
+- One organisation ("Latif Kids Hub") with branches: **Al Malqa, Al Rayan, Olaya** (tenant boundary = branch; table `Daycare`).
+- Roles: **Super Admin** (all branches) · **Branch Manager** (own branch) · **Teacher** (own class) · **Parent** (own linked children). Visibility is enforced on the data side (API), not only hidden in the UI.
+- No free-trial signup, no multi-nursery switcher, no plan quotas, no marketing landing page.
+
+## Authentication
+- **Google sign-in only** (web + mobile). No passwords, no OTP/confirmation codes, no SMS.
+- Parents sign up themselves with Google. Staff accounts are created by admins (by email) and sign in with that Google account.
+- Super admins = emails listed in `SUPER_ADMIN_EMAILS`.
+
+## Locale & calendar
+- Arabic RTL default, English toggle. Week runs **Saturday → Thursday; Friday is closed** (greyed). Time zone Asia/Riyadh. Currency SAR.
+
+## Payments
+- Parents pay **on-site**: no online payment gateway, no invoices/receipts. Staff press "Mark paid"; "Remind" sends a notification. Parents see their child's status read-only.
+
+## Data
+- **No demo data.** Only an admin-only "TEST data" button, clearly labelled TEST. Every button saves and loads real data. No raw translation keys on screen.
+
+## Visual style
+- Page `#f2f4f5`, white cards, radius 20px, faint shadow; primary gradient `#5b6db4 → #7b649b`.
+- Status chips: green `#2fb36d` (accepted/paid), amber `#f2a33a` (under review/vacation), red `#e5484d` (rejected/unpaid/absent). Donut "attended" `#9eca9e`.
+- Web: icon sidebar on the start side (right in RTL) with logo on top; header has bell + branch switcher.
+
+## Module notes from the reference
+- **Attendance kiosk**: QR refreshes every 30 s (no reuse) or a personal 6-digit PIN per person; record person, direction in/out, time, method qr/pin; clear success/error. Staff can also check in with geolocation inside the branch radius + device biometric.
+- **Daily Story (AI)**: optional, **off by default** (feature toggle `dailyStoryAi`). Generate from the day's records → teacher edits → Share with family. Data: child, date, text, shared.
+- **Subscriptions**: 4 cards (total, paid, unpaid, cancelled), 6 filters, row menu Mark paid / Remind / Archive child / Cancel; unpaid rows tinted red; side panel reminders + plan details. Admin + branch manager.
+- **Dashboard**: 5 cards (children, staff, classes, units, activities) + attendance donut (no record, absent, vacation, departure, attended) with class + date filters and refresh/last updated. Super admin gets a branch filter. Real counts only.
+- **Admission requests**: 4 cards, period chips (today/last week/last month/last year), search child/guardian/phone, status + date filters; Accept creates the child, assigns a class, links the parent by phone/email and opens the message thread; Reject sends a polite message.
+- **Staff profile & files**: profile panel (photo, role, status, join date, qualification, email, address, enforceable permission toggles), Files/Messages tabs, file cards with download/delete, Add file, deleted-files bin. Files are private.
+- **Units (curriculum)**: optional; cards (total/active/archived), active/archived tabs, expandable unit rows with Lessons/Activities and Add lesson; side panel of active teachers (no plan-usage quotas).
+- **Messages**: inbox (search, tabs All/Staff/Parents, per-child threads, unread counters) + chat (text, photos, files, voice notes). Add read ticks, announcements to a branch or class, quick replies/templates, quiet hours. Parent sees own children's threads; teacher own class; manager own branch; admin all.
+- **Calendar**: day/week/month, prev/next/Today, filters class + type, Add to calendar, coloured chips "+N more". Events target a branch, a class or everyone. All roles read their scope; admin + manager add.
+- **Parent home**: greeting, Saturday–Thursday strip, "Enroll my child" card, linked children and their daily reports.
+
+---
+
+# Original specification (v0)
 
 # Product
 Multi-tenant SaaS for daycares/nurseries. Three client surfaces:

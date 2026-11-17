@@ -16,9 +16,10 @@ type Status = 'loading' | 'signedOut' | 'signedIn';
 interface AuthState {
   status: Status;
   user: AuthUser | null;
-  signInWithPassword: (identifier: string, password: string) => Promise<AuthUser>;
-  requestOtp: (phone: string) => Promise<{ devCode?: string }>;
-  signInWithOtp: (phone: string, code: string) => Promise<AuthUser>;
+  /** Sign up or sign in with a Google ID token. */
+  signInWithGoogle: (idToken: string, locale: string) => Promise<AuthUser>;
+  /** Local development only (API AUTH_DEV_LOGIN=true). */
+  devLogin: (email: string) => Promise<AuthUser>;
   signOut: () => Promise<void>;
 }
 
@@ -68,12 +69,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       user,
       signOut,
-      signInWithPassword: async (identifier, password) =>
-        accept(await api.public<AuthResponse>('/auth/login', { identifier, password })),
-      requestOtp: (phone) =>
-        api.public('/auth/otp/request', { identifier: phone, purpose: 'LOGIN' }),
-      signInWithOtp: async (phone, code) =>
-        accept(await api.public<AuthResponse>('/auth/otp/verify', { identifier: phone, code })),
+      signInWithGoogle: async (idToken, locale) =>
+        accept(await api.public<AuthResponse>('/auth/google', { idToken, locale })),
+      devLogin: async (email) =>
+        accept(await api.public<AuthResponse>('/auth/dev-login', { email })),
     }),
     [status, user, signOut, accept],
   );

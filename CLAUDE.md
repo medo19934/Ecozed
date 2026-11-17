@@ -4,7 +4,7 @@
 
 ## Session start (mandatory)
 
-1. Read `SPEC.md` and `PROGRESS.md`.
+1. Read `SPEC.md` ("Revision 1" overrides the rest) and `PROGRESS.md`. Visual reference: `docs/latif-kids-hub-reference.pdf`.
 2. Pick the first unchecked phase in PROGRESS.md. Work on that phase only.
 
 ## Stack
@@ -27,8 +27,9 @@ legacy/       old Ecozed e-commerce app — not in workspace, do not touch
 
 ## Conventions
 
-- Brand "Latif Kids"; primary gradient indigo-500 → violet-600; icons: lucide only.
-- Multi-tenancy: every business table has `daycareId`; set from JWT via guard/Prisma extension. Never trust client `daycareId`.
+- Brand "Latif Kids"; gradient #5b6db4 → #7b649b, page #f2f4f5, radius 20px; icons: lucide only.
+- Branches (Al Malqa, Al Rayan, Olaya) are the tenant (`Daycare` table). Roles: SUPER_ADMIN, MANAGER, STAFF, PARENT. Google sign-in only.
+- Every business table has `daycareId` (branch); set from JWT via guard/Prisma extension. Never trust client `daycareId`.
 - Soft deletes (`deletedAt`), pagination on all list endpoints, audit log for sensitive actions.
 - All user-facing strings via i18n keys (ar + en). Use logical CSS (`ms-/me-/ps-/pe-`), never `left/right`.
 - Validate input with shared zod schemas on both client and server.
@@ -43,7 +44,7 @@ legacy/       old Ecozed e-commerce app — not in workspace, do not touch
 - `pnpm infra:up` / `pnpm infra:down` — Postgres, Redis, MinIO via docker compose
 - `pnpm dev` — run all apps in parallel; `pnpm --filter @latif/api dev` for one
 - `pnpm build` · `pnpm lint` · `pnpm typecheck` · `pnpm test` · `pnpm test:e2e` · `pnpm format`
-- `pnpm --filter @latif/api db:migrate` · `pnpm --filter @latif/api seed` (demo logins: `*@latifkids.test` / `Password123!`)
+- `pnpm --filter @latif/api db:migrate` · `pnpm --filter @latif/api seed` (branches only; local login via `AUTH_DEV_LOGIN=true`)
 
 ## Rules
 
@@ -51,4 +52,5 @@ legacy/       old Ecozed e-commerce app — not in workspace, do not touch
 - Commit after each phase (and at sensible checkpoints within a big phase).
 - Keep replies terse. No long explanations, no re-printing files.
 - Don't add deps outside the fixed stack without a reason noted in PROGRESS.md.
+- No demo data in seeds; no raw i18n keys on screen; every button saves/loads real data.
 - Never commit secrets; update `.env.example` when adding env vars.

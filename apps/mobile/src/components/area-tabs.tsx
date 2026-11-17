@@ -22,7 +22,7 @@ export function AreaTabs({ area, tabs }: { area: AppArea; tabs: TabDef[] }) {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#6366f1',
+        tabBarActiveTintColor: '#5b6db4',
         tabBarInactiveTintColor: '#8a8aa3',
         tabBarStyle: { height: 76, paddingTop: 8, paddingBottom: 14, borderTopColor: '#e6e6f0' },
         tabBarLabelStyle: { fontSize: 12, lineHeight: 18, fontWeight: '600' },

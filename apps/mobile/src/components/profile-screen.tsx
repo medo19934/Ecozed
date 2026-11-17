@@ -32,7 +32,7 @@ export function ProfileScreen() {
         <Card>
           <Row label={t('profile.role')} value={user?.role ? t(`roles.${user.role}`) : null} />
           <View className="h-px bg-line" />
-          <Row label={t('profile.daycare')} value={daycare} />
+          <Row label={t('profile.branch')} value={daycare} />
         </Card>
         <Pressable
           accessibilityRole="button"
@@ -40,7 +40,7 @@ export function ProfileScreen() {
           onPress={() => changeLocale(i18n.language === 'ar' ? 'en' : 'ar')}
           className="min-h-14 flex-row items-center gap-3 rounded-2xl border border-line bg-white px-4 active:bg-line"
         >
-          <Languages color="#6366f1" size={20} />
+          <Languages color="#5b6db4" size={20} />
           <Text className="flex-1 text-start text-base text-ink">
             {t('profile.switchLanguage')}
           </Text>
@@ -54,7 +54,7 @@ export function ProfileScreen() {
           }}
           className="min-h-14 flex-row items-center gap-3 rounded-2xl border border-line bg-white px-4 active:bg-line"
         >
-          <LogOut color="#e11d48" size={20} />
+          <LogOut color="#e5484d" size={20} />
           <Text className="text-start text-base font-medium text-danger">
             {t('profile.logout')}
           </Text>

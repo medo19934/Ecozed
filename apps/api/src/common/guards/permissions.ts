@@ -2,7 +2,7 @@ import { ALL_STAFF_PERMISSIONS, Role, type StaffPermission } from '@latif/shared
 
 /** Effective permission set for a membership. */
 export const effectivePermissions = (role: Role | null, granted: string[]): StaffPermission[] => {
-  if (role === Role.OWNER || role === Role.MANAGER || role === Role.SUPER_ADMIN) {
+  if (role === Role.MANAGER || role === Role.SUPER_ADMIN) {
     return [...ALL_STAFF_PERMISSIONS];
   }
   if (role === Role.STAFF) {

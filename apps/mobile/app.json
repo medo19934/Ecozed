@@ -14,7 +14,7 @@
       "expo-router",
       "expo-secure-store",
       ["expo-localization", { "supportsRTL": true }],
-      ["expo-splash-screen", { "backgroundColor": "#6366f1" }]
+      ["expo-splash-screen", { "backgroundColor": "#5b6db4" }]
     ],
     "extra": { "supportsRTL": true },
     "experiments": { "typedRoutes": true }

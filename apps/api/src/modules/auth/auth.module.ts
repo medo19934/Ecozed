@@ -3,7 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AppConfig } from '../../config/app-config.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { OtpService } from './otp.service';
+import { GOOGLE_VERIFIER, GoogleIdTokenVerifier } from './google-verifier';
 import { TokenService } from './token.service';
 
 @Module({
@@ -15,7 +15,11 @@ import { TokenService } from './token.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, TokenService, OtpService],
+  providers: [
+    AuthService,
+    TokenService,
+    { provide: GOOGLE_VERIFIER, useClass: GoogleIdTokenVerifier },
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

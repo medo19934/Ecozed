@@ -2,8 +2,8 @@ import { ALL_STAFF_PERMISSIONS, StaffPermission } from '@latif/shared';
 import { effectivePermissions, hasPermissions } from './permissions';
 
 describe('permissions', () => {
-  it('owner and manager hold every permission', () => {
-    expect(effectivePermissions('OWNER', [])).toEqual(ALL_STAFF_PERMISSIONS);
+  it('super admin and branch manager hold every permission', () => {
+    expect(effectivePermissions('SUPER_ADMIN', [])).toEqual(ALL_STAFF_PERMISSIONS);
     expect(effectivePermissions('MANAGER', [])).toEqual(ALL_STAFF_PERMISSIONS);
   });
   it('staff only hold granted, known flags', () => {

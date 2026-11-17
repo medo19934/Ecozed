@@ -1,23 +1,27 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { isRtl } from '@latif/shared';
+import { useLocale, useTranslations } from 'next-intl';
 import { BrandLogo } from '@/components/brand-logo';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip } from '@/components/ui/tooltip';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
-import { NAV_ITEMS } from './nav-items';
+import type { NavItem } from './nav-items';
 
 export function SidebarNav({
+  items,
   collapsed,
   onNavigate,
 }: {
+  items: NavItem[];
   collapsed?: boolean;
   onNavigate?: () => void;
 }) {
   const t = useTranslations('nav');
   const tc = useTranslations('common');
   const pathname = usePathname();
+  const tipSide = isRtl(useLocale()) ? 'left' : 'right';
 
   return (
     <div className="flex h-full flex-col">
@@ -28,7 +32,7 @@ export function SidebarNav({
       </div>
       <nav aria-label={t('home')} className="flex-1 overflow-y-auto px-3 pb-4">
         <ul className="grid gap-1">
-          {NAV_ITEMS.map((item) => {
+          {items.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             const Icon = item.icon;
             const label = t(item.key);
@@ -55,7 +59,11 @@ export function SidebarNav({
             );
             return (
               <li key={item.key}>
-                <Tooltip content={label} side="right" disabled={!collapsed}>
+                <Tooltip
+                  content={item.soon ? `${label} · ${tc('soon')}` : label}
+                  side={tipSide}
+                  disabled={!collapsed}
+                >
                   {item.soon ? (
                     <span
                       className={cls}

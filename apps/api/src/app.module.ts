@@ -11,7 +11,6 @@ import { AppConfigModule } from './config/config.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
-import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -20,16 +19,12 @@ import { PrismaModule } from './prisma/prisma.module';
     ThrottlerModule.forRootAsync({
       inject: [AppConfig],
       useFactory: (config: AppConfig) => ({
-        throttlers: [
-          { name: 'default', ttl: 60_000, limit: 300 },
-          { name: 'otp', ttl: 60_000, limit: 1000 },
-        ],
+        throttlers: [{ name: 'default', ttl: 60_000, limit: 300 }],
         skipIf: () => config.get('NODE_ENV') === 'test',
       }),
     }),
     PrismaModule,
     AuditModule,
-    NotificationsModule,
     HealthModule,
     AuthModule,
   ],

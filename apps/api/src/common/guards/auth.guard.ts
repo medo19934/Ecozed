@@ -55,28 +55,35 @@ export class AuthGuard implements CanActivate {
     };
 
     if (payload.daycareId) {
-      const m = await this.prisma.raw.membership.findFirst({
-        where: {
-          userId: user.id,
-          daycareId: payload.daycareId,
-          status: 'ACTIVE',
-          deletedAt: null,
-          daycare: { deletedAt: null },
-        },
-        select: { daycareId: true, role: true, permissions: true },
-      });
-      if (!m && !user.isSuperAdmin) throw new UnauthorizedException('Membership revoked');
-      if (m) {
+      if (user.isSuperAdmin) {
+        // Super admins act in any existing branch.
+        const branch = await this.prisma.raw.daycare.findFirst({
+          where: { id: payload.daycareId, deletedAt: null },
+          select: { id: true },
+        });
+        if (branch) auth = { ...auth, daycareId: branch.id };
+      } else {
+        const m = await this.prisma.raw.membership.findFirst({
+          where: {
+            userId: user.id,
+            daycareId: payload.daycareId,
+            status: 'ACTIVE',
+            deletedAt: null,
+            daycare: { deletedAt: null },
+          },
+          select: { daycareId: true, role: true, permissions: true },
+        });
+        if (!m) throw new UnauthorizedException('Membership revoked');
         auth = {
           ...auth,
           daycareId: m.daycareId,
-          role: user.isSuperAdmin ? 'SUPER_ADMIN' : m.role,
-          permissions: effectivePermissions(
-            user.isSuperAdmin ? 'SUPER_ADMIN' : m.role,
-            m.permissions,
-          ),
+          role: m.role,
+          permissions: effectivePermissions(m.role, m.permissions),
         };
       }
+    } else if (!user.isSuperAdmin) {
+      // Signed-up parent with no linked children yet.
+      auth = { ...auth, role: 'PARENT' };
     }
 
     req.auth = auth;

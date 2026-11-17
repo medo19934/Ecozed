@@ -9,7 +9,7 @@ export const badgeVariants = cva(
       variant: {
         default: 'bg-primary/10 text-primary',
         success: 'bg-success/12 text-success',
-        warning: 'bg-warning/15 text-[oklch(0.5_0.12_70)]',
+        warning: 'bg-warning/15 text-[#b8711a]',
         destructive: 'bg-destructive/10 text-destructive',
         muted: 'bg-muted text-muted-foreground',
         outline: 'border text-foreground',

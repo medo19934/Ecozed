@@ -23,4 +23,4 @@ export const PhoneSchema = z
   .trim()
   .regex(/^\+[1-9]\d{6,14}$/, 'invalid_phone');
 
-export const EmailSchema = z.email().trim().toLowerCase();
+export const EmailSchema = z.string().trim().toLowerCase().pipe(z.email());

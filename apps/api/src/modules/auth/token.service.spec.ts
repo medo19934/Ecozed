@@ -34,7 +34,7 @@ describe('TokenService', () => {
     const t = await svc.issue({
       userId: 'u1',
       daycareId: 'd1',
-      role: 'OWNER',
+      role: 'MANAGER',
       isSuperAdmin: false,
     });
     expect(t.expiresIn).toBe(900);

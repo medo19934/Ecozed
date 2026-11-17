@@ -5,14 +5,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        brand: { from: '#6366f1', to: '#7c3aed', DEFAULT: '#5b5bd6' },
-        surface: '#f6f6fb',
+        brand: { from: '#5b6db4', to: '#7b649b', DEFAULT: '#5b6db4', soft: '#e9ecf6' },
+        surface: '#f2f4f5',
         ink: { DEFAULT: '#1e1b3a', muted: '#6b6b86' },
         line: '#e6e6f0',
-        success: '#16a34a',
-        danger: '#e11d48',
+        success: '#2fb36d',
+        warning: '#f2a33a',
+        danger: '#e5484d',
       },
-      borderRadius: { '2xl': '20px', '3xl': '28px' },
+      borderRadius: { '2xl': '16px', '3xl': '20px' },
     },
   },
   plugins: [],

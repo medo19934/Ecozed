@@ -1,13 +1,15 @@
+import type { Role } from '@latif/shared';
 import {
   BarChart3,
+  Baby,
   BookOpen,
-  Building2,
   CalendarDays,
   ClipboardCheck,
   CreditCard,
-  FileText,
+  House,
   LayoutDashboard,
   MessageSquare,
+  NotebookPen,
   School,
   Settings,
   UserPlus,
@@ -15,21 +17,25 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+export type NavKey =
+  | 'dashboard'
+  | 'home'
+  | 'attendance'
+  | 'children'
+  | 'staff'
+  | 'classes'
+  | 'units'
+  | 'calendar'
+  | 'admissions'
+  | 'subscriptions'
+  | 'messages'
+  | 'dailyReports'
+  | 'reports'
+  | 'settings'
+  | 'enrollChild';
+
 export interface NavItem {
-  key:
-    | 'dashboard'
-    | 'classes'
-    | 'profile'
-    | 'people'
-    | 'curriculum'
-    | 'calendar'
-    | 'attendance'
-    | 'enrollment'
-    | 'subscriptions'
-    | 'reports'
-    | 'documents'
-    | 'messages'
-    | 'settings';
+  key: NavKey;
   href: string;
   icon: LucideIcon;
   /** Not built yet — rendered disabled with a "Soon" badge. Flip off as phases land. */
@@ -37,18 +43,29 @@ export interface NavItem {
   unreadDot?: boolean;
 }
 
-export const NAV_ITEMS: NavItem[] = [
+const STAFF_NAV: NavItem[] = [
   { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { key: 'classes', href: '/classes', icon: School, soon: true },
-  { key: 'profile', href: '/settings/profile', icon: Building2, soon: true },
-  { key: 'people', href: '/children', icon: Users, soon: true },
-  { key: 'curriculum', href: '/curriculum', icon: BookOpen, soon: true },
-  { key: 'calendar', href: '/calendar', icon: CalendarDays, soon: true },
   { key: 'attendance', href: '/attendance', icon: ClipboardCheck, soon: true },
-  { key: 'enrollment', href: '/enrollment', icon: UserPlus, soon: true },
+  { key: 'children', href: '/children', icon: Baby, soon: true },
+  { key: 'staff', href: '/staff', icon: Users, soon: true },
+  { key: 'classes', href: '/classes', icon: School, soon: true },
+  { key: 'units', href: '/units', icon: BookOpen, soon: true },
+  { key: 'calendar', href: '/calendar', icon: CalendarDays, soon: true },
+  { key: 'admissions', href: '/admissions', icon: UserPlus, soon: true },
   { key: 'subscriptions', href: '/subscriptions', icon: CreditCard, soon: true },
-  { key: 'reports', href: '/reports', icon: BarChart3, soon: true },
-  { key: 'documents', href: '/documents', icon: FileText, soon: true },
   { key: 'messages', href: '/messages', icon: MessageSquare, soon: true, unreadDot: true },
+  { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen, soon: true },
+  { key: 'reports', href: '/reports', icon: BarChart3, soon: true },
   { key: 'settings', href: '/settings', icon: Settings, soon: true },
 ];
+
+const PARENT_NAV: NavItem[] = [
+  { key: 'home', href: '/dashboard', icon: House },
+  { key: 'enrollChild', href: '/enroll', icon: UserPlus, soon: true },
+  { key: 'calendar', href: '/calendar', icon: CalendarDays, soon: true },
+  { key: 'messages', href: '/messages', icon: MessageSquare, soon: true },
+  { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen, soon: true },
+];
+
+export const navFor = (role: Role | undefined): NavItem[] =>
+  role === 'PARENT' ? PARENT_NAV : STAFF_NAV;

@@ -1,5 +1,5 @@
 import { forwardAuth } from '@/lib/bff';
 
 export function POST(request: Request) {
-  return forwardAuth('/auth/register', request);
+  return forwardAuth('/auth/google', request);
 }

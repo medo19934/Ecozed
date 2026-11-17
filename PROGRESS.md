@@ -1,6 +1,7 @@
 # Latif Kids — Progress
 
 Legend: `[ ]` todo · `[x]` done. Work one phase at a time; commit after each.
+SPEC.md "Revision 1" (from `docs/latif-kids-hub-reference.pdf`) overrides the original spec.
 
 ## Phase 0 — Monorepo skeleton
 
@@ -12,82 +13,77 @@ Legend: `[ ]` todo · `[x]` done. Work one phase at a time; commit after each.
 
 ## Phase 1 — Foundations (shared + API core + app shells)
 
-- [x] packages/shared: enums (roles, statuses), base zod schemas, pagination types, constants
+- [x] packages/shared: enums (roles, statuses), base zod schemas, pagination types, constants (branches, Sat–Thu week)
 - [x] api: NestJS bootstrap, config module, Swagger, health check
-- [x] api: Prisma schema core (Daycare, User, Membership w/ permission flags, DaycareFeature, AuditLog, RefreshToken, OtpCode)
-- [x] api: tenancy guard + Prisma extension (daycareId scoping, soft delete)
-- [x] api: auth (email/phone+password, JWT access/refresh, OTP, forgot password), RBAC guards + permission flags
-- [x] web: Next.js + Tailwind + shadcn/ui, next-intl (ar RTL default / en), theme tokens (indigo→violet)
-- [x] web: auth pages (login, parent OTP, forgot password), admin layout (collapsible sidebar, breadcrumbs, user/lang menu, fullscreen)
-- [x] mobile: Expo Router + NativeWind + i18next RTL, role-based login, tab shells (parent/teacher)
-- [x] Unit tests for auth service; e2e auth flow
+- [x] api: Prisma schema core (Branch=`Daycare`, User w/ googleId, Membership w/ permission flags, DaycareFeature, AuditLog, RefreshToken)
+- [x] api: tenancy guard + Prisma extension (branch scoping, soft delete); super admin acts in any branch
+- [x] api: Google sign-up/sign-in (ID token verify), JWT access/refresh rotation, RBAC guards + permission flags + feature toggles
+- [x] web: Next.js + Tailwind + shadcn-style UI, next-intl (ar RTL default / en), reference palette (#5b6db4→#7b649b, #f2f4f5)
+- [x] web: Google login page, icon sidebar (role-based nav), header bell + branch switcher, parent home (Sat–Thu strip, Enroll card)
+- [x] mobile: Expo Router + NativeWind + i18next RTL, Google sign-in, parent/teacher tab shells, parent home
+- [x] Unit tests for auth service; e2e Google auth flow (fake verifier)
 
-## Phase 2 — Daycare setup & core records
+## Phase 2 — Branch setup & core records
 
-- [ ] 4-step signup/onboarding flow + dashboard checklist widget
-- [ ] Daycare profile: info, logo upload (S3/MinIO), phone w/ country code, map picker + geofence warning
-- [ ] Bank account, e-payment provider settings (interface + Stripe + mock), T&C rich text, feature toggles
-- [ ] Classes CRUD (capacity indicators, teachers) + Units CRUD
-- [ ] Children CRUD (guardians, allergies, medical, pickup auth, archive/restore, search/filter/pagination) + profile page
-- [ ] Staff CRUD (specialty tags, permissions checklist) + profile tabs (files w/ bin + restore)
-- [ ] Seed script: demo daycare (88 children, 25 staff, 12 classes)
+- [ ] Branch profile (super admin edits all; manager own): name ar/en, logo upload (S3/MinIO), phone, address, map pin + geofence radius warning
+- [ ] Feature toggles per branch (messages, QR attendance, geofenced staff attendance, Daily Story AI — off by default)
+- [ ] Staff: admin creates staff by email (role manager/teacher/assistant, branch, class), permission toggles enforced; profile panel + Files tab (private, upload/download/soft-delete, deleted-files bin)
+- [ ] Classes CRUD (capacity, age range, teachers); teachers see only their class
+- [ ] Children CRUD (guardians linked to parent accounts, allergies, medical, pickup, archive/restore, search/filter/pagination) + child profile
+- [ ] Parent: linked children list on home; visibility enforced (own children only)
+- [ ] Admin-only "TEST data" button (clearly labelled) — no seed demo data
 
 ## Phase 3 — Dashboard & Attendance
 
-- [ ] Dashboard KPI cards (clickable) + quick actions
-- [ ] Attendance donut (date picker, class filter, refresh, last updated)
-- [ ] Children daily roster, statuses, check-in/out, drop-off/pick-up person
-- [ ] Rotating signed QR + 6-digit code screen (web); scan/type code (mobile)
-- [ ] Staff attendance via teacher app with geofence check
-- [ ] Parent vacation requests (mobile) + approval (web)
+- [ ] Dashboard: 5 cards (children, staff, classes, units, activities) + attendance donut (class/date filters, refresh, last updated), branch filter for super admin
+- [ ] Attendance kiosk screen: QR rotating every 30 s (server-signed, no reuse) + 6-digit personal PIN; success/error feedback
+- [ ] Mobile: scan kiosk QR / enter PIN; record person, direction in/out, time, method
+- [ ] Children daily roster (attended, absent, vacation, departure, no record); vacation requests by parents
+- [ ] Staff check-in with geolocation inside branch radius (+ device biometric)
 
-## Phase 4 — Curriculum, Calendar, Daily logs, Documents
+## Phase 4 — Admissions, Calendar, Units
 
-- [ ] Lesson/activity entity + attachments; "Add to calendar" form
-- [ ] Calendar month/week/day, filters, color chips, "+N more", side panel (progress bars, active teachers)
-- [ ] Mobile day strip + bottom-sheet lesson details with media gallery
-- [ ] Daily logs (teacher app): meals, nap, toilet, mood, activities, notes, photos; parent feed
-- [ ] Documents center: categories, expiry reminders (BullMQ job)
+- [ ] Parent "Enroll my child" → admission request to a branch
+- [ ] Admission requests: 4 cards, period chips, search/status/date filters; Accept (create child, assign class, link parent, open thread) / Reject (polite message)
+- [ ] Calendar day/week/month, Sat–Thu, Friday closed & greyed; filters class/type; Add to calendar (admin/manager); targets branch/class/everyone; "+N more"
+- [ ] Units (optional): active/archived, lessons & activities, active teachers side panel
 
-## Phase 5 — Enrollment, Subscriptions & Payments
+## Phase 5 — Subscriptions (on-site payments)
 
-- [ ] Public enrollment form + terms display
-- [ ] Enrollment table: KPIs, filters, date chips, Hijri/Gregorian, accept (creates child+guardian, WhatsApp-ready msg) / reject w/ reason
-- [ ] Plans CRUD (services, billing period)
-- [ ] Subscriptions table: KPIs, 6 filters + period, expandable rows, pills, red expired rows, row actions, side panels, add modal
-- [ ] Parent in-app payment, webhook status updates, PDF receipts
-- [ ] e2e: enrollment + subscription flows
+- [ ] Plans (name, price SAR, period, services)
+- [ ] Subscriptions: 4 cards, 6 filters + period, table, row menu Mark paid / Remind / Archive child / Cancel, unpaid rows red, side panel reminders + plan details, Add subscription
+- [ ] Parent read-only status of own children
 
-## Phase 6 — Messaging, AI Daily Digest, Notifications
+## Phase 6 — Messages, Daily reports, Daily Story, Notifications
 
-- [ ] Threads (child + guardian), list with search/tabs, chat pane, attachments (image/file/voice), unread, read receipts, new message modal
-- [ ] Socket.IO gateway (tenant-scoped rooms) + web/mobile clients
-- [ ] AI Daily Digest: provider-agnostic LLM service, ar/en, editable "Daily Story" modal, share with family
-- [ ] Notifications: in-app bell, Expo push, email; all event triggers via BullMQ
+- [ ] Inbox + chat (per-child threads, text/photo/file/voice, unread, read ticks), new conversation, announcements to branch/class, quick replies/templates
+- [ ] Socket.IO real time; scope: parent own children, teacher own class, manager own branch, admin all
+- [ ] Daily reports (teacher app): meals, nap, toilet, mood, activities, notes, photos; parent view
+- [ ] Daily Story AI (when toggle on): generate from day's records → teacher edits → Share with family (ar/en)
+- [ ] Notifications: bell, Expo push, quiet hours; triggers (attendance, message, payment reminder, admission status, calendar, story shared)
 
-## Phase 7 — Reports & Public website
+## Phase 7 — Reports & polish
 
-- [ ] Reports: attendance, financial, enrollment funnel, class occupancy; date filters; CSV/PDF export
-- [ ] Marketing (marketing) group: header w/ products dropdown, hero, 4-step cards, features, store badges, pricing, FAQ, WhatsApp button
-- [ ] Blog (markdown), About, Contact form
-- [ ] Per-daycare public page /d/[slug]: about, services, plans, photos, enrollment form
+- [ ] Reports: attendance, payments (paid/unpaid), admissions funnel, class occupancy; CSV/PDF export
+- [ ] UX pass: skeletons, empty states, toasts, confirm dialogs, a11y, responsive; no raw i18n keys
+- [ ] Hijri/Gregorian display option
 
-## Phase 8 — Polish, tests, release readiness
+## Phase 8 — Release readiness
 
-- [ ] Mobile completion pass (parent + teacher flows, push, RTL QA)
-- [ ] UX pass: skeletons, empty states, toasts, confirm dialogs, a11y (keyboard, labels, contrast), responsive
-- [ ] Hijri/Gregorian toggle + currency setting applied everywhere
-- [ ] Service unit test coverage; Playwright smoke test for web
-- [ ] Audit log coverage for sensitive actions; pagination everywhere check
-- [ ] README run steps, .env.example complete, CI workflow (lint/typecheck/test)
+- [ ] Mobile completion pass (parent + teacher flows, push, RTL QA on devices; dev build for Google sign-in)
+- [ ] Service unit test coverage; e2e for admissions/subscriptions; Playwright smoke test for web
+- [ ] Audit log coverage; pagination everywhere check
+- [ ] README, .env.example, CI workflow (lint/typecheck/test)
 
 ## Decisions & notes
 
+- Scope changed per owner PDF (SPEC "Revision 1"): branches instead of SaaS tenants, Google-only auth, on-site payments, no marketing site, no demo data.
 - NestJS pinned to v11: v12 is ESM-only and `nestjs-zod` (shared zod DTOs → Swagger) supports ≤11.
 - Prisma 7 (`prisma-client` generator, `@prisma/adapter-pg`, `prisma.config.ts`). Client in `apps/api/src/generated` (git-ignored).
-- `PrismaService.scoped` = tenant + soft-delete client (use in features); `.raw` = auth/system only. New tenant models must be added to `TENANT_MODELS` (a test enforces it).
-- Web auth = BFF: `/bff/auth/*` route handlers store JWTs in httpOnly cookies; `/bff/api/*` proxies to the API with auto refresh. Next 16 uses `src/proxy.ts` (not middleware).
-- shadcn registry unreachable from CI sandbox → components hand-written in shadcn style (`components.json` kept).
+- `PrismaService.scoped` = branch + soft-delete client (use in features); `.raw` = auth/system only. New tenant models must be added to `TENANT_MODELS` (a test enforces it). Branch table is still named `Daycare` (`daycareId`).
+- Auth: `POST /auth/google` verifies the Google ID token (`google-auth-library`, audiences = `GOOGLE_CLIENT_IDS`). New email → parent; existing email (staff created by admin) → linked; `SUPER_ADMIN_EMAILS` → super admin. `POST /auth/dev-login` only when `AUTH_DEV_LOGIN=true` (refused in production).
+- Web auth = BFF: `/bff/auth/*` route handlers store JWTs in httpOnly cookies; `/bff/api/*` proxies to the API with auto refresh. Next 16 uses `src/proxy.ts`.
+- Mobile Google sign-in = `expo-auth-session` (needs a dev build / store build with OAuth client IDs; Expo Go is not supported by Google).
+- shadcn registry unreachable from the sandbox → components hand-written in shadcn style (`components.json` kept).
 - Expo SDK 58, NativeWind 4 + Tailwind 3 (mobile), React 19.3 across web+mobile. Tokens in SecureStore. Arabic default; switching language reloads to apply native RTL.
 - e2e tests run against `latif_kids_test` (`prisma migrate deploy`, unique fixtures, no destructive reset).
-- OTP delivery is a logging stub (`OTP_SENDER`); `OTP_DEV_ECHO=true` returns codes in dev/test responses.

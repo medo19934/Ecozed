@@ -5,7 +5,7 @@ export type AppArea = 'parent' | 'teacher';
 /** Which app area a role lands in (single Expo app, two experiences). */
 export const areaForRole = (role: Role | null | undefined): AppArea | null => {
   if (role === Role.PARENT) return 'parent';
-  if (role === Role.STAFF || role === Role.OWNER || role === Role.MANAGER) return 'teacher';
+  if (role === Role.STAFF || role === Role.MANAGER || role === Role.SUPER_ADMIN) return 'teacher';
   return null;
 };
 

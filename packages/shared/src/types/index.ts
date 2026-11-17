@@ -16,6 +16,7 @@ export interface AuthTokens {
   expiresIn: number;
 }
 
+/** A branch the user can act in (all branches for super admins). */
 export interface MembershipSummary {
   daycareId: string;
   daycareName: string;
@@ -27,11 +28,12 @@ export interface AuthUser {
   fullName: string;
   email: string | null;
   phone: string | null;
+  avatarUrl: string | null;
   locale: Locale;
   isSuperAdmin: boolean;
-  /** Active tenant for this session (null for super admins / users without membership). */
+  /** Active branch for this session (null for parents without linked children). */
   daycareId: string | null;
-  role: Role | null;
+  role: Role;
   permissions: StaffPermission[];
   features: Partial<Record<FeatureToggle, boolean>>;
   memberships: MembershipSummary[];

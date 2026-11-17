@@ -41,11 +41,10 @@ export const api = {
 
 /** Session endpoints handled by Next route handlers (tokens stay in httpOnly cookies). */
 export const sessionApi = {
-  login: <T>(body: unknown) => request<T>('/bff/auth/login', { method: 'POST', body: json(body) }),
-  register: <T>(body: unknown) =>
-    request<T>('/bff/auth/register', { method: 'POST', body: json(body) }),
-  verifyOtp: <T>(body: unknown) =>
-    request<T>('/bff/auth/otp-verify', { method: 'POST', body: json(body) }),
+  google: <T>(idToken: string, locale: string) =>
+    request<T>('/bff/auth/google', { method: 'POST', body: json({ idToken, locale }) }),
+  devLogin: <T>(email: string) =>
+    request<T>('/bff/auth/dev-login', { method: 'POST', body: json({ email }) }),
   switchDaycare: <T>(daycareId: string) =>
     request<T>('/bff/auth/switch', { method: 'POST', body: json({ daycareId }) }),
   logout: () => request<{ ok: true }>('/bff/auth/logout', { method: 'POST' }),

@@ -7,7 +7,7 @@ const intl = createMiddleware(routing);
 
 /** Admin areas that require a session (checked after the locale segment). */
 const PROTECTED = ['/dashboard', '/classes', '/children', '/staff', '/settings', '/messages'];
-const AUTH_PAGES = ['/login', '/register', '/forgot-password', '/otp'];
+const AUTH_PAGES = ['/login'];
 
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -22,6 +22,12 @@ export default function proxy(request: NextRequest) {
     const url = new URL(`/${locale}/login`, request.url);
     url.searchParams.set('next', pathname);
     return NextResponse.redirect(url);
+  }
+  // No marketing site: the root goes straight to the app.
+  if (subPath === '/') {
+    return NextResponse.redirect(
+      new URL(`/${locale}/${hasSession ? 'dashboard' : 'login'}`, request.url),
+    );
   }
   if (hasSession && AUTH_PAGES.includes(subPath)) {
     return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
