@@ -1,4 +1,4 @@
-import type { AuthUser, StaffPermission } from '@latif/shared';
+import { menuFor, type AuthUser, type MenuKey, type StaffPermission } from '@latif/shared';
 import {
   BarChart3,
   Baby,
@@ -49,45 +49,33 @@ export interface NavItem {
   roles?: AuthUser['role'][];
 }
 
-const STAFF_NAV: NavItem[] = [
-  { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { key: 'attendance', href: '/attendance', icon: ClipboardCheck },
-  { key: 'children', href: '/children', icon: Baby },
-  { key: 'parents', href: '/parents', icon: Contact, roles: ['SUPER_ADMIN', 'MANAGER'] },
-  { key: 'staff', href: '/staff', icon: Users, permission: 'canAddStaff' },
-  { key: 'classes', href: '/classes', icon: School },
-  { key: 'units', href: '/units', icon: BookOpen },
-  { key: 'calendar', href: '/calendar', icon: CalendarDays },
-  { key: 'admissions', href: '/admissions', icon: UserPlus, permission: 'canManageEnrollment' },
-  {
-    key: 'subscriptions',
-    href: '/subscriptions',
-    icon: CreditCard,
-    permission: 'canManagePayments',
-  },
-  { key: 'messages', href: '/messages', icon: MessageSquare, unreadDot: true },
-  { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen },
-  { key: 'reports', href: '/reports', icon: BarChart3, permission: 'canViewReports' },
-  { key: 'settings', href: '/settings', icon: Settings, permission: 'canManageSettings' },
-];
-
-const PARENT_NAV: NavItem[] = [
-  { key: 'home', href: '/dashboard', icon: House },
-  { key: 'enrollChild', href: '/enroll', icon: UserPlus },
-  { key: 'calendar', href: '/calendar', icon: CalendarDays },
-  { key: 'messages', href: '/messages', icon: MessageSquare, unreadDot: true },
-  { key: 'dailyReports', href: '/daily-reports', icon: NotebookPen },
-  { key: 'subscriptions', href: '/subscriptions', icon: CreditCard },
-];
+/** Icons per shared menu key (the role rules themselves live in @latif/shared `menuFor`). */
+const ICONS: Record<MenuKey, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  home: House,
+  attendance: ClipboardCheck,
+  children: Baby,
+  parents: Contact,
+  staff: Users,
+  classes: School,
+  units: BookOpen,
+  calendar: CalendarDays,
+  admissions: UserPlus,
+  subscriptions: CreditCard,
+  messages: MessageSquare,
+  dailyReports: NotebookPen,
+  reports: BarChart3,
+  settings: Settings,
+  enrollChild: UserPlus,
+};
 
 export const navFor = (user: AuthUser | undefined): NavItem[] =>
-  user?.role === 'PARENT'
-    ? PARENT_NAV
-    : STAFF_NAV.filter(
-        (i) =>
-          (!i.permission || Boolean(user?.permissions.includes(i.permission))) &&
-          (!i.roles || (user ? i.roles.includes(user.role) : false)),
-      );
+  menuFor(user).map((m) => ({
+    key: m.key,
+    href: m.path,
+    icon: ICONS[m.key],
+    unreadDot: m.key === 'messages',
+  }));
 
 /** True when the current role may open this path (the user's menu is the allow-list). */
 export const canOpen = (user: AuthUser | undefined, pathname: string): boolean =>

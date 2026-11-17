@@ -1,6 +1,6 @@
 import { Baby } from 'lucide-react-native';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Image, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import { API_URL } from '@/lib/api';
 import { tokenStore } from '@/lib/token-store';
 
@@ -42,15 +42,22 @@ export function ChildRow({
   name,
   lines,
   badge,
+  onPress,
 }: {
   badge?: ReactNode;
+  /** Opens the child profile when given. */
+  onPress?: () => void;
   photoPath: string | null;
   gender: 'MALE' | 'FEMALE';
   name: string;
   lines: (string | null | undefined)[];
 }) {
+  const Box = onPress ? Pressable : View;
   return (
-    <View className="flex-row items-center gap-4 rounded-3xl border border-line bg-white p-4">
+    <Box
+      {...(onPress ? { onPress, accessibilityRole: 'button' as const } : {})}
+      className="flex-row items-center gap-4 rounded-3xl border border-line bg-white p-4"
+    >
       <ChildPhoto path={photoPath} gender={gender} />
       <View className="flex-1 gap-0.5">
         <View className="flex-row items-center justify-between gap-2">
@@ -63,6 +70,6 @@ export function ChildRow({
           </Text>
         ))}
       </View>
-    </View>
+    </Box>
   );
 }

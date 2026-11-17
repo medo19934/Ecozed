@@ -1,5 +1,6 @@
 import type { ChildListItem, Paginated } from '@latif/shared';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, RefreshControl, ScrollView, Text } from 'react-native';
 import { api } from '@/lib/api';
@@ -13,6 +14,7 @@ import { WeekStrip } from './week-strip';
 /** Teacher "Today": children of the teacher's classes (scope enforced by the API). */
 export function TeacherHome() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { user } = useAuth();
   const age = useFormatAge();
   const branch = user?.memberships.find((m) => m.daycareId === user.daycareId)?.daycareName;
@@ -39,6 +41,7 @@ export function TeacherHome() {
           kids.data.items.map((k) => (
             <ChildRow
               key={k.id}
+              onPress={() => router.push(`/child/${k.id}`)}
               photoPath={k.hasPhoto ? `/children/${k.id}/photo` : null}
               gender={k.gender}
               name={k.fullName}

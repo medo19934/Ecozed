@@ -21,6 +21,7 @@ concurrency:
 env:
   # The live API the app talks to.
   EXPO_PUBLIC_API_URL: https://latif-kids-api.vercel.app
+  EXPO_PUBLIC_WEB_URL: https://latif-kids.vercel.app
   GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false
 
 jobs:

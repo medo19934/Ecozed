@@ -3,6 +3,7 @@ import {
   ClipboardCheck,
   MessageCircle,
   NotebookPen,
+  LayoutGrid,
   Sun,
   UserRound,
 } from 'lucide-react-native';
@@ -18,6 +19,7 @@ export default function TeacherLayout() {
         { name: 'calendar', titleKey: 'tabs.calendar', icon: CalendarDays },
         { name: 'messages', titleKey: 'tabs.messages', icon: MessageCircle },
         { name: 'reports', titleKey: 'tabs.reports', icon: NotebookPen },
+        { name: 'more', titleKey: 'tabs.more', icon: LayoutGrid },
         { name: 'profile', titleKey: 'tabs.profile', icon: UserRound },
       ]}
     />

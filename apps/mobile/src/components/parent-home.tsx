@@ -69,6 +69,7 @@ export function ParentHome() {
             return (
               <ChildRow
                 key={k.id}
+                onPress={() => router.push(`/child/${k.id}`)}
                 badge={today ? <StatusPill status={today.status} /> : undefined}
                 photoPath={k.hasPhoto ? `/parent/children/${k.id}/photo` : null}
                 gender={k.gender}

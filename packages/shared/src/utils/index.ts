@@ -21,3 +21,4 @@ export const ageParts = (birthDate: Date, at: Date = new Date()) => {
   months = Math.max(0, months);
   return { years: Math.floor(months / 12), months: months % 12 };
 };
+export * from './menus';
