@@ -32,7 +32,6 @@ export async function initI18n(): Promise<void> {
 }
 
 async function reload(): Promise<void> {
-  if (Platform.OS === 'web') return globalThis.location?.reload();
   try {
     await Updates.reloadAsync();
   } catch {
@@ -44,7 +43,11 @@ async function reload(): Promise<void> {
 export async function changeLocale(locale: Locale): Promise<void> {
   await secureStorage.set(LOCALE_KEY, locale);
   await i18n.changeLanguage(locale);
-  if (Platform.OS === 'web') return reload();
+  if (Platform.OS === 'web') {
+    // Web flips direction live via the dir attribute; no reload needed.
+    globalThis.document?.documentElement.setAttribute('dir', isRtl(locale) ? 'rtl' : 'ltr');
+    return;
+  }
   const rtl = isRtl(locale);
   if (I18nManager.isRTL !== rtl) {
     I18nManager.forceRTL(rtl);
