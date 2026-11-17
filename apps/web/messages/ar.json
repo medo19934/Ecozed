@@ -105,7 +105,7 @@
       "wrong_password": "كلمة المرور الحالية غير صحيحة.",
       "password_too_short": "كلمة المرور 8 أحرف على الأقل."
     },
-    "publicSubtitle": "اختر بطاقتك للدخول مباشرة، أو ادخل ببريدك الإلكتروني أو رقم جوالك.",
+    "publicSubtitle": "اختر بطاقتك للدخول مباشرة.",
     "generalAdmin": "الإدارة العامة",
     "branchOf": "{name}",
     "roles": {
@@ -166,7 +166,26 @@
     "emptyHint": "لا توجد بيانات بعد. أضف الفصول والطاقم والأطفال، أو حمّل بيانات تجريبية (TEST) لتجربة كل الخصائص — ويمكن حذفها لاحقًا من الإعدادات.",
     "emptyAddChild": "إضافة طفل",
     "loadSample": "تحميل بيانات تجريبية",
-    "sampleLoaded": "تم تحميل البيانات التجريبية"
+    "sampleLoaded": "تم تحميل البيانات التجريبية",
+    "today": "اليوم",
+    "upcoming": "القادم هذا الأسبوع",
+    "seeAll": "عرض الكل",
+    "noEvents": "لا توجد فعاليات قادمة.",
+    "latestMessages": "آخر الرسائل",
+    "noMessages": "لا توجد رسائل بعد.",
+    "unpaidSubs": "اشتراكات غير مدفوعة",
+    "pendingAdmissions": "طلبات تسجيل قيد المراجعة",
+    "reportsToday": "تقارير اليوم المُشاركة",
+    "staffPresent": "حضور الطاقم اليوم",
+    "teacherIntro": "إليك يوم فصلك في {branch}",
+    "myClasses": "فصولي",
+    "myChildren": "أطفال فصلي",
+    "unreadMessages": "رسائل غير مقروءة",
+    "reportsToWrite": "تقارير لم تُشارك بعد",
+    "writeReports": "كتابة التقارير اليومية",
+    "messageParents": "مراسلة أولياء الأمور",
+    "latestReports": "آخر التقارير اليومية",
+    "fees": "الرسوم والاشتراكات"
   },
   "parent": {
     "greeting": "أهلًا، {name}",

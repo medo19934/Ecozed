@@ -9,6 +9,7 @@ import {
 import { createZodDto } from 'nestjs-zod';
 import { CurrentAuth, Roles, type AuthContext } from '../../common/decorators/auth.decorators';
 import { requireBranch } from '../../common/utils/scope';
+import { dbDate } from '../attendance/attendance.util';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AttendanceService } from '../attendance/attendance.service';
 import { UnitsService } from '../units/units.service';
@@ -74,5 +75,41 @@ export class DashboardController {
       AND: [scope, q.classroomId ? { classroomId: q.classroomId } : {}],
     });
     return { date, total, counts, updatedAt: new Date().toISOString() };
+  }
+
+  /** Manager / general admin: money, admissions, daily reports and staff presence today. */
+  @Get('extras')
+  async extras(@CurrentAuth() auth: AuthContext, @Query() q: DashboardQueryDto) {
+    const ids = await this.branchIds(auth, q.scope);
+    const today = dbDate(localDate());
+    const where = { daycareId: { in: ids } };
+    const [unpaid, pendingAdmissions, activeChildren, reportsShared, staffTotal, staffIn] =
+      await Promise.all([
+        this.prisma.raw.subscription.findMany({
+          where: { ...where, deletedAt: null, paymentStatus: 'UNPAID', status: 'ACTIVE' },
+          select: { value: true },
+        }),
+        this.prisma.raw.admissionRequest.count({ where: { ...where, status: 'UNDER_REVIEW' } }),
+        this.prisma.raw.child.count({ where: { ...where, deletedAt: null, status: 'ACTIVE' } }),
+        this.prisma.raw.dailyReport.count({
+          where: { ...where, date: today, sharedAt: { not: null } },
+        }),
+        this.prisma.raw.membership.count({
+          where: {
+            ...where,
+            deletedAt: null,
+            status: 'ACTIVE',
+            role: { in: ['MANAGER', 'STAFF'] },
+          },
+        }),
+        this.prisma.raw.staffAttendance.count({ where: { ...where, date: today } }),
+      ]);
+    return {
+      unpaidCount: unpaid.length,
+      unpaidAmount: unpaid.reduce((n, s) => n + Number(s.value), 0),
+      pendingAdmissions,
+      reports: { shared: reportsShared, total: activeChildren },
+      staff: { checkedIn: staffIn, total: staffTotal },
+    };
   }
 }

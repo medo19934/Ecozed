@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useSession } from '@/lib/use-session';
 import { ParentHome } from './parent-home';
 import { StaffDashboard } from './staff-dashboard';
+import { TeacherDashboard } from './teacher-dashboard';
 
 export function DashboardView() {
   const tn = useTranslations('nav');
@@ -25,5 +26,6 @@ export function DashboardView() {
     );
   }
 
+  if (user.role === 'STAFF') return <TeacherDashboard user={user} />;
   return <StaffDashboard user={user} />;
 }

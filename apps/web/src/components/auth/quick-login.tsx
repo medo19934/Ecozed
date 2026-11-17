@@ -1,21 +1,10 @@
 'use client';
 
 import type { AuthUser, DemoAccount } from '@latif/shared';
-import {
-  Baby,
-  Building2,
-  GraduationCap,
-  Loader2,
-  LogIn,
-  ShieldCheck,
-  UserRound,
-} from 'lucide-react';
+import { Baby, Building2, GraduationCap, Loader2, ShieldCheck, UserRound } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { FormField } from '@/components/ui/form-field';
-import { Input } from '@/components/ui/input';
 import { sessionApi } from '@/lib/api-client';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { usePostLogin } from '@/lib/use-post-login';
@@ -34,7 +23,6 @@ export function QuickLogin({ accounts }: { accounts: DemoAccount[] }) {
   const errorMessage = useErrorMessage();
   const onLoggedIn = usePostLogin();
   const [busy, setBusy] = useState<string | null>(null);
-  const [identifier, setIdentifier] = useState('');
 
   const signIn = async (id: string) => {
     setBusy(id);
@@ -103,34 +91,6 @@ export function QuickLogin({ accounts }: { accounts: DemoAccount[] }) {
           </div>
         </section>
       ))}
-      <form
-        className="grid gap-3 rounded-2xl border p-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (identifier.trim()) void signIn(identifier.trim());
-        }}
-      >
-        <p className="text-sm font-medium">{t('identifierTitle')}</p>
-        <FormField id="identifier" label={t('identifier')} hint={t('identifierHint')}>
-          <Input
-            id="identifier"
-            dir="ltr"
-            autoComplete="username"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            placeholder="name@example.com · 05XXXXXXXX"
-            required
-          />
-        </FormField>
-        <Button type="submit" disabled={!!busy}>
-          {busy === identifier.trim() ? (
-            <Loader2 className="animate-spin" />
-          ) : (
-            <LogIn className="rtl:-scale-x-100" />
-          )}
-          {t('signIn')}
-        </Button>
-      </form>
     </div>
   );
 }

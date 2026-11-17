@@ -105,7 +105,7 @@
       "wrong_password": "Current password is wrong.",
       "password_too_short": "Password must be at least 8 characters."
     },
-    "publicSubtitle": "Pick your card to enter instantly, or sign in with your email or phone number.",
+    "publicSubtitle": "Pick your card to enter.",
     "generalAdmin": "General administration",
     "branchOf": "{name}",
     "roles": {
@@ -166,7 +166,26 @@
     "emptyHint": "No data yet. Add classes, staff and children, or load TEST sample data to try every feature — you can remove it later in Settings.",
     "emptyAddChild": "Add child",
     "loadSample": "Load sample data",
-    "sampleLoaded": "Sample data loaded"
+    "sampleLoaded": "Sample data loaded",
+    "today": "Today",
+    "upcoming": "Coming up this week",
+    "seeAll": "See all",
+    "noEvents": "No upcoming events.",
+    "latestMessages": "Latest messages",
+    "noMessages": "No messages yet.",
+    "unpaidSubs": "Unpaid subscriptions",
+    "pendingAdmissions": "Admission requests under review",
+    "reportsToday": "Daily reports shared today",
+    "staffPresent": "Staff present today",
+    "teacherIntro": "Here is your class's day at {branch}",
+    "myClasses": "My classes",
+    "myChildren": "Children in my classes",
+    "unreadMessages": "Unread messages",
+    "reportsToWrite": "Reports not shared yet",
+    "writeReports": "Write daily reports",
+    "messageParents": "Message parents",
+    "latestReports": "Latest daily reports",
+    "fees": "Fees & subscriptions"
   },
   "parent": {
     "greeting": "Hello, {name}",

@@ -26,7 +26,10 @@ export class BranchBootstrapService implements OnApplicationBootstrap {
     if (this.config.get('NODE_ENV') === 'test') return;
     await this.ensureBranches();
     await this.ensureSuperAdmins();
-    if (this.config.get('PUBLIC_DEMO')) await this.demo.seed();
+    if (this.config.get('PUBLIC_DEMO')) {
+      await this.demo.seed();
+      await this.demo.refreshToday();
+    }
   }
 
   /** Creates the general admin accounts (SUPER_ADMIN_EMAILS) with SUPER_ADMIN_PASSWORD. */

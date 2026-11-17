@@ -27,6 +27,9 @@ import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import { AttendanceDonut } from './attendance-donut';
+import { LatestMessages, StatCard, UpcomingEvents } from './widgets';
+import { useSar } from '@/components/subscriptions/subscriptions-view';
+import { CreditCard, NotebookPen, UserCheck, UserPlus as UserPlusIcon } from 'lucide-react';
 
 function Kpi({
   icon: Icon,
@@ -102,6 +105,20 @@ export function StaffDashboard({ user }: { user: AuthUser }) {
     onError: (e) => toast.error(errorMessage(e)),
   });
   const empty = admin && scope === 'branch' && s !== undefined && s.children === 0;
+  const sar = useSar();
+  const extras = useQuery({
+    queryKey: ['dashboard', 'extras', scope, user.daycareId],
+    queryFn: () =>
+      api.get<{
+        unpaidCount: number;
+        unpaidAmount: number;
+        pendingAdmissions: number;
+        reports: { shared: number; total: number };
+        staff: { checkedIn: number; total: number };
+      }>(`/dashboard/extras?scope=${scope}`),
+    enabled: admin,
+  });
+  const x = extras.data;
 
   return (
     <>
@@ -181,8 +198,47 @@ export function StaffDashboard({ user }: { user: AuthUser }) {
             tint="#e5484d"
           />
         </div>
+        {admin && (
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <StatCard
+              icon={CreditCard}
+              label={t('unpaidSubs')}
+              value={x?.unpaidCount}
+              sub={x ? sar(x.unpaidAmount) : undefined}
+              href="/subscriptions"
+              tint="#e5484d"
+            />
+            <StatCard
+              icon={UserPlusIcon}
+              label={t('pendingAdmissions')}
+              value={x?.pendingAdmissions}
+              href="/admissions"
+              tint="#f2a33a"
+            />
+            <StatCard
+              icon={NotebookPen}
+              label={t('reportsToday')}
+              value={x ? `${x.reports.shared}/${x.reports.total}` : undefined}
+              href="/daily-reports"
+              tint="#5b6db4"
+            />
+            <StatCard
+              icon={UserCheck}
+              label={t('staffPresent')}
+              value={x ? `${x.staff.checkedIn}/${x.staff.total}` : undefined}
+              href="/attendance"
+              tint="#2fb36d"
+            />
+          </div>
+        )}
         <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
-          <AttendanceDonut scope={scope} />
+          <div className="grid gap-6">
+            <AttendanceDonut scope={scope} />
+            <div className="grid gap-6 lg:grid-cols-2">
+              <UpcomingEvents />
+              <LatestMessages />
+            </div>
+          </div>
           <Card className="h-fit gap-3 p-5">
             <p className="font-semibold">{t('quickActions')}</p>
             <Button variant="outline" className="justify-start" asChild>

@@ -13,6 +13,7 @@ import { DayStatusChip } from '@/components/attendance/status-chip';
 import { MY_ATTENDANCE_KEY } from '@/components/attendance/pin-dialog';
 import { StatusChip } from '@/components/ui/status-chip';
 import { useFormatDate } from '@/lib/format';
+import { ParentOverview } from './parent-overview';
 import { VacationDialog } from './vacation-dialog';
 import { useQuery } from '@tanstack/react-query';
 import { Baby } from 'lucide-react';
@@ -176,6 +177,7 @@ export function ParentHome({ user }: { user: AuthUser }) {
         </CardContent>
       </Card>
       <MyChildren />
+      <ParentOverview />
       <MyVacations />
       <section className="space-y-3">
         <h3 className="font-semibold">{t('thisWeek')}</h3>

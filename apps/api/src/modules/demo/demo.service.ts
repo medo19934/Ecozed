@@ -408,4 +408,139 @@ export class DemoService {
     );
     this.logger.log('Demo data created');
   }
+
+  /**
+   * Keeps the demo alive day after day (idempotent, runs on every start):
+   * a fee plan + this month's subscriptions once, and today's attendance, staff
+   * check-ins and shared daily reports when missing.
+   */
+  async refreshToday(): Promise<void> {
+    const db = this.prisma.raw;
+    const today = localDate();
+    const date = dbDate(today);
+    const monthStart = `${today.slice(0, 8)}01`;
+    const monthEnd = new Date(Date.UTC(Number(today.slice(0, 4)), Number(today.slice(5, 7)), 0))
+      .toISOString()
+      .slice(0, 10);
+    const branches = await db.daycare.findMany({ where: { deletedAt: null } });
+    for (const b of branches) {
+      const kids = await db.child.findMany({
+        where: { daycareId: b.id, isTest: true, deletedAt: null, status: 'ACTIVE' },
+        orderBy: { createdAt: 'asc' },
+        select: { id: true },
+      });
+      if (!kids.length) continue;
+      const author = await db.membership.findFirst({
+        where: { daycareId: b.id, isTest: true, role: 'STAFF', deletedAt: null },
+      });
+      // Plan + subscriptions (once).
+      if (!(await db.plan.count({ where: { daycareId: b.id, isTest: true } }))) {
+        const plan = await db.plan.create({
+          data: {
+            daycareId: b.id,
+            name: 'الخطة الشهرية',
+            price: 1800,
+            period: 'MONTHLY',
+            services: ['وجبات', 'أنشطة', 'تقارير يومية'],
+            isTest: true,
+          },
+        });
+        await db.plan.create({
+          data: {
+            daycareId: b.id,
+            name: 'الفصل الدراسي',
+            price: 6500,
+            period: 'TERM',
+            services: ['وجبات', 'أنشطة', 'مواصلات'],
+            isTest: true,
+          },
+        });
+        for (const [i, k] of kids.entries()) {
+          const paid = i % 3 !== 1;
+          await db.subscription.create({
+            data: {
+              daycareId: b.id,
+              childId: k.id,
+              planId: plan.id,
+              value: 1800,
+              startDate: dbDate(monthStart),
+              endDate: dbDate(monthEnd),
+              paymentStatus: paid ? 'PAID' : 'UNPAID',
+              paymentMethod: paid ? (['CASH', 'CARD', 'TRANSFER'] as const)[i % 3] : null,
+              paidAt: paid ? new Date() : null,
+              isTest: true,
+            },
+          });
+        }
+      }
+      // Today's attendance.
+      for (const [i, k] of kids.entries()) {
+        if (i % 4 === 3) continue;
+        const status = i % 5 === 4 ? 'ABSENT' : i % 7 === 6 ? 'VACATION' : 'ATTENDED';
+        await db.childAttendance.upsert({
+          where: { childId_date: { childId: k.id, date } },
+          update: {},
+          create: {
+            daycareId: b.id,
+            childId: k.id,
+            date,
+            status,
+            checkInAt:
+              status === 'ATTENDED'
+                ? new Date(`${today}T05:${String(10 + i).padStart(2, '0')}:00Z`)
+                : null,
+            droppedOffBy: status === 'ATTENDED' ? 'الأم' : null,
+            method: i % 2 ? 'QR' : 'MANUAL',
+          },
+        });
+      }
+      // Staff check-ins.
+      const staff = await db.membership.findMany({
+        where: {
+          daycareId: b.id,
+          isTest: true,
+          deletedAt: null,
+          role: { in: ['MANAGER', 'STAFF'] },
+        },
+      });
+      for (const m of staff) {
+        const exists = await db.staffAttendance.findFirst({ where: { membershipId: m.id, date } });
+        if (!exists) {
+          await db.staffAttendance.create({
+            data: {
+              daycareId: b.id,
+              membershipId: m.id,
+              date,
+              checkInAt: new Date(`${today}T04:45:00Z`),
+              method: 'PIN',
+            } as never,
+          });
+        }
+      }
+      // Shared daily reports for half of the class.
+      for (const [i, k] of kids.entries()) {
+        if (i % 2) continue;
+        await db.dailyReport.upsert({
+          where: { childId_date: { childId: k.id, date } },
+          update: {},
+          create: {
+            daycareId: b.id,
+            childId: k.id,
+            date,
+            meals: [
+              { meal: 'BREAKFAST', amount: 'ALL' },
+              { meal: 'LUNCH', amount: i % 4 ? 'MOST' : 'ALL' },
+            ],
+            napMinutes: 45 + (i % 3) * 15,
+            toilet: 2,
+            mood: (['HAPPY', 'CALM', 'TIRED'] as const)[i % 3],
+            activities: 'رسم، قصة، لعب في الساحة',
+            authorId: author?.userId ?? null,
+            sharedAt: new Date(),
+            isTest: true,
+          },
+        });
+      }
+    }
+  }
 }
