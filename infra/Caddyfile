@@ -1,0 +1,10 @@
+# HTTPS for the web app and the API (mobile app talks to https://DOMAIN/api/v1).
+{$DOMAIN} {
+	encode zstd gzip
+	handle /api/* {
+		reverse_proxy api:4000
+	}
+	handle {
+		reverse_proxy web:3000
+	}
+}

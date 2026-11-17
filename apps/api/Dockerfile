@@ -14,7 +14,6 @@ FROM node:22-alpine
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /out ./
-# prisma CLI is needed to apply migrations on start.
-RUN npm i --no-save --no-audit --no-fund prisma@7.10.1 dotenv@17 >/dev/null
 EXPOSE 4000
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+# Apply pending migrations, then start (prisma CLI is a production dependency).
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node dist/main.js"]

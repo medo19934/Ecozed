@@ -1,0 +1,71 @@
+# Production on one server (VPS): Postgres + Redis + API + web behind Caddy (automatic HTTPS).
+#   cp .env.production.example .env.production   # fill it in
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+name: latif-kids-prod
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: latif
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: latif_kids
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U latif -d latif_kids']
+      interval: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  api:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      NODE_ENV: production
+      API_PORT: 4000
+      DATABASE_URL: postgresql://latif:${POSTGRES_PASSWORD}@postgres:5432/latif_kids?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET}
+      CORS_ORIGINS: https://${DOMAIN}
+      GOOGLE_CLIENT_IDS: ${GOOGLE_CLIENT_IDS:?set GOOGLE_CLIENT_IDS}
+      SUPER_ADMIN_EMAILS: ${SUPER_ADMIN_EMAILS:?set SUPER_ADMIN_EMAILS}
+      AUTH_DEV_LOGIN: 'false'
+      STORAGE_DRIVER: local
+      STORAGE_LOCAL_DIR: /app/storage
+    volumes:
+      - uploads:/app/storage
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      API_URL: http://api:4000/api/v1
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [web, api]
+    ports: ['80:80', '443:443']
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN}
+    volumes:
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy:/data
+
+volumes:
+  pgdata:
+  uploads:
+  caddy:
