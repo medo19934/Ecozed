@@ -5,6 +5,7 @@ import {
   FeatureToggle,
   GeoCheckSchema,
   KioskPinSchema,
+  KioskPreviewSchema,
   KioskScanSchema,
   RosterQuerySchema,
   StaffPermission,
@@ -28,6 +29,7 @@ class RosterQueryDto extends createZodDto(RosterQuerySchema) {}
 class ActionDto extends createZodDto(ChildAttendanceActionSchema) {}
 class PinDto extends createZodDto(KioskPinSchema) {}
 class ScanDto extends createZodDto(KioskScanSchema) {}
+class PreviewDto extends createZodDto(KioskPreviewSchema) {}
 class GeoDto extends createZodDto(GeoCheckSchema) {}
 class VacationDtoIn extends createZodDto(VacationRequestSchema) {}
 class ReviewDto extends createZodDto(VacationReviewSchema) {}
@@ -96,11 +98,19 @@ export class AttendanceController {
     return this.attendance.kioskPin(auth, dto.pin);
   }
 
-  /** Any staff member or parent of the token's branch, from the mobile app. */
+  /** What a scanned QR would do (who, which children, in/out). Writes nothing. */
+  @HttpCode(200)
+  @Post('kiosk/preview')
+  preview(@CurrentAuth() auth: AuthContext, @Body() dto: PreviewDto) {
+    return this.attendance.kioskPreview(auth, dto.token);
+  }
+
+  /** check_in(token): any staff member or parent of the token's branch (app or phone camera). */
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @HttpCode(200)
   @Post('kiosk/scan')
   scan(@CurrentAuth() auth: AuthContext, @Body() dto: ScanDto) {
-    return this.attendance.kioskScan(auth, dto.token, dto.childIds);
+    return this.attendance.kioskScan(auth, dto.token, dto.childIds, dto.direction);
   }
 
   @HttpCode(200)

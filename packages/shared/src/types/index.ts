@@ -221,6 +221,19 @@ export interface KioskToken {
   branch: { id: string; name: string; nameEn: string | null; hasLogo: boolean };
 }
 
+/** What a scanned kiosk QR would do for the signed-in person (nothing is written yet). */
+export interface KioskPreview {
+  branch: { id: string; name: string; nameEn: string | null };
+  person: string;
+  kind: 'STAFF' | 'PARENT';
+  /** Staff: next action for themselves (null = already checked out today). */
+  staffNext: 'IN' | 'OUT' | null;
+  /** Parent: their children in this branch with the next possible action. */
+  children: { id: string; fullName: string; status: string; next: 'IN' | 'OUT' | null }[];
+  /** Seconds left before this QR stops being accepted. */
+  expiresInSeconds: number;
+}
+
 export interface KioskResultItem {
   kind: 'CHILD' | 'STAFF';
   name: string;

@@ -25,7 +25,11 @@ export const KioskScanSchema = z.object({
   token: z.string().min(20).max(500),
   /** Parent: which of their children (default: all in this branch). */
   childIds: z.array(z.uuid()).max(10).optional(),
+  /** Check in or out. Omitted (older apps): each person/child toggles. */
+  direction: z.enum(['IN', 'OUT']).optional(),
 });
+
+export const KioskPreviewSchema = z.object({ token: z.string().min(20).max(500) });
 export type KioskScanInput = z.infer<typeof KioskScanSchema>;
 
 export const GeoCheckSchema = z.object({

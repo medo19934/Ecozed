@@ -683,3 +683,13 @@ model StoredFile {
   data      Bytes
   createdAt DateTime @default(now())
 }
+
+/// A kiosk QR token already used by this person (replay protection; tokens expire in minutes).
+model KioskTokenUse {
+  tokenHash String
+  userId    String   @db.Uuid
+  usedAt    DateTime @default(now())
+
+  @@id([tokenHash, userId])
+  @@index([usedAt])
+}

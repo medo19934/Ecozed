@@ -63,3 +63,16 @@ export const verifyKioskToken = (
 
 export const pinHash = (secret: string, daycareId: string, pin: string) =>
   createHmac('sha256', secret).update(`pin:${daycareId}:${pin}`).digest('hex');
+
+/** Seconds until a (valid) token stops being accepted. */
+export const kioskTokenExpiresIn = (token: string, now = Date.now()): number => {
+  try {
+    const p = JSON.parse(Buffer.from(token.split('.')[1] ?? '', 'base64url').toString()) as {
+      w: number;
+    };
+    const end = (p.w + ATTENDANCE.QR_MAX_AGE_WINDOWS + 1) * ATTENDANCE.QR_WINDOW_SECONDS;
+    return Math.max(0, end - Math.floor(now / 1000));
+  } catch {
+    return 0;
+  }
+};

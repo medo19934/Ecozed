@@ -238,7 +238,7 @@
     "age_range_invalid": "Minimum age must be below maximum age.",
     "invalid_phone": "Use the international format, e.g. +966501234567.",
     "forbidden": "You don't have permission to do this.",
-    "not_checked_in": "This child isn't checked in yet.",
+    "not_checked_in": "Not checked in yet.",
     "future_date": "You can't record a future day.",
     "invalid_qr": "This QR code has expired. Scan the code on the screen again.",
     "invalid_pin": "Unknown PIN. Please try again.",
@@ -265,7 +265,10 @@
     "password_too_short": "Password must be at least 8 characters.",
     "subscription_canceled": "This subscription is canceled.",
     "already_paid": "Already paid.",
-    "invalid_date": "Invalid date."
+    "invalid_date": "Invalid date.",
+    "qr_used": "This code was already used. Scan the new code on the screen.",
+    "pin_locked": "Too many wrong PINs. Try again in 5 minutes.",
+    "already_checked_in": "Already checked in."
   },
   "settings": {
     "title": "Settings",
@@ -501,7 +504,26 @@
     "scanInvalid": "Invalid scan link. Scan the code on the branch screen again.",
     "scanning": "Recording attendance…",
     "nothingToRecord": "Nothing to record for your account in this branch.",
-    "toApp": "Go to the app"
+    "toApp": "Go to the app",
+    "doneTitle": "Recorded",
+    "scanAgain": "Scan the code on the branch screen again.",
+    "direction": "Type",
+    "checkIn": "Check in",
+    "checkOut": "Check out",
+    "whichChildren": "Which of your children?",
+    "noChildrenHere": "No children linked to your account in this branch.",
+    "nobodyFor": "No child can be recorded with this choice right now.",
+    "alreadyOut": "You already checked out today.",
+    "confirm": "Confirm",
+    "expiresIn": "Code valid for {s} s",
+    "openInApp": "Open in the Latif Kids app",
+    "childStatus": {
+      "NO_RECORD": "Not recorded",
+      "ATTENDED": "Present",
+      "ABSENT": "Absent",
+      "VACATION": "Vacation",
+      "DEPARTURE": "Left"
+    }
   },
   "pin": {
     "menu": "My attendance PIN",

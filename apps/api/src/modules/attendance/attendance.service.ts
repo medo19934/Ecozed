@@ -1,8 +1,9 @@
-import { randomInt } from 'node:crypto';
+import { createHash, randomInt } from 'node:crypto';
 import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  HttpException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import {
   type ChildAttendanceActionInput,
   type DayStatus,
   type GeoCheckInput,
+  type KioskPreview,
   type KioskResult,
   type KioskResultItem,
   type KioskToken,
@@ -37,10 +39,14 @@ import {
   isoDate,
   kioskToken,
   pinHash,
+  kioskTokenExpiresIn,
   verifyKioskToken,
 } from './attendance.util';
 
 const err = (code: string, message: string) => new BadRequestException({ code, message });
+
+const PIN_MAX_FAILURES = 5;
+const PIN_LOCK_MS = 5 * 60_000;
 
 @Injectable()
 export class AttendanceService {
@@ -337,6 +343,7 @@ export class AttendanceService {
     person: string,
     method: AttendanceMethod,
     actorId: string,
+    direction?: 'IN' | 'OUT',
   ): Promise<KioskResultItem[]> {
     const date = dbDate(await this.today(daycareId));
     const now = new Date();
@@ -345,6 +352,9 @@ export class AttendanceService {
       const child = await this.prisma.raw.child.findFirstOrThrow({ where: { id: childId } });
       const r = await this.prisma.raw.childAttendance.findFirst({ where: { childId, date } });
       if (r?.status === 'DEPARTURE') continue;
+      // Explicit choice: only check in children who are not in; only check out children who are.
+      if (direction === 'IN' && r?.status === 'ATTENDED') continue;
+      if (direction === 'OUT' && r?.status !== 'ATTENDED') continue;
       if (r?.status === 'ATTENDED') {
         await this.prisma.raw.childAttendance.update({
           where: { id: r.id },
@@ -383,10 +393,13 @@ export class AttendanceService {
       }
     }
     if (!items.length)
-      throw new ConflictException({
-        code: 'already_checked_out',
-        message: 'Already picked up today',
-      });
+      throw new ConflictException(
+        direction === 'IN'
+          ? { code: 'already_checked_in', message: 'Already checked in' }
+          : direction === 'OUT'
+            ? { code: 'not_checked_in', message: 'Not checked in yet' }
+            : { code: 'already_checked_out', message: 'Already picked up today' },
+      );
     return items;
   }
 
@@ -414,8 +427,10 @@ export class AttendanceService {
     method: AttendanceMethod,
     actorId: string,
     childIds?: string[],
+    direction?: 'IN' | 'OUT',
   ): Promise<KioskResult> {
     if (membership.role === 'STAFF' || membership.role === 'MANAGER') {
+      if (direction) await this.assertStaffDirection(daycareId, membership.id, direction);
       return {
         person: membership.user.fullName,
         items: [await this.toggleStaff(daycareId, membership.id, method, actorId)],
@@ -436,7 +451,14 @@ export class AttendanceService {
     await this.debounce(daycareId, { childId: { in: ids } });
     return {
       person: membership.user.fullName,
-      items: await this.toggleChildren(daycareId, ids, membership.user.fullName, method, actorId),
+      items: await this.toggleChildren(
+        daycareId,
+        ids,
+        membership.user.fullName,
+        method,
+        actorId,
+        direction,
+      ),
     };
   }
 
@@ -454,9 +476,27 @@ export class AttendanceService {
     };
   }
 
-  /** A person types their PIN on the kiosk (kiosk runs under a staff session of that branch). */
+  /**
+   * A person types their PIN on the kiosk (kiosk runs under a staff session of that branch).
+   * Attempt limit: 5 wrong PINs within 5 minutes on a kiosk locks it for the rest of the window.
+   */
   async kioskPin(auth: AuthContext, pin: string): Promise<KioskResult> {
     const daycareId = requireBranch(auth);
+    const since = new Date(Date.now() - PIN_LOCK_MS);
+    const failures = await this.prisma.raw.auditLog.count({
+      where: {
+        daycareId,
+        actorId: auth.userId,
+        action: 'kiosk.pin_failed',
+        createdAt: { gte: since },
+      },
+    });
+    if (failures >= PIN_MAX_FAILURES) {
+      throw new HttpException(
+        { code: 'pin_locked', message: 'Too many wrong PINs, try again later' },
+        429,
+      );
+    }
     const m = await this.prisma.raw.membership.findFirst({
       where: {
         daycareId,
@@ -466,12 +506,16 @@ export class AttendanceService {
       },
       include: { user: { select: { fullName: true } } },
     });
-    if (!m) throw err('invalid_pin', 'Unknown PIN');
+    if (!m) {
+      await this.prisma.raw.auditLog.create({
+        data: { daycareId, actorId: auth.userId, action: 'kiosk.pin_failed', entity: 'Membership' },
+      });
+      throw err('invalid_pin', 'Unknown PIN');
+    }
     return this.recordFor(daycareId, m, 'PIN', m.userId);
   }
 
-  /** A signed-in staff member or parent scans the kiosk QR with the app. */
-  async kioskScan(auth: AuthContext, token: string, childIds?: string[]): Promise<KioskResult> {
+  private async scanContext(auth: AuthContext, token: string) {
     const daycareId = verifyKioskToken(this.secret, token);
     if (!daycareId) throw err('invalid_qr', 'QR expired or invalid');
     if (!(await this.feature(daycareId, FeatureToggle.CHILD_QR_ATTENDANCE))) {
@@ -486,7 +530,97 @@ export class AttendanceService {
     });
     if (!m)
       throw new ForbiddenException({ code: 'not_member', message: 'Not a member of this branch' });
-    return this.recordFor(daycareId, m, 'QR', auth.userId, childIds);
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    const used = await this.prisma.raw.kioskTokenUse.findUnique({
+      where: { tokenHash_userId: { tokenHash, userId: auth.userId } },
+    });
+    if (used) throw new ConflictException({ code: 'qr_used', message: 'This QR was already used' });
+    return { daycareId, m, tokenHash };
+  }
+
+  /** What scanning this QR would do for the signed-in person. Writes nothing. */
+  async kioskPreview(auth: AuthContext, token: string): Promise<KioskPreview> {
+    const { daycareId, m } = await this.scanContext(auth, token);
+    const b = await this.branch(daycareId);
+    const date = dbDate(await this.today(daycareId));
+    const base = {
+      branch: { id: b.id, name: b.name, nameEn: b.nameEn },
+      person: m.user.fullName,
+      expiresInSeconds: kioskTokenExpiresIn(token),
+    };
+    if (m.role === 'STAFF' || m.role === 'MANAGER') {
+      const r = await this.prisma.raw.staffAttendance.findFirst({
+        where: { membershipId: m.id, date },
+      });
+      return {
+        ...base,
+        kind: 'STAFF',
+        staffNext: !r ? 'IN' : !r.checkOutAt ? 'OUT' : null,
+        children: [],
+      };
+    }
+    const kids = await this.prisma.raw.child.findMany({
+      where: {
+        daycareId,
+        deletedAt: null,
+        status: 'ACTIVE',
+        guardians: { some: { userId: m.userId } },
+      },
+      orderBy: { fullName: 'asc' },
+    });
+    const recs = await this.prisma.raw.childAttendance.findMany({
+      where: { date, childId: { in: kids.map((k) => k.id) } },
+    });
+    return {
+      ...base,
+      kind: 'PARENT',
+      staffNext: null,
+      children: kids.map((k) => {
+        const r = recs.find((x) => x.childId === k.id);
+        const status = r?.status ?? 'NO_RECORD';
+        return {
+          id: k.id,
+          fullName: k.fullName,
+          status,
+          next: status === 'DEPARTURE' ? null : status === 'ATTENDED' ? 'OUT' : 'IN',
+        };
+      }),
+    };
+  }
+
+  /**
+   * check_in(token): a signed-in staff member or parent scans the kiosk QR (app or phone camera).
+   * The token is branch-bound, short-lived and single-use per person.
+   */
+  async kioskScan(
+    auth: AuthContext,
+    token: string,
+    childIds?: string[],
+    direction?: 'IN' | 'OUT',
+  ): Promise<KioskResult> {
+    const { daycareId, m, tokenHash } = await this.scanContext(auth, token);
+    const result = await this.recordFor(daycareId, m, 'QR', auth.userId, childIds, direction);
+    await this.prisma.raw.kioskTokenUse
+      .create({ data: { tokenHash, userId: auth.userId } })
+      .catch(() => undefined);
+    // Housekeeping: tokens older than an hour can't be valid anyway.
+    void this.prisma.raw.kioskTokenUse
+      .deleteMany({ where: { usedAt: { lt: new Date(Date.now() - 3_600_000) } } })
+      .catch(() => undefined);
+    return result;
+  }
+
+  private async assertStaffDirection(
+    daycareId: string,
+    membershipId: string,
+    direction: 'IN' | 'OUT',
+  ) {
+    const date = dbDate(await this.today(daycareId));
+    const r = await this.prisma.raw.staffAttendance.findFirst({ where: { membershipId, date } });
+    if (direction === 'IN' && r)
+      throw new ConflictException({ code: 'already_checked_in', message: 'Already checked in' });
+    if (direction === 'OUT' && (!r || r.checkOutAt))
+      throw new ConflictException({ code: 'not_checked_in', message: 'Not checked in yet' });
   }
 
   // ---------------- Personal PIN ----------------

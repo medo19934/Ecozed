@@ -169,12 +169,17 @@ describe('Phase 3 — dashboard & attendance (e2e)', () => {
       .send({ token })
       .expect(200);
     expect(drop.body.items.map((i: { direction: string }) => i.direction)).toEqual(['IN', 'IN']);
-    await http.post('/api/v1/attendance/kiosk/scan').set(bearer(mom)).send({ token }).expect(409); // debounce
+    // Same QR again by the same person: rejected (single use per person).
+    await http.post('/api/v1/attendance/kiosk/scan').set(bearer(mom)).send({ token }).expect(409);
     await waitDebounce();
+    // Pick-up scans the new code on the screen.
+    const pickToken = (
+      await http.get('/api/v1/attendance/kiosk/token').set(bearer(admin)).expect(200)
+    ).body.token;
     const pick = await http
       .post('/api/v1/attendance/kiosk/scan')
       .set(bearer(mom))
-      .send({ token, childIds: [kid2] })
+      .send({ token: pickToken, childIds: [kid2] })
       .expect(200);
     expect(pick.body.items).toEqual([
       expect.objectContaining({ direction: 'OUT', name: 'طفلة 2' }),
