@@ -3,11 +3,14 @@
 import {
   AddParentSchema,
   type ChildListItem,
+  type IssuedPassword,
   type Paginated,
   type ParentListItem,
 } from '@latif/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Contact, Mail, Phone, Plus, Search } from 'lucide-react';
+import { Contact, KeyRound, Mail, Phone, Plus, Search } from 'lucide-react';
+import { IssuedPasswordDialog } from '@/components/auth/issued-password-dialog';
+import { Confirm } from '@/components/ui/confirm';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -35,6 +38,20 @@ export function ParentsView() {
       api.get<ParentListItem[]>(`/parents${search ? `?search=${encodeURIComponent(search)}` : ''}`),
   });
   const rows = q.data ?? [];
+  const qc = useQueryClient();
+  const errorMessage = useErrorMessage();
+  const tcr = useTranslations('credentials');
+  const [issued, setIssued] = useState<IssuedPassword | null>(null);
+  const account = useMutation({
+    mutationFn: (v: { key: string; reset: boolean }) =>
+      api.post<{ issued: IssuedPassword | null }>('/parents/account', v),
+    onSuccess: (r) => {
+      void qc.invalidateQueries({ queryKey: ['parents'] });
+      if (r.issued) setIssued(r.issued);
+      else toast.success(tcr('linked'));
+    },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
 
   return (
     <div className="grid gap-4">
@@ -43,8 +60,9 @@ export function ParentsView() {
           <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
         </div>
+        <IssuedPasswordDialog issued={issued} onClose={() => setIssued(null)} />
         {canAdd && (
-          <AddParentDialog>
+          <AddParentDialog onIssued={setIssued}>
             <Button>
               <Plus /> {t('add')}
             </Button>
@@ -73,6 +91,8 @@ export function ParentsView() {
                 <Th>{t('contact')}</Th>
                 <Th>{t('children')}</Th>
                 <Th>{t('account')}</Th>
+                {canAdd && <Th />}
+                {canAdd && <Th />}
               </Tr>
             </THead>
             <TBody>
@@ -110,6 +130,31 @@ export function ParentsView() {
                       {p.linked ? t('active') : t('invited')}
                     </Badge>
                   </Td>
+                  {canAdd && (
+                    <Td className="text-end">
+                      {p.linked ? (
+                        <Confirm
+                          title={tcr('resetTitle')}
+                          body={tcr('resetHint', { name: p.fullName })}
+                          confirmLabel={tcr('reset')}
+                          onConfirm={() => account.mutate({ key: p.key, reset: true })}
+                        >
+                          <Button variant="ghost" size="sm" disabled={account.isPending}>
+                            <KeyRound /> {tcr('reset')}
+                          </Button>
+                        </Confirm>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={account.isPending}
+                          onClick={() => account.mutate({ key: p.key, reset: false })}
+                        >
+                          <KeyRound /> {tcr('createLogin')}
+                        </Button>
+                      )}
+                    </Td>
+                  )}
                 </Tr>
               ))}
             </TBody>
@@ -120,7 +165,13 @@ export function ParentsView() {
   );
 }
 
-function AddParentDialog({ children }: { children: React.ReactNode }) {
+function AddParentDialog({
+  children,
+  onIssued,
+}: {
+  children: React.ReactNode;
+  onIssued: (i: IssuedPassword) => void;
+}) {
   const t = useTranslations('parents');
   const tc = useTranslations('common');
   const qc = useQueryClient();
@@ -135,8 +186,10 @@ function AddParentDialog({ children }: { children: React.ReactNode }) {
     enabled: open,
   });
   const save = useMutation({
-    mutationFn: (body: unknown) => api.post<ParentListItem>('/parents', body),
-    onSuccess: () => {
+    mutationFn: (body: unknown) =>
+      api.post<ParentListItem & { issued: IssuedPassword | null }>('/parents', body),
+    onSuccess: (r) => {
+      if (r.issued) onIssued(r.issued);
       void qc.invalidateQueries({ queryKey: ['parents'] });
       void qc.invalidateQueries({ queryKey: ['children'] });
       toast.success(t('added'));

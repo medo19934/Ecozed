@@ -8,6 +8,7 @@ const BLOCKED = new Set([
   'auth/google',
   'auth/dev-login',
   'auth/login',
+  'auth/register',
   'auth/refresh',
   'auth/logout',
   'auth/switch-daycare',

@@ -1,4 +1,5 @@
 import type { ApiErrorBody, AuthResponse } from '@latif/shared';
+import { Platform } from 'react-native';
 import { i18n } from '@/i18n';
 import { tokenStore } from './token-store';
 
@@ -26,9 +27,9 @@ export const setSessionExpiredHandler = (fn: () => void) => {
 
 async function raw<T>(path: string, init: RequestInit, token?: string): Promise<T> {
   const headers: Record<string, string> = {
-    'content-type': 'application/json',
     'accept-language': i18n.language ?? 'ar',
   };
+  if (!(init.body instanceof FormData)) headers['content-type'] = 'application/json';
   if (token) headers.authorization = `Bearer ${token}`;
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
@@ -84,6 +85,25 @@ export const api = {
       method: 'POST',
       body: body === undefined ? undefined : JSON.stringify(body),
     }),
+  /** Multipart upload of a local file (`uri` from a picker or recorder). */
+  upload: async <T>(
+    path: string,
+    file: { uri: string; name: string; type: string },
+    fields: Record<string, string> = {},
+  ) => {
+    const form = new FormData();
+    for (const [k, v] of Object.entries(fields)) form.append(k, v);
+    if (Platform.OS === 'web') {
+      // Browsers need a real Blob; native accepts { uri, name, type }.
+      form.append(
+        'file',
+        new File([await (await fetch(file.uri)).blob()], file.name, { type: file.type }),
+      );
+    } else {
+      form.append('file', file as unknown as Blob);
+    }
+    return request<T>(path, { method: 'POST', body: form });
+  },
   /** Unauthenticated GET (sign-in options). */
   publicGet: <T>(path: string) => raw<T>(path, {}),
   /** Unauthenticated call (login, OTP). */

@@ -1,7 +1,8 @@
 'use client';
 
 import type { AuthUser } from '@latif/shared';
-import { KeyRound, LogOut } from 'lucide-react';
+import { KeyRound, LockKeyhole, LogOut } from 'lucide-react';
+import { ChangePasswordDialog } from '@/components/auth/change-password-dialog';
 import { PinDialog } from '@/components/attendance/pin-dialog';
 import { useTranslations } from 'next-intl';
 import { Avatar } from '@/components/ui/avatar';
@@ -45,6 +46,12 @@ export function UserMenu({ user }: { user: AuthUser }) {
             </DropdownMenuItem>
           </PinDialog>
         )}
+        <ChangePasswordDialog>
+          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+            <LockKeyhole aria-hidden />
+            {t('changePassword')}
+          </DropdownMenuItem>
+        </ChangePasswordDialog>
         <DropdownMenuItem
           variant="destructive"
           onSelect={async () => {

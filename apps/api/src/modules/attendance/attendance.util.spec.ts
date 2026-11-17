@@ -2,12 +2,13 @@ import { haversineM, kioskToken, verifyKioskToken } from './attendance.util';
 
 describe('kiosk token', () => {
   const secret = 'test-secret';
-  it('verifies within the current and previous 30 s window only', () => {
+  it('verifies for about two minutes only', () => {
     const t0 = Date.UTC(2026, 0, 1, 8, 0, 5);
     const { token } = kioskToken(secret, 'branch-1', t0);
     expect(verifyKioskToken(secret, token, t0)).toBe('branch-1');
     expect(verifyKioskToken(secret, token, t0 + 30_000)).toBe('branch-1');
-    expect(verifyKioskToken(secret, token, t0 + 61_000)).toBeNull();
+    expect(verifyKioskToken(secret, token, t0 + 115_000)).toBe('branch-1');
+    expect(verifyKioskToken(secret, token, t0 + 151_000)).toBeNull();
   });
   it('rejects tampered or foreign tokens', () => {
     const { token } = kioskToken(secret, 'branch-1');

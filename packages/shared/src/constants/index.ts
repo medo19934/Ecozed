@@ -27,6 +27,8 @@ export const PAGINATION = { DEFAULT_PAGE_SIZE: 20, MAX_PAGE_SIZE: 100 } as const
 export const ATTENDANCE = {
   /** Kiosk QR rotates this often; a code is accepted for one extra window to absorb scan delay. */
   QR_WINDOW_SECONDS: 30,
+  /** A scanned QR stays valid this many windows (4 × 30 s): time to sign in after a camera scan. */
+  QR_MAX_AGE_WINDOWS: 4,
   /** Ignore a second scan / PIN for the same person within this time. */
   DEBOUNCE_SECONDS: 60,
 } as const;

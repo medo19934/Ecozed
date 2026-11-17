@@ -4,6 +4,7 @@ import {
   ALL_STAFF_PERMISSIONS,
   CreateStaffSchema,
   UpdateStaffSchema,
+  type IssuedPassword,
   type StaffDetail,
   type StaffPermission,
 } from '@latif/shared';
@@ -85,8 +86,9 @@ export function StaffFormDialog({ staff, children }: { staff?: StaffDetail; chil
     mutationFn: (body: unknown) =>
       staff
         ? api.patch<StaffDetail>(`/staff/${staff.membershipId}`, body)
-        : api.post<StaffDetail>('/staff', body),
-    onSuccess: (s) => {
+        : api.post<StaffDetail & { issued?: IssuedPassword | null }>('/staff', body),
+    onSuccess: (s: StaffDetail & { issued?: IssuedPassword | null }) => {
+      if (s.issued) qc.setQueryData(['issued', s.membershipId], s.issued);
       void qc.invalidateQueries({ queryKey: ['staff'] });
       void qc.invalidateQueries({ queryKey: ['classes'] });
       toast.success(tc('saved'));

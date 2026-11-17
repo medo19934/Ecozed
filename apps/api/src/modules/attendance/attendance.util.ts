@@ -33,7 +33,10 @@ export const kioskToken = (secret: string, daycareId: string, now = Date.now()) 
   };
 };
 
-/** Returns the branch id if the token is authentic and from the current or previous window. */
+/**
+ * Returns the branch id if the token is authentic and recent: up to ~2 minutes old, so a parent
+ * who scans with the phone camera still has time to sign in (the QR on screen rotates every 30 s).
+ */
 export const verifyKioskToken = (
   secret: string,
   token: string,
@@ -51,7 +54,8 @@ export const verifyKioskToken = (
       w: number;
     };
     const current = Math.floor(now / 1000 / ATTENDANCE.QR_WINDOW_SECONDS);
-    return p.v === 1 && (p.w === current || p.w === current - 1) ? p.b : null;
+    const age = current - p.w;
+    return p.v === 1 && age >= -1 && age <= ATTENDANCE.QR_MAX_AGE_WINDOWS ? p.b : null;
   } catch {
     return null;
   }

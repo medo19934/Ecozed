@@ -13,5 +13,6 @@ export default function Index() {
     );
   }
   if (status === 'signedOut') return <Redirect href="/(auth)/login" />;
+  if (user?.mustChangePassword) return <Redirect href="/password?forced=1" />;
   return <Redirect href={homeRouteFor(user?.role)} />;
 }

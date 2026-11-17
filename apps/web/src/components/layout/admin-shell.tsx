@@ -19,6 +19,7 @@ import { navFor } from './nav-items';
 import { NotificationsBell } from './notifications-bell';
 import { SidebarNav } from './sidebar';
 import { UserMenu } from './user-menu';
+import { ChangePasswordDialog } from '@/components/auth/change-password-dialog';
 
 const EXPAND_KEY = 'lk:sidebar-expanded';
 
@@ -102,6 +103,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           {user ? <UserMenu user={user} /> : <Skeleton className="h-10 w-36" />}
         </header>
 
+        {user?.mustChangePassword && <ChangePasswordDialog forced />}
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
           {!user ? (
             // Wait for the session so pages never fire requests the user isn't allowed to make.

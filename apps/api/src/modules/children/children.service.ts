@@ -1,10 +1,16 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type {
   AddParentInput,
   ChildDetail,
   ChildInput,
   ChildListItem,
   ChildListQuery,
+  IssuedPassword,
   Paginated,
   ParentListItem,
 } from '@latif/shared';
@@ -14,6 +20,7 @@ import { isBranchAdmin, pageArgs } from '../../common/utils/scope';
 import type { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { CredentialsService } from '../auth/credentials.service';
 import { sniffImage } from '../branches/branches.service';
 import { ClassesService } from '../classes/classes.service';
 import { IMAGE_MIME, StorageService, type UploadedBlob } from '../storage/storage.service';
@@ -33,6 +40,7 @@ export class ChildrenService {
     private readonly links: GuardianLinkService,
     private readonly storage: StorageService,
     private readonly audit: AuditService,
+    private readonly credentials: CredentialsService,
   ) {}
 
   /** Teachers only see children of their classes; branch admins see all. */
@@ -209,7 +217,10 @@ export class ChildrenService {
   }
 
   /** Adds the same guardian to each chosen child (skips children that already have them). */
-  async addParent(auth: AuthContext, input: AddParentInput): Promise<ParentListItem> {
+  async addParent(
+    auth: AuthContext,
+    input: AddParentInput,
+  ): Promise<ParentListItem & { issued: IssuedPassword | null }> {
     const ids = [...new Set(input.childIds)];
     const children = await this.prisma.scoped.child.findMany({
       where: { AND: [await this.visibility(auth), { id: { in: ids } }] },
@@ -239,9 +250,44 @@ export class ChildrenService {
       metadata: { childIds: ids },
     });
     const key = input.email ?? input.phone ?? '';
+    const issued = (await this.parentAccount(auth, key, false)).issued;
     const found = (await this.parents(auth)).find((p) => p.key === key);
     if (!found) throw new NotFoundException();
-    return found;
+    return { ...found, issued };
+  }
+
+  /**
+   * Gives a parent (guardian contact the user can see) a login: creates the account if
+   * needed, links their children and issues a one-time password. `reset` re-issues it.
+   * An account that already has its own password is only linked unless `reset`.
+   */
+  async parentAccount(
+    auth: AuthContext,
+    key: string,
+    reset: boolean,
+  ): Promise<{ issued: IssuedPassword | null }> {
+    const guardians = await this.prisma.scoped.childGuardian.findMany({
+      where: {
+        OR: [{ email: key }, { phone: key }],
+        child: { AND: [await this.visibility(auth), { deletedAt: null }] },
+      },
+    });
+    const g = guardians[0];
+    if (!g) throw new NotFoundException();
+    let user = await this.prisma.raw.user.findFirst({
+      where: {
+        OR: [...(g.email ? [{ email: g.email }] : []), ...(g.phone ? [{ phone: g.phone }] : [])],
+      },
+    });
+    if (user?.deletedAt)
+      throw new BadRequestException({ message: 'Account disabled', code: 'account_disabled' });
+    user ??= await this.prisma.raw.user.create({
+      data: { fullName: g.fullName, email: g.email, phone: g.phone },
+    });
+    for (const childId of new Set(guardians.map((x) => x.childId)))
+      await this.links.linkChildGuardians(childId);
+    if (user.passwordHash && !reset) return { issued: null };
+    return { issued: await this.credentials.issue(user.id) };
   }
 
   private async loadAny(id: string): Promise<Row> {

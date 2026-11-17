@@ -9,7 +9,9 @@ import {
   FileText,
   Megaphone,
   MessageSquare,
+  Mic,
   Paperclip,
+  Square,
   Plus,
   Search,
   SendHorizontal,
@@ -196,6 +198,45 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
   const [body, setBody] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const recorder = useRef<MediaRecorder | null>(null);
+  const [recording, setRecording] = useState(0);
+  const session = useSession();
+  const isStaff = session.data?.role !== 'PARENT';
+  useEffect(() => {
+    if (!recording) return;
+    const timer = setInterval(() => setRecording((s) => s + 1), 1000);
+    return () => clearInterval(timer);
+  }, [recording > 0]);
+
+  const toggleRecord = async () => {
+    if (recorder.current) {
+      recorder.current.stop();
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const type =
+        ['audio/webm', 'audio/mp4', 'audio/ogg'].find((x) => MediaRecorder.isTypeSupported(x)) ??
+        '';
+      const rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
+      const chunks: Blob[] = [];
+      rec.ondataavailable = (e) => chunks.push(e.data);
+      rec.onstop = () => {
+        stream.getTracks().forEach((tr) => tr.stop());
+        recorder.current = null;
+        setRecording(0);
+        const mime = (rec.mimeType || 'audio/webm').split(';')[0]!;
+        const blob = new Blob(chunks, { type: mime });
+        if (blob.size > 0)
+          send.mutate(new File([blob], `voice.${mime.split('/')[1]}`, { type: mime }));
+      };
+      rec.start();
+      recorder.current = rec;
+      setRecording(1);
+    } catch {
+      toast.error(t('micDenied'));
+    }
+  };
 
   const q = useQuery({
     queryKey: ['messages', 'thread', id],
@@ -275,7 +316,14 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
               )}
               {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
               {m.attachment &&
-                (m.attachment.mime.startsWith('image/') ? (
+                (m.attachment.mime.startsWith('audio/') ? (
+                  <audio
+                    controls
+                    preload="none"
+                    src={fileUrl(`/messages/threads/${id}/files/${m.id}`)}
+                    className="mt-1 h-10 max-w-64"
+                  />
+                ) : m.attachment.mime.startsWith('image/') ? (
                   <a
                     href={fileUrl(`/messages/threads/${id}/files/${m.id}`)}
                     target="_blank"
@@ -319,6 +367,20 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
         ))}
         <div ref={endRef} />
       </div>
+      {thread.canPost && isStaff && (
+        <div className="flex gap-2 overflow-x-auto border-t px-3 pt-2">
+          {[0, 1, 2, 3].map((i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setBody(t(`quick.${i}` as 'quick.0'))}
+              className="shrink-0 rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground hover:border-primary hover:text-foreground"
+            >
+              {t(`quick.${i}` as 'quick.0')}
+            </button>
+          ))}
+        </div>
+      )}
       {thread.canPost ? (
         <form
           className="flex items-end gap-2 border-t p-3"
@@ -347,6 +409,20 @@ function Chat({ id, onBack }: { id: string; onBack: () => void }) {
           >
             <Paperclip />
           </Button>
+          <Button
+            type="button"
+            variant={recording ? 'destructive' : 'ghost'}
+            size="icon"
+            onClick={() => void toggleRecord()}
+            aria-label={recording ? t('stopRecording') : t('record')}
+          >
+            {recording ? <Square /> : <Mic />}
+          </Button>
+          {recording > 0 && (
+            <span className="self-center text-sm font-medium text-destructive tabular-nums">
+              {t('recording', { s: recording - 1 })}
+            </span>
+          )}
           <Textarea
             rows={1}
             className="max-h-32 min-h-11 flex-1 resize-none"

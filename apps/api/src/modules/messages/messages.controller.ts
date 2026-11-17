@@ -18,7 +18,7 @@ import {
   type OpenThreadInput,
 } from '@latif/shared';
 import { createZodDto, ZodValidationPipe } from 'nestjs-zod';
-import { CurrentAuth, type AuthContext } from '../../common/decorators/auth.decorators';
+import { CurrentAuth, Public, type AuthContext } from '../../common/decorators/auth.decorators';
 import { fileResponse } from '../../common/utils/files';
 import { MAX_UPLOAD_BYTES, type UploadedBlob } from '../storage/storage.service';
 import { MessagesService } from './messages.service';
@@ -31,6 +31,16 @@ class PageDto extends createZodDto(MessagePageQuerySchema) {}
 @Controller('messages')
 export class MessagesController {
   constructor(private readonly messages: MessagesService) {}
+
+  /** Signed, time-limited attachment link (no auth header: for the app's image/audio players). */
+  @Public()
+  @Get('f/:token')
+  async signedFile(@Param('token') token: string) {
+    const f = await this.messages.signedAttachment(token.slice(0, 400));
+    const inline =
+      f.mime.startsWith('image/') || f.mime.startsWith('audio/') || f.mime === 'application/pdf';
+    return fileResponse(f.buffer, f.mime, f.name, inline);
+  }
 
   @Get('threads')
   threads(@CurrentAuth() auth: AuthContext, @Query() q: ListDto) {
@@ -89,6 +99,8 @@ export class MessagesController {
     @Param('messageId', ParseUUIDPipe) messageId: string,
   ) {
     const f = await this.messages.attachment(auth, id, messageId);
-    return fileResponse(f.buffer, f.mime, f.name, f.mime.startsWith('image/'));
+    const inline =
+      f.mime.startsWith('image/') || f.mime.startsWith('audio/') || f.mime === 'application/pdf';
+    return fileResponse(f.buffer, f.mime, f.name, inline);
   }
 }

@@ -3,10 +3,12 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { CurrentAuth, Public, type AuthContext } from '../../common/decorators/auth.decorators';
 import {
+  ChangePasswordDto,
   DevLoginDto,
   GoogleAuthDto,
   IdentifierLoginDto,
   RefreshTokenDto,
+  RegisterDto,
   SwitchDaycareDto,
 } from './auth.dto';
 import { AuthService } from './auth.service';
@@ -48,13 +50,29 @@ export class AuthController {
     return this.auth.google(dto);
   }
 
-  /** Public demo: sign in with an email or phone (PUBLIC_DEMO=true). Returns 404 otherwise. */
+  /** Sign in with email or phone + password (no password needed only when PUBLIC_DEMO=true). */
   @Public()
-  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(200)
   @Post('login')
   login(@Body() dto: IdentifierLoginDto) {
-    return this.auth.identifierLogin(dto.identifier, dto.locale);
+    return this.auth.identifierLogin(dto.identifier, dto.password, dto.locale);
+  }
+
+  /** Parent self sign-up with email or phone + password. */
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @HttpCode(200)
+  @Post('register')
+  register(@Body() dto: RegisterDto) {
+    return this.auth.register(dto);
+  }
+
+  @ApiBearerAuth()
+  @HttpCode(200)
+  @Post('password')
+  changePassword(@CurrentAuth() auth: AuthContext, @Body() dto: ChangePasswordDto) {
+    return this.auth.changePassword(auth.userId, dto);
   }
 
   /** Local development only (AUTH_DEV_LOGIN=true). Returns 404 otherwise. */

@@ -37,6 +37,15 @@ export interface AuthUser {
   permissions: StaffPermission[];
   features: Partial<Record<FeatureToggle, boolean>>;
   memberships: MembershipSummary[];
+  /** Signed in with an admin-issued temporary password: must choose a new one. */
+  mustChangePassword: boolean;
+}
+
+/** Returned once when an admin creates a login or resets a password. */
+export interface IssuedPassword {
+  identifier: string;
+  fullName: string;
+  tempPassword: string;
 }
 
 export interface AuthResponse {
@@ -377,7 +386,8 @@ export interface ThreadDto {
 export interface MessageDto {
   id: string;
   body: string | null;
-  attachment: { name: string; mime: string } | null;
+  /** `url`: signed API path (`/messages/f/…`, ~6 h) usable without auth headers. */
+  attachment: { name: string; mime: string; url: string } | null;
   sender: { id: string; fullName: string; avatarUrl: string | null; role: string | null };
   mine: boolean;
   /** For my messages: someone else has read it. */

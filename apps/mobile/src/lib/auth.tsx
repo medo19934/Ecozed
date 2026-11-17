@@ -18,8 +18,17 @@ interface AuthState {
   user: AuthUser | null;
   /** Sign up or sign in with a Google ID token. */
   signInWithGoogle: (idToken: string, locale: string) => Promise<AuthUser>;
-  /** Public demo mode: email or phone, no verification. */
-  login: (identifier: string, locale: string) => Promise<AuthUser>;
+  /** Email or phone + password (password optional only in public demo mode). */
+  login: (identifier: string, locale: string, password?: string) => Promise<AuthUser>;
+  /** Parent self sign-up. */
+  register: (input: {
+    fullName: string;
+    identifier: string;
+    password: string;
+    locale: string;
+  }) => Promise<AuthUser>;
+  /** Re-reads the signed-in user (e.g. after changing the password). */
+  refreshUser: () => Promise<void>;
   /** Local development only (API AUTH_DEV_LOGIN=true). */
   devLogin: (email: string) => Promise<AuthUser>;
   signOut: () => Promise<void>;
@@ -73,8 +82,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut,
       signInWithGoogle: async (idToken, locale) =>
         accept(await api.public<AuthResponse>('/auth/google', { idToken, locale })),
-      login: async (identifier, locale) =>
-        accept(await api.public<AuthResponse>('/auth/login', { identifier, locale })),
+      login: async (identifier, locale, password) =>
+        accept(await api.public<AuthResponse>('/auth/login', { identifier, locale, password })),
+      register: async (input) => accept(await api.public<AuthResponse>('/auth/register', input)),
+      refreshUser: async () => setUser(await api.get<AuthUser>('/auth/me')),
       devLogin: async (email) =>
         accept(await api.public<AuthResponse>('/auth/dev-login', { email })),
     }),

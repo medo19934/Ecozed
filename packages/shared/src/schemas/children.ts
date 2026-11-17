@@ -72,3 +72,10 @@ export const AddParentSchema = z
   })
   .refine((g) => g.phone || g.email, { message: 'guardian_contact_required', path: ['email'] });
 export type AddParentInput = z.infer<typeof AddParentSchema>;
+
+export const ParentAccountSchema = z.object({
+  /** The parent's email or phone as listed (ParentListItem.key). */
+  key: z.string().trim().min(3).max(120),
+  reset: z.boolean().default(false),
+});
+export type ParentAccountInput = z.infer<typeof ParentAccountSchema>;

@@ -83,7 +83,8 @@
       "MANAGER": "Branch manager",
       "STAFF": "Teacher",
       "PARENT": "Parent"
-    }
+    },
+    "changePassword": "Change password"
   },
   "auth": {
     "title": "Welcome to Latif Kids",
@@ -98,7 +99,11 @@
       "invalid_google_token": "Google sign-in failed. Please try again.",
       "google_not_configured": "Google sign-in isn't configured on the server.",
       "account_disabled": "This account has been disabled. Contact your branch.",
-      "user_not_found": "No account with this email or phone."
+      "user_not_found": "No account with this email or phone.",
+      "invalid_credentials": "Wrong email/phone or password.",
+      "account_exists": "An account with this email or phone already exists. Sign in, or ask your branch for a password.",
+      "wrong_password": "Current password is wrong.",
+      "password_too_short": "Password must be at least 8 characters."
     },
     "publicSubtitle": "Pick your card to enter instantly, or sign in with your email or phone number.",
     "generalAdmin": "General administration",
@@ -112,7 +117,18 @@
     "identifierTitle": "Sign in with email or phone",
     "identifier": "Email or phone number",
     "identifierHint": "Staff: the email your manager registered. Parents: the email or phone saved for your child.",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "passwordSubtitle": "Sign in with your email or phone number and password.",
+    "tabLogin": "Sign in",
+    "tabRegister": "New parent account",
+    "fullName": "Full name",
+    "password": "Password",
+    "passwordHint": "At least 8 characters.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "createAccount": "Create account",
+    "loginHelp": "Staff and parents registered by a branch: use the password the branch sent you. Forgot it? Contact your branch.",
+    "registerHelp": "After creating your account you can request enrollment. The branch links your children to your account."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -215,7 +231,11 @@
     "class_required": "Choose a class for a class event.",
     "time_range_invalid": "End time must be after start time.",
     "invalid_time": "Use HH:MM time.",
-    "no_branch": "No active branch."
+    "no_branch": "No active branch.",
+    "invalid_credentials": "Wrong email/phone or password.",
+    "account_exists": "An account with this email or phone already exists. Sign in, or ask your branch for a password.",
+    "wrong_password": "Current password is wrong.",
+    "password_too_short": "Password must be at least 8 characters."
   },
   "settings": {
     "title": "Settings",
@@ -632,7 +652,17 @@
     "announcementTitle": "Announcement title",
     "audience": "Audience",
     "wholeBranch": "All parents in the branch",
-    "start": "Start conversation"
+    "start": "Start conversation",
+    "record": "Record a voice note",
+    "stopRecording": "Stop and send",
+    "recording": "Recording… {s}s",
+    "micDenied": "Can't access the microphone.",
+    "quick": {
+      "0": "Got your message, thank you.",
+      "1": "We'll get back to you soon.",
+      "2": "Your child is doing well and enjoying the day 🌸",
+      "3": "Please send extra clothes tomorrow."
+    }
   },
   "parents": {
     "title": "Parents",
@@ -655,5 +685,30 @@
     "pickChildrenError": "Pick at least one child",
     "noChildren": "Add a child first from the Children page.",
     "added": "Parent added"
+  },
+  "credentials": {
+    "title": "Sign-in details",
+    "hint": "This password is shown only once. Send it to the person; they will be asked to change it on first sign-in.",
+    "identifier": "Email or phone",
+    "password": "Temporary password",
+    "copy": "Copy",
+    "copied": "Copied",
+    "whatsapp": "Send via WhatsApp",
+    "done": "Done",
+    "shareText": "Hi {name}, your Latif Kids account is ready.\nLink: {site}\nSign in: {identifier}\nTemporary password: {password}",
+    "reset": "Reset password",
+    "resetTitle": "Reset password?",
+    "resetHint": "A new temporary password will be created for {name} and they will be signed out everywhere.",
+    "createLogin": "Create login",
+    "linked": "Account linked to the children",
+    "forcedTitle": "Choose a new password",
+    "forcedHint": "You signed in with a temporary password. Choose your own password to continue.",
+    "changeTitle": "Change password",
+    "changed": "Password changed",
+    "current": "Current password",
+    "new": "New password",
+    "rule": "At least 8 characters.",
+    "confirm": "Confirm password",
+    "mismatch": "Passwords don't match"
   }
 }

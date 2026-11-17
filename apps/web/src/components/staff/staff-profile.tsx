@@ -1,12 +1,18 @@
 'use client';
 
-import { ALL_STAFF_PERMISSIONS, type StaffDetail, type StaffPermission } from '@latif/shared';
+import {
+  ALL_STAFF_PERMISSIONS,
+  type IssuedPassword,
+  type StaffDetail,
+  type StaffPermission,
+} from '@latif/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Archive,
   ArchiveRestore,
   CalendarDays,
   GraduationCap,
+  KeyRound,
   Mail,
   MapPin,
   MessageSquare,
@@ -14,6 +20,8 @@ import {
   Phone,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { IssuedPasswordDialog } from '@/components/auth/issued-password-dialog';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/layout/page-header';
 import { Avatar } from '@/components/ui/avatar';
@@ -66,6 +74,17 @@ export function StaffProfile({ id }: { id: string }) {
     onError: (e) => toast.error(errorMessage(e)),
   });
 
+  // A just-created login hands its one-time password over through the query cache.
+  const [issued, setIssued] = useState<IssuedPassword | null>(
+    () => qc.getQueryData<IssuedPassword>(['issued', id]) ?? null,
+  );
+  const reset = useMutation({
+    mutationFn: () => api.post<IssuedPassword>(`/staff/${id}/password`),
+    onSuccess: setIssued,
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  const tcr = useTranslations('credentials');
+
   const s = staff.data;
   const crumbs = [
     { label: tn('dashboard'), href: '/dashboard' },
@@ -101,6 +120,25 @@ export function StaffProfile({ id }: { id: string }) {
                         : ''}
                   </p>
                 </div>
+                <IssuedPasswordDialog
+                  issued={issued}
+                  onClose={() => {
+                    setIssued(null);
+                    qc.removeQueries({ queryKey: ['issued', id] });
+                  }}
+                />
+                {s.status !== 'ARCHIVED' && s.userId !== me?.id && (
+                  <Confirm
+                    title={tcr('resetTitle')}
+                    body={tcr('resetHint', { name: s.fullName })}
+                    confirmLabel={tcr('reset')}
+                    onConfirm={() => reset.mutate()}
+                  >
+                    <Button variant="outline" size="sm" disabled={reset.isPending}>
+                      <KeyRound /> {tcr('reset')}
+                    </Button>
+                  </Confirm>
+                )}
                 <div className="flex flex-wrap justify-center gap-2">
                   {s.status === 'ARCHIVED' ? (
                     <StatusChip color="red">{tc('archived')}</StatusChip>

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Languages, LogOut } from 'lucide-react-native';
+import { Languages, LockKeyhole, LogOut } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { changeLocale, i18n } from '@/i18n';
@@ -47,6 +47,14 @@ export function ProfileScreen() {
             {t('profile.switchLanguage')}
           </Text>
           <Text className="font-medium text-brand">{t('language')}</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push('/password')}
+          className="min-h-14 flex-row items-center gap-3 rounded-2xl border border-line bg-white px-4 active:bg-line"
+        >
+          <LockKeyhole color="#5b6db4" size={20} />
+          <Text className="flex-1 text-start text-base text-ink">{t('pw.title')}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"

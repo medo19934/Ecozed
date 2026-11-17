@@ -23,6 +23,11 @@ export const EnvSchema = z.object({
   /** Comma-separated emails that become super admins on Google sign-in. */
   SUPER_ADMIN_EMAILS: z.string().default(''),
   /**
+   * First password for the super admins in SUPER_ADMIN_EMAILS (accounts are created on start
+   * if missing). Only applied to accounts without a password; they must change it after signing in.
+   */
+  SUPER_ADMIN_PASSWORD: z.string().default(''),
+  /**
    * Public demo: sign in with just an email or phone (no password, no code), demo role
    * cards on the login page, and demo data in every branch. Anyone can enter any account —
    * never enable with real families' data.

@@ -21,15 +21,36 @@ export type RefreshTokenInput = z.infer<typeof RefreshTokenSchema>;
 export const SwitchDaycareSchema = z.object({ daycareId: z.uuid() });
 export type SwitchDaycareInput = z.infer<typeof SwitchDaycareSchema>;
 
-/** Sign in with an email or a phone number (public demo mode: no password, no code). */
+/** An email address or a phone number (local 05… accepted). */
+export const IdentifierSchema = z
+  .string()
+  .trim()
+  .min(3)
+  .max(120)
+  .transform((v) => (v.includes('@') ? v.toLowerCase() : normalizePhone(v)))
+  .pipe(z.union([EmailSchema, PhoneSchema]));
+
+export const PasswordSchema = z.string().min(8, 'password_too_short').max(100);
+
+/** Sign in with email or phone + password (the password is optional only in PUBLIC_DEMO mode). */
 export const IdentifierLoginSchema = z.object({
-  identifier: z
-    .string()
-    .trim()
-    .min(3)
-    .max(120)
-    .transform((v) => (v.includes('@') ? v.toLowerCase() : normalizePhone(v)))
-    .pipe(z.union([EmailSchema, PhoneSchema])),
+  identifier: IdentifierSchema,
+  password: z.string().max(100).optional(),
   locale: LocaleSchema.optional(),
 });
+
+/** Parent self sign-up. */
+export const RegisterSchema = z.object({
+  fullName: z.string().trim().min(2).max(120),
+  identifier: IdentifierSchema,
+  password: PasswordSchema,
+  locale: LocaleSchema.optional(),
+});
+export type RegisterInput = z.infer<typeof RegisterSchema>;
+
+export const ChangePasswordSchema = z.object({
+  currentPassword: z.string().max(100).optional(),
+  newPassword: PasswordSchema,
+});
+export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>;
 export type IdentifierLoginInput = z.infer<typeof IdentifierLoginSchema>;

@@ -1,14 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import type { DemoAccount } from '@latif/shared';
-import {
-  Baby,
-  BriefcaseBusiness,
-  Building2,
-  GraduationCap,
-  ShieldCheck,
-  Sparkles,
-} from 'lucide-react-native';
+import { Baby, Building2, GraduationCap, ShieldCheck, Sparkles } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -48,33 +41,44 @@ export default function LoginScreen() {
   const [publicDemo, setPublicDemo] = useState<boolean | null>(null);
   const [accounts, setAccounts] = useState<DemoAccount[]>([]);
   const [picked, setPicked] = useState<string>();
+  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [fullName, setFullName] = useState('');
+  const [password, setPassword] = useState('');
+  const [google, setGoogle] = useState(false);
 
   useEffect(() => {
     api
-      .publicGet<{ publicDemo: boolean }>('/auth/options')
+      .publicGet<{ publicDemo: boolean; google: boolean }>('/auth/options')
       .then(async (o) => {
         setPublicDemo(o.publicDemo);
+        setGoogle(o.google);
         if (o.publicDemo) setAccounts(await api.publicGet<DemoAccount[]>('/auth/demo-accounts'));
       })
       .catch(() => setPublicDemo(false));
   }, []);
 
   const run = useCallback(
-    async (fn: () => Promise<{ role: Parameters<typeof homeRouteFor>[0] }>) => {
+    async (
+      fn: () => Promise<{ role: Parameters<typeof homeRouteFor>[0]; mustChangePassword: boolean }>,
+    ) => {
       setBusy(true);
       setError(undefined);
       try {
         const user = await fn();
-        router.replace(homeRouteFor(user.role));
+        router.replace(user.mustChangePassword ? '/password?forced=1' : homeRouteFor(user.role));
       } catch (e) {
         setError(
           e instanceof ApiError && e.code === 'account_disabled'
             ? t('auth.disabled')
-            : e instanceof ApiError && e.status === 404
-              ? t('auth.notFound')
-              : publicDemo
-                ? t('common.error')
-                : t('auth.failed'),
+            : e instanceof ApiError && e.code === 'invalid_credentials'
+              ? t('auth.invalidCredentials')
+              : e instanceof ApiError && e.code === 'account_exists'
+                ? t('auth.accountExists')
+                : e instanceof ApiError && e.status === 404
+                  ? t('auth.notFound')
+                  : publicDemo
+                    ? t('common.error')
+                    : t('auth.failed'),
         );
       } finally {
         setBusy(false);
@@ -118,7 +122,7 @@ export default function LoginScreen() {
           </View>
           <Text className="mt-8 text-start text-2xl font-bold text-white">{t('auth.title')}</Text>
           <Text className="mt-2 text-start text-base text-white/85">
-            {publicDemo ? t('auth.publicSubtitle') : t('auth.subtitle')}
+            {publicDemo ? t('auth.publicSubtitle') : t('auth.passwordSubtitle')}
           </Text>
         </LinearGradient>
 
@@ -191,26 +195,84 @@ export default function LoginScreen() {
             </Card>
           ) : (
             <Card className="gap-5">
-              <GoogleButton onIdToken={onIdToken} busy={busy} />
+              <View className="flex-row gap-1 rounded-2xl bg-surface p-1">
+                {(['login', 'register'] as const).map((m) => (
+                  <Pressable
+                    key={m}
+                    accessibilityRole="tab"
+                    accessibilityState={{ selected: mode === m }}
+                    onPress={() => {
+                      setMode(m);
+                      setError(undefined);
+                    }}
+                    className={`min-h-11 flex-1 items-center justify-center rounded-xl ${mode === m ? 'bg-white' : ''}`}
+                  >
+                    <Text
+                      className={`text-sm ${mode === m ? 'font-semibold text-ink' : 'text-ink-muted'}`}
+                    >
+                      {t(m === 'login' ? 'auth.tabLogin' : 'auth.tabRegister')}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              {mode === 'register' && (
+                <Field
+                  label={t('auth.fullName')}
+                  value={fullName}
+                  onChangeText={setFullName}
+                  autoComplete="name"
+                />
+              )}
+              <Field
+                label={t('auth.identifier')}
+                value={identifier}
+                onChangeText={setIdentifier}
+                autoCapitalize="none"
+                autoComplete="username"
+                keyboardType="email-address"
+                placeholder="name@example.com · 05XXXXXXXX"
+                style={{ writingDirection: 'ltr', textAlign: 'left' }}
+              />
+              <Field
+                label={t('auth.password')}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoCapitalize="none"
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                style={{ writingDirection: 'ltr', textAlign: 'left' }}
+              />
               {error ? (
                 <Text accessibilityRole="alert" className="text-start text-sm text-danger">
                   {error}
                 </Text>
               ) : null}
-              <View className="gap-3">
-                <View className="flex-row items-start gap-3">
-                  <Baby color="#5b6db4" size={18} />
-                  <Text className="flex-1 text-start text-sm leading-5 text-ink-muted">
-                    {t('auth.parentsNote')}
-                  </Text>
-                </View>
-                <View className="flex-row items-start gap-3">
-                  <BriefcaseBusiness color="#5b6db4" size={18} />
-                  <Text className="flex-1 text-start text-sm leading-5 text-ink-muted">
-                    {t('auth.staffNote')}
-                  </Text>
-                </View>
-              </View>
+              <PrimaryButton
+                label={t(mode === 'login' ? 'auth.signIn' : 'auth.createAccount')}
+                loading={busy}
+                onPress={() => {
+                  const id = identifier.trim();
+                  if (!id || !password) return setError(t('auth.fillAll'));
+                  if (mode === 'register' && password.length < 8)
+                    return setError(t('auth.passwordHint'));
+                  if (mode === 'register' && fullName.trim().length < 2)
+                    return setError(t('auth.fillAll'));
+                  void run(() =>
+                    mode === 'login'
+                      ? auth.login(id, i18n.language, password)
+                      : auth.register({
+                          fullName: fullName.trim(),
+                          identifier: id,
+                          password,
+                          locale: i18n.language,
+                        }),
+                  );
+                }}
+              />
+              <Text className="text-start text-sm leading-5 text-ink-muted">
+                {t(mode === 'login' ? 'auth.loginHelp' : 'auth.registerHelp')}
+              </Text>
+              {google && <GoogleButton onIdToken={onIdToken} busy={busy} />}
             </Card>
           )}
 

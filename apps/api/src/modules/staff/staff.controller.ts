@@ -74,6 +74,12 @@ export class StaffController {
   }
 
   @RequirePermissions(StaffPermission.CAN_ADD_STAFF, StaffPermission.CAN_ARCHIVE_ACCOUNTS)
+  /** Creates or resets the staff member's login: returns a one-time password to hand over. */
+  @Post(':id/password')
+  issuePassword(@Param('id', ParseUUIDPipe) id: string) {
+    return this.staff.issuePassword(id);
+  }
+
   @Post(':id/archive')
   archive(@CurrentAuth() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string) {
     return this.staff.setArchived(auth, id, true);

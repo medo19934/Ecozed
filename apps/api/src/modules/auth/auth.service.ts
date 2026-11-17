@@ -1,8 +1,17 @@
-import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   FeatureToggle,
   type AuthResponse,
   type AuthUser,
+  type ChangePasswordInput,
+  type RegisterInput,
   type GoogleAuthInput,
   type Locale,
   type Role,
@@ -15,6 +24,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { GuardianLinkService } from '../children/guardian-link.service';
 import { GOOGLE_VERIFIER, type GoogleIdentity, type GoogleVerifier } from './google-verifier';
+import { hashPassword, verifyPassword } from './password';
 import { TokenService } from './token.service';
 
 export const DEFAULT_FEATURES: Record<FeatureToggle, boolean> = {
@@ -60,15 +70,35 @@ export class AuthService {
   }
 
   /**
-   * Sign in (or sign up as a parent) with an email or phone number — PUBLIC_DEMO only.
-   * Existing staff/parents are matched by email or phone.
+   * Sign in with an email or phone number + password.
+   * PUBLIC_DEMO only: no password needed and unknown identifiers become parent accounts.
    */
-  async identifierLogin(identifier: string, locale?: Locale): Promise<AuthResponse> {
-    if (!this.config.get('PUBLIC_DEMO')) throw new NotFoundException();
+  async identifierLogin(
+    identifier: string,
+    password?: string,
+    locale?: Locale,
+  ): Promise<AuthResponse> {
+    const demo = this.config.get('PUBLIC_DEMO');
     const isEmail = identifier.includes('@');
     let user = await this.prisma.raw.user.findFirst({
       where: isEmail ? { email: identifier } : { phone: identifier },
     });
+    if (!demo) {
+      const ok = await verifyPassword(password ?? '', user?.passwordHash ?? null);
+      if (!user || !ok) {
+        await this.audit.log({
+          action: 'auth.login_failed',
+          entity: 'User',
+          entityId: user?.id ?? null,
+          actorId: null,
+          daycareId: null,
+        });
+        throw new UnauthorizedException({
+          message: 'Wrong email/phone or password',
+          code: 'invalid_credentials',
+        });
+      }
+    }
     if (user?.deletedAt) {
       throw new UnauthorizedException({ message: 'Account disabled', code: 'account_disabled' });
     }
@@ -90,13 +120,69 @@ export class AuthService {
       });
     }
     await this.audit.log({
-      action: 'auth.login_identifier',
+      action: 'auth.login',
       entity: 'User',
       entityId: user.id,
       actorId: user.id,
     });
-    await this.guardianLinks.linkUser(user);
+    if (demo) await this.guardianLinks.linkUser(user);
     return this.session(user.id, user.lastDaycareId);
+  }
+
+  /**
+   * Parent self sign-up (email or phone + password). Children are linked by the branch
+   * (child record / Parents page / accepted enrollment), never just by claiming a number.
+   */
+  async register(input: RegisterInput): Promise<AuthResponse> {
+    const isEmail = input.identifier.includes('@');
+    const existing = await this.prisma.raw.user.findFirst({
+      where: isEmail ? { email: input.identifier } : { phone: input.identifier },
+    });
+    if (existing) {
+      throw new ConflictException({ message: 'An account already exists', code: 'account_exists' });
+    }
+    const user = await this.prisma.raw.user.create({
+      data: {
+        fullName: input.fullName,
+        ...(isEmail ? { email: input.identifier } : { phone: input.identifier }),
+        locale: input.locale ?? 'ar',
+        passwordHash: await hashPassword(input.password),
+      },
+    });
+    await this.audit.log({
+      action: 'auth.signup_parent',
+      entity: 'User',
+      entityId: user.id,
+      actorId: user.id,
+      daycareId: null,
+    });
+    return this.session(user.id, null);
+  }
+
+  async changePassword(userId: string, input: ChangePasswordInput): Promise<{ ok: true }> {
+    const user = await this.prisma.raw.user.findFirstOrThrow({
+      where: { id: userId, deletedAt: null },
+    });
+    // A temporary (admin-issued) password was just used to sign in: no need to type it again.
+    if (user.passwordHash && !user.mustChangePassword) {
+      if (!(await verifyPassword(input.currentPassword ?? '', user.passwordHash))) {
+        throw new BadRequestException({
+          message: 'Current password is wrong',
+          code: 'wrong_password',
+        });
+      }
+    }
+    await this.prisma.raw.user.update({
+      where: { id: userId },
+      data: { passwordHash: await hashPassword(input.newPassword), mustChangePassword: false },
+    });
+    await this.audit.log({
+      action: 'auth.password_changed',
+      entity: 'User',
+      entityId: userId,
+      actorId: userId,
+    });
+    return { ok: true };
   }
 
   /** Local development sign-in without Google (AUTH_DEV_LOGIN=true only). */
@@ -242,6 +328,7 @@ export class AuthService {
       permissions: effectivePermissions(role, membership?.permissions ?? []),
       features,
       memberships: branches,
+      mustChangePassword: user.mustChangePassword,
     };
   }
 

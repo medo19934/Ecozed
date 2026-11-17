@@ -224,7 +224,7 @@ describe('Messages + email/phone sign-in (e2e)', () => {
       .set(bearer(admin))
       .send({ fullName: 'جدة', relationship: 'جدة', phone, childIds: [kidA, kidB] })
       .expect(201);
-    expect(added.body).toMatchObject({ phone: `+966${phone.slice(1)}`, linked: false });
+    expect(added.body).toMatchObject({ phone: `+966${phone.slice(1)}`, linked: true });
     expect(added.body.children).toHaveLength(2);
     const p = await login(phone);
     const kids = await http

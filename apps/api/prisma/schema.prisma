@@ -32,20 +32,24 @@ enum MembershipStatus {
 }
 
 model User {
-  id            String    @id @default(uuid()) @db.Uuid
-  fullName      String
-  email         String?   @unique
-  phone         String?   @unique
+  id                 String    @id @default(uuid()) @db.Uuid
+  fullName           String
+  email              String?   @unique
+  phone              String?   @unique
   /// Google account subject ("sub"); set on first Google sign-in.
-  googleId      String?   @unique
-  locale        String    @default("ar")
-  avatarUrl     String?
-  isSuperAdmin  Boolean   @default(false)
-  lastDaycareId String?   @db.Uuid
-  lastLoginAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
+  googleId           String?   @unique
+  /// scrypt hash ("scrypt$salt$hash"); null until an admin issues a password or the user registers.
+  passwordHash       String?
+  /// Set for admin-issued temporary passwords: the user must choose a new one after signing in.
+  mustChangePassword Boolean   @default(false)
+  locale             String    @default("ar")
+  avatarUrl          String?
+  isSuperAdmin       Boolean   @default(false)
+  lastDaycareId      String?   @db.Uuid
+  lastLoginAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deletedAt          DateTime?
 
   memberships   Membership[]
   refreshTokens RefreshToken[]

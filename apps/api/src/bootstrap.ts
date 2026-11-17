@@ -7,7 +7,8 @@ import { AppConfig } from './config/app-config.service';
 /** Shared app configuration for main.ts and e2e tests. */
 export function configureApp(app: INestApplication): INestApplication {
   const config = app.get(AppConfig);
-  app.use(helmet());
+  // cross-origin: the app (another origin) shows signed attachment images/audio.
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.enableCors({
     origin: config
       .get('CORS_ORIGINS')

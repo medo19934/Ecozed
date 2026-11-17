@@ -52,6 +52,19 @@
         {
           "faceIDPermission": "Confirm it's you before checking in."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Latif Kids lets you send photos in messages.",
+          "cameraPermission": "Latif Kids uses the camera to take photos for messages and to scan the attendance QR code."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Latif Kids records voice notes you send in messages."
+        }
       ]
     ],
     "extra": {

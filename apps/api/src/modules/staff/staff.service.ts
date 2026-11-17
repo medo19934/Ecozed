@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type {
+  IssuedPassword,
   CreateStaffInput,
   Paginated,
   StaffDetail,
@@ -19,6 +20,7 @@ import { isBranchAdmin, pageArgs, requireBranch } from '../../common/utils/scope
 import type { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { CredentialsService } from '../auth/credentials.service';
 import { ClassesService } from '../classes/classes.service';
 
 const include = {
@@ -36,6 +38,7 @@ export class StaffService {
     private readonly prisma: PrismaService,
     private readonly classes: ClassesService,
     private readonly audit: AuditService,
+    private readonly credentials: CredentialsService,
   ) {}
 
   async list(q: StaffListQuery): Promise<Paginated<StaffListItem>> {
@@ -70,6 +73,11 @@ export class StaffService {
     return toDetail(await this.load(id));
   }
 
+  async issuePassword(id: string): Promise<IssuedPassword> {
+    const m = await this.load(id);
+    return this.credentials.issue(m.userId);
+  }
+
   private async load(id: string): Promise<Row> {
     const m = await this.prisma.scoped.membership.findFirst({
       where: { id, role: { in: ['MANAGER', 'STAFF'] } },
@@ -99,7 +107,10 @@ export class StaffService {
     }
   }
 
-  async create(auth: AuthContext, input: CreateStaffInput): Promise<StaffDetail> {
+  async create(
+    auth: AuthContext,
+    input: CreateStaffInput,
+  ): Promise<StaffDetail & { issued: IssuedPassword | null }> {
     const daycareId = requireBranch(auth);
     this.guardEdit(auth, input);
     await Promise.all(input.classIds.map((id) => this.classes.assertClass(id)));
@@ -157,7 +168,9 @@ export class StaffService {
       entityId: m.id,
       metadata: { email: input.email, role: input.role },
     });
-    return this.get(m.id);
+    // New login → one-time password for the admin to hand over.
+    const issued = user.passwordHash ? null : await this.credentials.issue(user.id);
+    return { ...(await this.get(m.id)), issued };
   }
 
   async update(auth: AuthContext, id: string, input: UpdateStaffInput): Promise<StaffDetail> {

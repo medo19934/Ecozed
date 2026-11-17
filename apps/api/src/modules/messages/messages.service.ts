@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import {
   BadRequestException,
   ForbiddenException,
@@ -13,9 +14,10 @@ import type {
 } from '@latif/shared';
 import type { AuthContext } from '../../common/decorators/auth.decorators';
 import type { MessageThread, Prisma } from '../../generated/prisma/client';
+import { AppConfig } from '../../config/app-config.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { decodeFileName } from '../../common/utils/files';
-import { DOCUMENT_MIME, StorageService, type UploadedBlob } from '../storage/storage.service';
+import { MESSAGE_MIME, StorageService, type UploadedBlob } from '../storage/storage.service';
 
 /**
  * Messaging between a branch and families (one thread per child), between staff
@@ -30,7 +32,46 @@ export class MessagesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly config: AppConfig,
   ) {}
+
+  // ---------------- signed attachment links (apps: <img>/<audio> can't send auth headers) ----------------
+
+  private sign(body: string): string {
+    return createHmac('sha256', `${this.config.get('JWT_ACCESS_SECRET')}:files`)
+      .update(body)
+      .digest('base64url');
+  }
+
+  /** `/messages/f/<token>` valid for 6 hours. */
+  private signedPath(messageId: string): string {
+    const body = Buffer.from(`${messageId}.${Math.floor(Date.now() / 1000) + 6 * 3600}`).toString(
+      'base64url',
+    );
+    return `/messages/f/${body}.${this.sign(body)}`;
+  }
+
+  async signedAttachment(token: string) {
+    const [body, sig] = token.split('.');
+    const expected = body ? this.sign(body) : '';
+    if (
+      !body ||
+      !sig ||
+      sig.length !== expected.length ||
+      !timingSafeEqual(Buffer.from(sig), Buffer.from(expected))
+    ) {
+      throw new NotFoundException();
+    }
+    const [messageId, exp] = Buffer.from(body, 'base64url').toString().split('.');
+    if (!messageId || Number(exp) < Date.now() / 1000) throw new NotFoundException();
+    const m = await this.prisma.raw.message.findFirst({ where: { id: messageId } });
+    if (!m?.attachmentKey) throw new NotFoundException();
+    return {
+      buffer: await this.storage.read(m.attachmentKey),
+      mime: m.attachmentMime!,
+      name: m.attachmentName ?? 'file',
+    };
+  }
 
   // ---------------- access ----------------
 
@@ -496,6 +537,7 @@ export class MessagesService {
           ? {
               name: m.attachmentName ?? 'file',
               mime: m.attachmentMime ?? 'application/octet-stream',
+              url: this.signedPath(m.id),
             }
           : null,
         sender: {
@@ -526,7 +568,7 @@ export class MessagesService {
     if (!text && !file)
       throw new BadRequestException({ code: 'empty_message', message: 'Message is empty' });
     const key = file
-      ? await this.storage.save(`branches/${t.daycareId}/messages/${t.id}`, file, DOCUMENT_MIME)
+      ? await this.storage.save(`branches/${t.daycareId}/messages/${t.id}`, file, MESSAGE_MIME)
       : null;
     const m = await this.prisma.raw.message.create({
       data: {
@@ -552,7 +594,9 @@ export class MessagesService {
     return {
       id: m.id,
       body: m.body,
-      attachment: key ? { name: m.attachmentName!, mime: m.attachmentMime! } : null,
+      attachment: key
+        ? { name: m.attachmentName!, mime: m.attachmentMime!, url: this.signedPath(m.id) }
+        : null,
       sender: { id: me.id, fullName: me.fullName, avatarUrl: me.avatarUrl, role: auth.role },
       mine: true,
       read: false,

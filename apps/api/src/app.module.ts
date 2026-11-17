@@ -7,6 +7,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { AccessGuard } from './common/guards/access.guard';
 import { AuthGuard } from './common/guards/auth.guard';
 import { AppConfig } from './config/app-config.service';
+import { CredentialsModule } from './modules/auth/credentials.service';
 import { AppConfigModule } from './config/config.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -40,6 +41,7 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
     PrismaModule,
     AuditModule,
+    CredentialsModule,
     StorageModule,
     DemoModule,
     DocumentsModule,

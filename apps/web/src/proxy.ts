@@ -35,7 +35,8 @@ export default function proxy(request: NextRequest) {
 
   if (!hasSession && PROTECTED.some((p) => subPath === p || subPath.startsWith(`${p}/`))) {
     const url = new URL(`/${locale}/login`, request.url);
-    url.searchParams.set('next', pathname);
+    // Keep the query (e.g. the kiosk QR token on /scan?t=…) through sign-in.
+    url.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(url);
   }
   // No marketing site: the root goes straight to the app.

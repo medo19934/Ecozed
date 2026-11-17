@@ -19,6 +19,7 @@ export function useSessionActions() {
   const qc = useQueryClient();
   return {
     setUser: (user: AuthUser) => qc.setQueryData(SESSION_KEY, user),
+    refresh: () => qc.invalidateQueries({ queryKey: SESSION_KEY }),
     async logout() {
       await sessionApi.logout();
       qc.clear();

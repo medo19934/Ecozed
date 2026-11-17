@@ -23,6 +23,21 @@ export const DOCUMENT_MIME = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'text/plain',
 ];
+/** Chat attachments: documents, photos and voice notes. */
+export const MESSAGE_MIME = [
+  ...DOCUMENT_MIME,
+  'image/heic',
+  'image/gif',
+  'audio/webm',
+  'audio/ogg',
+  'audio/mp4',
+  'audio/m4a',
+  'audio/x-m4a',
+  'audio/aac',
+  'audio/mpeg',
+  'audio/3gpp',
+  'audio/wav',
+];
 
 export interface UploadedBlob {
   buffer: Buffer;
@@ -66,6 +81,8 @@ export class StorageService {
   async save(prefix: string, file: UploadedBlob | undefined, allowed: string[]): Promise<string> {
     if (!file)
       throw new BadRequestException({ message: 'File is required', code: 'file_required' });
+    // "audio/webm;codecs=opus" → "audio/webm"
+    file.mimetype = file.mimetype.split(';')[0]!.trim().toLowerCase();
     if (!allowed.includes(file.mimetype)) {
       throw new BadRequestException({ message: 'File type not allowed', code: 'file_type' });
     }
