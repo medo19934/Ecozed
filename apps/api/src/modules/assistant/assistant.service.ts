@@ -3,7 +3,6 @@ import {
   ChildSchema,
   PlanSchema,
   UpdateBranchSchema,
-  localDate,
   type AssistantOp,
   type AssistantPlan,
   type AssistantPlanRequest,
@@ -20,8 +19,8 @@ import { ChildrenService } from '../children/children.service';
 import { ClassesService } from '../classes/classes.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { UsersService } from '../users/users.service';
-import { AiPlanner } from './ai-planner';
 import { looksTabular, readTable } from './table-parser';
+import { readText } from './text-commands';
 
 const norm = (s: string) =>
   s.toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim();
@@ -49,7 +48,6 @@ class Skip extends Error {}
 export class AssistantService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly ai: AiPlanner,
     private readonly audit: AuditService,
     private readonly branches: BranchesService,
     private readonly classes: ClassesService,
@@ -92,17 +90,13 @@ export class AssistantService {
       .then((r) => r.map((c) => c.name));
   }
 
-  async plan(
-    auth: AuthContext,
-    req: AssistantPlanRequest,
-    locale: 'ar' | 'en',
-  ): Promise<AssistantPlan> {
-    const aiEnabled = this.ai.enabled;
+  /** Reads a CSV / pasted table / chat message (free, rule-based — no paid AI). Saves nothing. */
+  async plan(auth: AuthContext, req: AssistantPlanRequest): Promise<AssistantPlan> {
     const list = await this.allowedBranches(auth);
     const tableText = req.file?.text ?? (looksTabular(req.message) ? req.message : null);
     let operations: AssistantOp[] = [];
     let warnings: string[] = [];
-    let reply = '';
+    const reply = '';
     let source: AssistantPlan['source'] = 'none';
 
     if (tableText) {
@@ -110,33 +104,13 @@ export class AssistantService {
       operations = read.operations;
       warnings = read.warnings;
       source = 'table';
-      if (req.message.trim() && req.file && aiEnabled) {
-        // A note typed next to a file (e.g. "all of these go to Al Rayan") is not interpreted
-        // by rules; say so rather than silently ignoring it.
-        warnings.push('note_not_read');
-      }
+      // A note typed next to a file (e.g. "all of these go to Al Rayan") is not interpreted.
+      if (req.message.trim() && req.file) warnings.push('note_not_read');
     } else if (req.message.trim()) {
-      if (!aiEnabled) {
-        return {
-          reply: '',
-          source: 'none',
-          operations: [],
-          warnings: ['ai_not_configured'],
-          aiEnabled,
-        };
-      }
-      const active = list.find((b) => b.id === auth.daycareId) ?? null;
-      const result = await this.ai.plan(req.message, req.history, {
-        locale,
-        today: localDate(),
-        activeBranch: active?.name ?? null,
-        branches: list.map((b) => b.name),
-        classes: auth.daycareId ? await this.classNamesIn(auth.daycareId) : [],
-      });
-      operations = result.operations;
-      reply = result.reply;
-      source = 'ai';
-      if (result.invalid) warnings.push(`invalid_items: ${result.invalid}`);
+      const read = readText(req.message);
+      operations = read.operations;
+      warnings = read.warnings;
+      source = 'text';
     }
 
     // Branch check + missing classes (added as class.create so the rows can land in them).
@@ -169,7 +143,7 @@ export class AssistantService {
         }
       }
     }
-    return { reply, source, operations: [...classAdds, ...kept], warnings, aiEnabled };
+    return { reply, source, operations: [...classAdds, ...kept], warnings };
   }
 
   async apply(auth: AuthContext, operations: AssistantOp[]): Promise<AssistantResult[]> {

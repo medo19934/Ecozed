@@ -40,7 +40,7 @@ export const FeatureToggle = {
   MESSAGES: 'messages',
   CHILD_QR_ATTENDANCE: 'childQrAttendance',
   STAFF_GEOFENCED_ATTENDANCE: 'staffGeofencedAttendance',
-  /** AI "Daily Story" in messages — off by default (costs AI credits). */
+  /** "Daily Story" switch — reserved, not built yet (off by default; no paid service is used). */
   DAILY_STORY_AI: 'dailyStoryAi',
   DAILY_REPORTS: 'dailyReports',
   SUBSCRIPTIONS: 'subscriptions',

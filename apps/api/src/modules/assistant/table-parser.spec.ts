@@ -1,6 +1,5 @@
 import { AssistantOpSchema } from '@latif/shared';
-import { z } from 'zod';
-import { toStrictSchema } from './ai-planner';
+import { readCommand, readText } from './text-commands';
 import { dateOf, genderOf, looksTabular, parseDelimited, phoneOf, readTable } from './table-parser';
 
 describe('assistant table reader', () => {
@@ -90,20 +89,81 @@ describe('assistant table reader', () => {
   });
 });
 
-describe('assistant structured-output schema', () => {
-  it('closes every object and makes every property required (nullable when optional)', () => {
-    const schema = toStrictSchema(z.toJSONSchema(AssistantOpSchema, { io: 'input' })) as {
-      anyOf: {
-        properties: Record<string, unknown>;
-        required: string[];
-        additionalProperties: boolean;
-      }[];
-    };
-    expect(schema.anyOf.length).toBe(9);
-    for (const variant of schema.anyOf) {
-      expect(variant.additionalProperties).toBe(false);
-      expect(variant.required.sort()).toEqual(Object.keys(variant.properties).sort());
-    }
-    expect(JSON.stringify(schema)).not.toMatch(/"(minLength|maximum|pattern|format|default)"/);
+describe('assistant chat reader (free, rule-based)', () => {
+  it('understands short Arabic and English instructions', () => {
+    expect(
+      readCommand('أضف معلمة اسمها سارة العتيبي sara@x.com 0501234567 في فصل العصافير'),
+    ).toEqual({
+      type: 'user.create',
+      role: 'STAFF',
+      fullName: 'سارة العتيبي',
+      email: 'sara@x.com',
+      phone: '+966501234567',
+      classNames: ['العصافير'],
+    });
+    expect(
+      readCommand('Add a teacher named Sara Ali sara@example.com to the Birds class'),
+    ).toMatchObject({
+      role: 'STAFF',
+      fullName: 'Sara Ali',
+      classNames: ['Birds'],
+    });
+    expect(readCommand('add manager Huda huda@x.com')).toMatchObject({
+      role: 'MANAGER',
+      fullName: 'Huda',
+    });
+    expect(readCommand('أضف ولي أمر أبو سعد 0500000001')).toMatchObject({
+      role: 'PARENT',
+      fullName: 'أبو سعد',
+    });
+    expect(readCommand('انقل الطفل سعد إلى فصل الفراشات')).toEqual({
+      type: 'child.move',
+      childName: 'سعد',
+      className: 'الفراشات',
+    });
+    expect(readCommand('move Saad to class Butterflies')).toMatchObject({
+      childName: 'Saad',
+      className: 'Butterflies',
+    });
+    expect(readCommand('أوقف حساب سارة')).toEqual({ type: 'user.deactivate', match: 'سارة' });
+    expect(readCommand('أوقف التقارير اليومية')).toEqual({
+      type: 'feature.set',
+      key: 'dailyReports',
+      enabled: false,
+    });
+    expect(readCommand('turn on messages')).toEqual({
+      type: 'feature.set',
+      key: 'messages',
+      enabled: true,
+    });
+    expect(readCommand('أضف فصل العصافير بسعة 15')).toEqual({
+      type: 'class.create',
+      name: 'العصافير',
+      capacity: 15,
+    });
+    expect(readCommand('أضف باقة شهرية بسعر 1500')).toMatchObject({
+      type: 'plan.create',
+      price: 1500,
+      period: 'MONTHLY',
+    });
+    expect(readCommand('كيف حالك')).toBeNull();
+  });
+
+  it('reads "key: value" cards and flags lines it does not understand', () => {
+    const r = readText(
+      'اسم الطفل: ليان\nالجنس: أنثى\nتاريخ الميلاد: 2022-01-10\nولي الأمر: أم ليان\nجوال ولي الأمر: 0501112223',
+    );
+    expect(r.operations).toEqual([
+      expect.objectContaining({
+        type: 'child.create',
+        fullName: 'ليان',
+        guardianPhone: '+966501112223',
+      }),
+    ]);
+    const mixed = readText('أضف فصل النحل\nشيء غير مفهوم');
+    expect(mixed.operations).toHaveLength(1);
+    expect(mixed.warnings).toEqual(['not_understood: شيء غير مفهوم']);
+    for (const op of [...r.operations, ...mixed.operations])
+      expect(AssistantOpSchema.safeParse(op).success).toBe(true);
   });
 });

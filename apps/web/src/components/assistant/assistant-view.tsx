@@ -1,7 +1,7 @@
 'use client';
 
 import type { AssistantOp, AssistantPlan, AssistantResult, IssuedPassword } from '@latif/shared';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import {
   CheckCircle2,
   Copy,
@@ -14,7 +14,7 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/layout/page-header';
@@ -293,37 +293,19 @@ function PlanCard({
 export function AssistantView() {
   const t = useTranslations('assistant');
   const tn = useTranslations('nav');
-  const locale = useLocale();
   const errorMessage = useErrorMessage();
   const [turns, setTurns] = useState<Turn[]>([]);
   const [text, setText] = useState('');
   const [file, setFile] = useState<{ name: string; text: string } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
-  const status = useQuery({
-    queryKey: ['assistant', 'status'],
-    queryFn: () => api.get<{ aiEnabled: boolean }>('/assistant/status'),
-  });
   useEffect(() => {
     bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [turns.length]);
 
   const send = useMutation({
-    mutationFn: (v: { message: string; file: { name: string; text: string } | null }) => {
-      const history = turns
-        .slice(-8)
-        .map((x) =>
-          x.role === 'user'
-            ? { role: 'user' as const, text: x.text.slice(0, 4000) }
-            : { role: 'assistant' as const, text: (x.plan.reply || '…').slice(0, 4000) },
-        );
-      return api.post<AssistantPlan>('/assistant/plan', {
-        message: v.message,
-        file: v.file ?? undefined,
-        history,
-        locale,
-      });
-    },
+    mutationFn: (v: { message: string; file: { name: string; text: string } | null }) =>
+      api.post<AssistantPlan>('/assistant/plan', { message: v.message, file: v.file ?? undefined }),
     onSuccess: (plan) =>
       setTurns((ts) => [
         ...ts,
@@ -455,7 +437,7 @@ export function AssistantView() {
               </Button>
               <Textarea
                 aria-label={t('placeholder')}
-                placeholder={status.data?.aiEnabled ? t('placeholder') : t('placeholderTable')}
+                placeholder={t('placeholder')}
                 className="max-h-48 min-h-11 flex-1 resize-y"
                 rows={2}
                 value={text}
@@ -486,9 +468,7 @@ export function AssistantView() {
               <li>{t('how2')}</li>
               <li>{t('how3')}</li>
             </ol>
-            {status.data && !status.data.aiEnabled && (
-              <p className="rounded-xl bg-muted p-3 text-muted-foreground">{t('aiOff')}</p>
-            )}
+            <p className="rounded-xl bg-muted p-3 text-muted-foreground">{t('commandsHint')}</p>
           </Card>
           <Card className="grid gap-2 p-5 text-sm">
             <h2 className="font-semibold">{t('templatesTitle')}</h2>

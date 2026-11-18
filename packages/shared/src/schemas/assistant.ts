@@ -92,16 +92,9 @@ export type AssistantOp = z.infer<typeof AssistantOpSchema>;
 export type AssistantOpType = AssistantOp['type'];
 
 export const AssistantPlanRequestSchema = z.object({
-  /** UI language (reply language for AI answers). */
-  locale: z.enum(['ar', 'en']).optional(),
   message: z.string().trim().max(20_000).default(''),
   /** Raw CSV / TSV text of an attached file (read in the browser). */
   file: z.object({ name: z.string().max(200), text: z.string().max(2_000_000) }).optional(),
-  /** Earlier turns, for follow-ups such as "also add…" (AI mode). */
-  history: z
-    .array(z.object({ role: z.enum(['user', 'assistant']), text: z.string().max(4000) }))
-    .max(10)
-    .default([]),
 });
 export type AssistantPlanRequest = z.infer<typeof AssistantPlanRequestSchema>;
 

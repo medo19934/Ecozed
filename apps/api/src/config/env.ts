@@ -36,12 +36,6 @@ export const EnvSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
-  /**
-   * Smart assistant: reading free-text messages uses the Claude API (optional, billed per use).
-   * Without a key, CSV / pasted tables still work (rule-based).
-   */
-  ANTHROPIC_API_KEY: z.string().optional(),
-  ASSISTANT_MODEL: z.string().default('claude-opus-5-5'),
   /** Local dev only: enables POST /auth/dev-login (email, no Google). Never in production. */
   AUTH_DEV_LOGIN: z
     .enum(['true', 'false'])

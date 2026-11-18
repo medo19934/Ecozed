@@ -523,12 +523,10 @@ export interface UserAuditEntry {
 /** Smart assistant: proposed changes (nothing is saved until applied). */
 export interface AssistantPlan {
   reply: string;
-  /** How the input was understood: a table/CSV (rules) or free text (AI). */
-  source: 'table' | 'ai' | 'none';
+  /** How the input was understood (both rule-based, free): a table/CSV or chat instructions. */
+  source: 'table' | 'text' | 'none';
   operations: AssistantOp[];
   warnings: string[];
-  /** AI reading of free text is available (server has an API key). */
-  aiEnabled: boolean;
 }
 
 export interface AssistantResult {

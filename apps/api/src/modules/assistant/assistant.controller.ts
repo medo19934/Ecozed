@@ -1,9 +1,8 @@
-import { Body, Controller, Get, Headers, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AssistantApplySchema, AssistantPlanRequestSchema } from '@latif/shared';
 import { createZodDto } from 'nestjs-zod';
 import { CurrentAuth, Roles, type AuthContext } from '../../common/decorators/auth.decorators';
-import { AiPlanner } from './ai-planner';
 import { AssistantService } from './assistant.service';
 
 class PlanDto extends createZodDto(AssistantPlanRequestSchema) {}
@@ -15,25 +14,13 @@ class ApplyDto extends createZodDto(AssistantApplySchema) {}
 @Roles('SUPER_ADMIN', 'MANAGER')
 @Controller('assistant')
 export class AssistantController {
-  constructor(
-    private readonly assistant: AssistantService,
-    private readonly ai: AiPlanner,
-  ) {}
-
-  @Get('status')
-  status() {
-    return { aiEnabled: this.ai.enabled };
-  }
+  constructor(private readonly assistant: AssistantService) {}
 
   /** Reads text / CSV and proposes changes. Saves nothing. */
   @HttpCode(200)
   @Post('plan')
-  plan(
-    @CurrentAuth() auth: AuthContext,
-    @Body() dto: PlanDto,
-    @Headers('accept-language') lang?: string,
-  ) {
-    return this.assistant.plan(auth, dto, dto.locale ?? (lang?.startsWith('en') ? 'en' : 'ar'));
+  plan(@CurrentAuth() auth: AuthContext, @Body() dto: PlanDto) {
+    return this.assistant.plan(auth, dto);
   }
 
   /** Applies the confirmed changes through the regular services. */

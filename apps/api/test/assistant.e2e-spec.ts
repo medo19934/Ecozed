@@ -1,7 +1,6 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { AssistantPlan, AssistantResult, AuthResponse } from '@latif/shared';
-import { AiPlanner } from '../src/modules/assistant/ai-planner';
 import { PrismaService } from '../src/prisma/prisma.service';
 
 process.env.PUBLIC_DEMO = 'false';
@@ -159,49 +158,15 @@ describe('Smart assistant (e2e)', () => {
     ).toBeGreaterThan(0);
   });
 
-  it('free text without an AI key explains how to proceed; with AI, Claude output is validated', async () => {
-    const off = await plan(managerA, { message: 'أضف معلمة اسمها سارة' });
-    expect(off).toMatchObject({ source: 'none', operations: [], warnings: ['ai_not_configured'] });
-
-    // Stand-in for the Claude API response (no network): one valid and one invalid item.
-    const planner = app.get(AiPlanner);
-    jest.spyOn(planner, 'enabled', 'get').mockReturnValue(true);
-    const create = jest.fn().mockResolvedValue({
-      stop_reason: 'end_turn',
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            reply: 'سأضيف المعلمة سارة.',
-            operations: [
-              {
-                type: 'user.create',
-                branch: null,
-                role: 'STAFF',
-                fullName: 'سارة',
-                email: 'sara@example.com',
-                phone: null,
-                classNames: [],
-              },
-              { type: 'child.create', fullName: 'بلا تاريخ' },
-            ],
-          }),
-        },
-      ],
+  it('chat sentences are understood without any paid AI service', async () => {
+    const p = await plan(managerA, {
+      message: `أضف معلمة اسمها نورة ${u} as-n${u}@example.com في فصل العصافير\nأوقف التقويم\nكلام غير مفهوم`,
     });
-    (planner as unknown as { client: unknown }).client = { beta: { messages: { create } } };
-    const on = await plan(managerA, { message: 'أضف معلمة اسمها سارة sara@example.com' });
-    expect(on.source).toBe('ai');
-    expect(on.reply).toBe('سأضيف المعلمة سارة.');
-    expect(on.operations).toEqual([
-      expect.objectContaining({ type: 'user.create', fullName: 'سارة' }),
-    ]);
-    expect(on.warnings).toEqual(['invalid_items: 1']);
-    const req = create.mock.calls[0]![0] as {
-      output_config: { format: { type: string } };
-      messages: { content: string }[];
-    };
-    expect(req.output_config.format.type).toBe('json_schema');
-    expect(req.messages.at(-1)!.content).toContain(nameA);
+    expect(p.source).toBe('text');
+    expect(p.operations.map((o) => o.type)).toEqual(['user.create', 'feature.set']);
+    expect(p.warnings).toEqual(['not_understood: كلام غير مفهوم']);
+    const r = await apply(managerA, p.operations);
+    expect(r.map((x) => x.status)).toEqual(['done', 'done']);
+    expect(r[0]!.issued?.tempPassword).toBeTruthy();
   });
 });
