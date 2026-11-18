@@ -308,8 +308,16 @@ export class TestDataService {
       where: { daycareId, isTest: true },
       select: { id: true, userId: true },
     });
+    // Items made by the TEST / sample accounts (demo events, conversations, admission requests).
+    const testUserIds = testMembers.map((m) => m.userId);
     await this.prisma.raw.calendarEvent.deleteMany({
-      where: { daycareId, title: { startsWith: 'TEST ·' } },
+      where: {
+        daycareId,
+        OR: [{ title: { startsWith: 'TEST ·' } }, { createdById: { in: testUserIds } }],
+      },
+    });
+    await this.prisma.raw.admissionRequest.deleteMany({
+      where: { daycareId, requestedById: { in: testUserIds } },
     });
     const testKids = await this.prisma.raw.child.findMany({
       where: { daycareId, isTest: true },
@@ -318,7 +326,11 @@ export class TestDataService {
     await this.prisma.raw.messageThread.deleteMany({
       where: {
         daycareId,
-        OR: [{ title: { startsWith: 'TEST ·' } }, { childId: { in: testKids.map((k) => k.id) } }],
+        OR: [
+          { title: { startsWith: 'TEST ·' } },
+          { childId: { in: testKids.map((k) => k.id) } },
+          { createdById: { in: testUserIds } },
+        ],
       },
     });
     await this.prisma.raw.unit.deleteMany({ where: { daycareId, isTest: true } });
