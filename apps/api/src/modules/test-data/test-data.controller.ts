@@ -21,6 +21,13 @@ export class TestDataController {
     return this.testData.create();
   }
 
+  /** Every branch at once (general admin only). Declared before the plain DELETE. */
+  @Roles('SUPER_ADMIN')
+  @Delete('all')
+  clearAll() {
+    return this.testData.clearAll();
+  }
+
   @Delete()
   clear() {
     return this.testData.clear();

@@ -323,6 +323,7 @@ function FeaturesTab({ branch }: { branch: BranchDto }) {
 
 function TestDataTab() {
   const t = useTranslations('settings');
+  const { data: user } = useSession();
   const errorMessage = useErrorMessage();
   const qc = useQueryClient();
   const status = useQuery({
@@ -331,9 +332,8 @@ function TestDataTab() {
   });
   const after = (s: { classes: number; children: number; staff: number }) => {
     qc.setQueryData(['test-data'], s);
-    void qc.invalidateQueries({
-      predicate: (q) => ['children', 'classes', 'staff'].includes(String(q.queryKey[0])),
-    });
+    // Lists, dashboards and counters everywhere show the change at once.
+    void qc.invalidateQueries({ predicate: (q) => q.queryKey[0] !== 'test-data' });
   };
   const create = useMutation({
     mutationFn: () => api.post<typeof status.data>('/test-data'),
@@ -343,6 +343,14 @@ function TestDataTab() {
   const clear = useMutation({
     mutationFn: () => api.delete<typeof status.data>('/test-data'),
     onSuccess: (s) => s && after(s),
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  const clearAll = useMutation({
+    mutationFn: () => api.delete<{ branches: number }>('/test-data/all'),
+    onSuccess: (r) => {
+      toast.success(t('testClearedAll', { count: r.branches }));
+      void qc.invalidateQueries();
+    },
     onError: (e) => toast.error(errorMessage(e)),
   });
   const s = status.data;
@@ -357,14 +365,16 @@ function TestDataTab() {
       <CardContent className="grid gap-4">
         {s ? <p className="text-sm">{t('testCounts', s)}</p> : <Skeleton className="h-5 w-64" />}
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            className="border-warning/60"
-            disabled={create.isPending}
-            onClick={() => create.mutate()}
+          <Confirm
+            title={t('testCreateConfirm')}
+            body={t('testCreateWarning')}
+            confirmLabel={t('testCreate')}
+            onConfirm={() => create.mutateAsync()}
           >
-            <FlaskConical /> {t('testCreate')}
-          </Button>
+            <Button variant="outline" className="border-warning/60" disabled={create.isPending}>
+              <FlaskConical /> {t('testCreate')}
+            </Button>
+          </Confirm>
           <Confirm
             title={t('testConfirm')}
             confirmLabel={t('testClear')}
@@ -375,6 +385,19 @@ function TestDataTab() {
               <Trash2 /> {t('testClear')}
             </Button>
           </Confirm>
+          {user?.isSuperAdmin && (
+            <Confirm
+              title={t('testClearAllConfirm')}
+              body={t('testClearAllBody')}
+              confirmLabel={t('testClearAll')}
+              destructive
+              onConfirm={() => clearAll.mutateAsync()}
+            >
+              <Button variant="destructive" disabled={clearAll.isPending}>
+                <Trash2 /> {t('testClearAll')}
+              </Button>
+            </Confirm>
+          )}
         </div>
       </CardContent>
     </Card>

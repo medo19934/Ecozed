@@ -319,7 +319,13 @@
     "testCounts": "Currently: {classes} classes · {staff} staff · {children} children",
     "testConfirm": "Remove all TEST data from this branch?",
     "adminsTab": "General admins",
-    "usersTab": "Users"
+    "usersTab": "Users",
+    "testCreateConfirm": "Add sample data to this branch?",
+    "testCreateWarning": "Sample (TEST) classes, teachers and children are added to this branch for trying the app. You can remove them later in one click.",
+    "testClearAll": "Remove sample data from all branches",
+    "testClearAllConfirm": "Remove all sample data from every branch?",
+    "testClearAllBody": "Only rows marked TEST and the sample accounts, classes and children are removed. Your real data is not affected.",
+    "testClearedAll": "Sample data removed from {count} branches."
   },
   "classes": {
     "title": "Classes",

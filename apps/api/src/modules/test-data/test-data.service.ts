@@ -303,7 +303,21 @@ export class TestDataService {
 
   /** Removes all TEST rows of the active branch (hard delete: test data only). */
   async clear() {
-    const daycareId = requireTenantId();
+    await this.clearBranch(requireTenantId());
+    return this.status();
+  }
+
+  /** General admin: removes the TEST / sample rows of every branch in one go. */
+  async clearAll() {
+    const branches = await this.prisma.raw.daycare.findMany({
+      where: { deletedAt: null },
+      select: { id: true },
+    });
+    for (const b of branches) await this.clearBranch(b.id);
+    return { branches: branches.length };
+  }
+
+  private async clearBranch(daycareId: string) {
     const testMembers = await this.prisma.raw.membership.findMany({
       where: { daycareId, isTest: true },
       select: { id: true, userId: true },
@@ -342,7 +356,11 @@ export class TestDataService {
     await this.prisma.raw.user.deleteMany({
       where: { id: { in: testMembers.map((m) => m.userId) }, memberships: { none: {} } },
     });
-    await this.audit.log({ action: 'test_data.clear', entity: 'Daycare', entityId: daycareId });
-    return this.status();
+    await this.audit.log({
+      action: 'test_data.clear',
+      entity: 'Daycare',
+      entityId: daycareId,
+      daycareId,
+    });
   }
 }
