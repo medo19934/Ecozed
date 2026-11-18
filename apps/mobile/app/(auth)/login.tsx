@@ -1,11 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import type { DemoAccount } from '@latif/shared';
-import { Baby, Building2, GraduationCap, ShieldCheck, Sparkles } from 'lucide-react-native';
+import { Baby, Building2, GraduationCap, ShieldCheck } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -14,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import logoMark from '../../assets/logo-mark.png';
 import { GoogleButton } from '@/components/google-button';
 import { BRAND_GRADIENT, Card, Field, PrimaryButton } from '@/components/ui';
 import { changeLocale, i18n } from '@/i18n';
@@ -113,9 +115,11 @@ export default function LoginScreen() {
         >
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
-              <View className="h-10 w-10 items-center justify-center rounded-2xl bg-white/20">
-                <Sparkles color="#fff" size={22} />
-              </View>
+              <Image
+                source={logoMark}
+                accessibilityIgnoresInvertColors
+                style={{ width: 40, height: 40, borderRadius: 12 }}
+              />
               <Text className="text-xl font-bold text-white">{t('appName')}</Text>
             </View>
             <Pressable
