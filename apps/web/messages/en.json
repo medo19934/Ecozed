@@ -68,7 +68,8 @@
     "breadcrumb": "Breadcrumb",
     "notifications": "Notifications",
     "noNotifications": "You're all caught up.",
-    "parents": "Parents"
+    "parents": "Parents",
+    "assistant": "Smart assistant"
   },
   "branch": {
     "label": "Branch",
@@ -273,7 +274,11 @@
     "other_branch": "You can only manage your own branch.",
     "user_exists": "This person is already in this branch.",
     "unknown_child": "This child no longer exists.",
-    "not_parent": "Only parents can be linked to children."
+    "not_parent": "Only parents can be linked to children.",
+    "ai_not_configured": "Free-text reading is not enabled.",
+    "ai_bad_key": "The server's AI key is invalid.",
+    "ai_busy": "The assistant is busy, try again shortly.",
+    "ai_failed": "Couldn't read the message. Try again or use a CSV."
   },
   "settings": {
     "title": "Settings",
@@ -1003,6 +1008,93 @@
         "unlink_child": "unlinked a child from",
         "move_child": "moved child"
       }
+    }
+  },
+  "assistant": {
+    "title": "Smart assistant",
+    "emptyTitle": "Enter your branches' data by chatting or with a file",
+    "emptyBody": "Write what you need, paste rows from Excel, or attach a CSV of children, teachers, parents, classes or plans. You review every change before it is saved.",
+    "example1": "Add a teacher named Sara Ali sara@example.com to the Birds class",
+    "example2": "Move the child Saad to the Butterflies class",
+    "example3": "Turn off daily reports in this branch",
+    "placeholder": "Type a message or paste rows from Excel… (Enter to send)",
+    "placeholderTable": "Paste rows from Excel with the header line, or attach a CSV…",
+    "attach": "Attach a CSV file",
+    "removeFile": "Remove file",
+    "send": "Send",
+    "thinking": "Reading your data…",
+    "saveAsCsv": "Save the Excel file as CSV (File → Save as → CSV UTF-8), then attach it.",
+    "fileTooBig": "The file is larger than 2 MB.",
+    "nothingFound": "I found nothing to add. Use a template or write the details.",
+    "reviewTitle": "Review the changes ({count}) — untick anything you don't want:",
+    "apply": "Confirm and save ({count})",
+    "applyHint": "Nothing is saved before you confirm. Normal permissions apply.",
+    "appliedToast": "Saved {done} of {total}.",
+    "passwordsTitle": "Temporary passwords (shown once)",
+    "passwordsHint": "Send each person their login; they must change the password on first sign-in.",
+    "copyAll": "Copy all",
+    "downloadCsv": "Download CSV",
+    "copied": "Copied",
+    "howTitle": "How it works",
+    "how1": "Type, paste or attach a file.",
+    "how2": "The assistant lists the proposed changes for each branch.",
+    "how3": "Review them and confirm; they are saved with the same permissions and logged.",
+    "aiOff": "Reading free-text messages is not enabled on the server. Tables and CSV files always work.",
+    "templatesTitle": "Templates",
+    "templatesHint": "Download a template, fill it in Excel, save as CSV and attach it. The branch column is optional (general admin).",
+    "template": {
+      "children": "Children & guardians",
+      "people": "Teachers, managers & parents",
+      "classes": "Classes",
+      "plans": "Subscription plans"
+    },
+    "status": {
+      "done": "Done",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "detail": {
+      "exists": "already exists",
+      "unknown_class": "unknown class: {value}",
+      "not_found": "not found: {value}",
+      "ambiguous": "more than one match: {value}",
+      "other_branch": "branch not allowed",
+      "error": "error"
+    },
+    "ops": {
+      "classCreate": "Add class “{name}” (capacity {capacity})",
+      "userCreate": "Add {role}: {name} — {contact} — classes: {classes}",
+      "userUpdate": "Update {match}: {changes}",
+      "userDeactivate": "Deactivate {match}",
+      "childCreate": "Add child {name} ({birthDate}) — class: {className} — guardian: {guardian}",
+      "childMove": "Move {name} to class {className}",
+      "branchUpdate": "Update branch details: {changes}",
+      "featureOn": "Turn on: {feature}",
+      "featureOff": "Turn off: {feature}",
+      "planCreate": "Add plan “{name}” at {price} SAR ({period})",
+      "period": {
+        "MONTHLY": "monthly",
+        "TERM": "per term",
+        "YEARLY": "yearly"
+      }
+    },
+    "warn": {
+      "row": "Row {row}: {problem}",
+      "missing_name": "name missing",
+      "missing_birth_date": "birth date missing or invalid",
+      "missing_gender": "gender missing",
+      "missing_guardian": "guardian name missing",
+      "missing_guardian_contact": "add the guardian's phone or email",
+      "missing_contact": "add an email or phone",
+      "missing_price": "price missing",
+      "unknown_row": "row type not recognised",
+      "no_rows": "The file has no rows after the header line.",
+      "unknown_columns": "Column names were not recognised. Use a template.",
+      "class_added": "The new class “{value}” will be added because it doesn't exist.",
+      "branch_not_allowed": "Rows for a branch you can't manage were ignored: {value}",
+      "invalid_items": "{value} incomplete item(s) were ignored.",
+      "note_not_read": "A note typed with a file isn't read; use the branch column in the file.",
+      "ai_not_configured": "Free-text reading is not enabled. Paste rows with headers or attach a CSV (templates on the side)."
     }
   }
 }

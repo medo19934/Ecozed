@@ -6,5 +6,6 @@ import { SubscriptionsService } from './subscriptions.service';
   // "mine" first so it isn't captured by the admin routes.
   controllers: [SubscriptionsController, SubscriptionsAdminController],
   providers: [SubscriptionsService],
+  exports: [SubscriptionsService],
 })
 export class SubscriptionsModule {}

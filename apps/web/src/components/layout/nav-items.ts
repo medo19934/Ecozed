@@ -13,6 +13,7 @@ import {
   NotebookPen,
   School,
   Settings,
+  Sparkles,
   UserPlus,
   Users,
   type LucideIcon,
@@ -34,6 +35,7 @@ export type NavKey =
   | 'dailyReports'
   | 'reports'
   | 'settings'
+  | 'assistant'
   | 'enrollChild';
 
 export interface NavItem {
@@ -66,6 +68,7 @@ const ICONS: Record<MenuKey, LucideIcon> = {
   dailyReports: NotebookPen,
   reports: BarChart3,
   settings: Settings,
+  assistant: Sparkles,
   enrollChild: UserPlus,
 };
 

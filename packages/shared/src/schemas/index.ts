@@ -9,3 +9,4 @@ export * from './curriculum';
 export * from './messages';
 export * from './finance';
 export * from './users';
+export * from './assistant';

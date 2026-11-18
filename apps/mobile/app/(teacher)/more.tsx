@@ -11,6 +11,7 @@ import {
   CreditCard,
   School,
   Settings,
+  Sparkles,
   UserPlus,
   Users,
   type LucideIcon,
@@ -34,6 +35,7 @@ const ICONS: Partial<Record<MenuKey, LucideIcon>> = {
   subscriptions: CreditCard,
   reports: BarChart3,
   settings: Settings,
+  assistant: Sparkles,
 };
 /** Native screens; everything else opens the same web page in the in-app browser. */
 const NATIVE: Partial<Record<MenuKey, Href>> = {

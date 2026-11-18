@@ -1,3 +1,4 @@
+import type { AssistantOp } from '../schemas/assistant';
 import type { Role, StaffPermission, FeatureToggle } from '../enums';
 import type { Locale } from '../constants';
 
@@ -517,4 +518,23 @@ export interface UserAuditEntry {
   target: string | null;
   branch: string | null;
   details: Record<string, unknown> | null;
+}
+
+/** Smart assistant: proposed changes (nothing is saved until applied). */
+export interface AssistantPlan {
+  reply: string;
+  /** How the input was understood: a table/CSV (rules) or free text (AI). */
+  source: 'table' | 'ai' | 'none';
+  operations: AssistantOp[];
+  warnings: string[];
+  /** AI reading of free text is available (server has an API key). */
+  aiEnabled: boolean;
+}
+
+export interface AssistantResult {
+  index: number;
+  status: 'done' | 'skipped' | 'failed';
+  /** Short human text, e.g. error code or what was created. */
+  detail: string | null;
+  issued: IssuedPassword | null;
 }

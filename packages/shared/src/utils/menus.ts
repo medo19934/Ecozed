@@ -21,6 +21,7 @@ export type MenuKey =
   | 'dailyReports'
   | 'reports'
   | 'settings'
+  | 'assistant'
   | 'enrollChild';
 
 export interface MenuEntry {
@@ -53,6 +54,7 @@ export const STAFF_MENU: MenuEntry[] = [
   { key: 'dailyReports', path: '/daily-reports', feature: 'dailyReports' },
   { key: 'reports', path: '/reports', permission: 'canViewReports' },
   { key: 'settings', path: '/settings', permission: 'canManageSettings' },
+  { key: 'assistant', path: '/assistant', roles: ['SUPER_ADMIN', 'MANAGER'] },
 ];
 
 export const PARENT_MENU: MenuEntry[] = [

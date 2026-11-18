@@ -9,6 +9,6 @@ import { GuardianLinkService } from './guardian-link.service';
   imports: [ClassesModule],
   controllers: [ChildrenController, ParentsController],
   providers: [ChildrenService, GuardianLinkService],
-  exports: [GuardianLinkService],
+  exports: [GuardianLinkService, ChildrenService],
 })
 export class ChildrenModule {}
