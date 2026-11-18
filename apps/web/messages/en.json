@@ -1096,5 +1096,21 @@
       "note_not_read": "A note typed with a file isn't read; use the branch column in the file.",
       "ai_not_configured": "Free-text reading is not enabled. Paste rows with headers or attach a CSV (templates on the side)."
     }
+  },
+  "getApp": {
+    "title": "Get the Latif Kids app",
+    "subtitle": "For parents and teachers — on iPhone and Android, without an app store.",
+    "iosTitle": "iPhone & iPad",
+    "ios1": "Open this link in Safari:",
+    "ios2": "Tap the Share button",
+    "ios3": "Choose “Add to Home Screen”",
+    "ios4": "Open “Latif Kids” from your home screen and sign in.",
+    "iosNote": "It runs full-screen like any app and updates automatically — no App Store needed.",
+    "androidTitle": "Android",
+    "android1": "Download the APK and install it (your phone may ask you to allow installs from this source).",
+    "androidButton": "Download APK",
+    "androidNote": "Open the release page and download latif-kids.apk. You can also use the iPhone link on Android.",
+    "qrAlt": "QR code for the link",
+    "link": "Mobile app (iPhone & Android)"
   }
 }

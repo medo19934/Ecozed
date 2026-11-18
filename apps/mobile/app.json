@@ -17,7 +17,9 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "lang": "ar",
+      "themeColor": "#5b6db4"
     },
     "plugins": [
       "expo-router",

@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { i18n, initI18n } from '@/i18n';
+import { IosInstallHint } from '@/components/ios-install-hint';
 import { AuthProvider } from '@/lib/auth';
 
 void SplashScreen.preventAutoHideAsync();
@@ -33,6 +34,7 @@ export default function RootLayout() {
           <AuthProvider>
             <StatusBar style="dark" />
             <Stack screenOptions={{ headerShown: false }} />
+            <IosInstallHint />
           </AuthProvider>
         </QueryClientProvider>
       </I18nextProvider>

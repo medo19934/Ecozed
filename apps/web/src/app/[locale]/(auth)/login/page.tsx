@@ -1,5 +1,5 @@
 import type { DemoAccount } from '@latif/shared';
-import { Baby, BriefcaseBusiness } from 'lucide-react';
+import { Baby, BriefcaseBusiness, Smartphone } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
@@ -7,6 +7,7 @@ import { DevLogin } from '@/components/auth/dev-login';
 import { GoogleSignIn } from '@/components/auth/google-sign-in';
 import { RoleLogin, type PublicBranch } from '@/components/auth/role-login';
 import { QuickLogin } from '@/components/auth/quick-login';
+import { Link } from '@/i18n/navigation';
 import { initLocale } from '@/i18n/locale';
 import { callApi } from '@/lib/bff';
 
@@ -50,6 +51,7 @@ async function loadOptions(): Promise<{
 export default async function LoginPage({ params }: PageProps<'/[locale]/login'>) {
   await initLocale(params);
   const t = await getTranslations('auth');
+  const tApp = await getTranslations('getApp');
   const devLogin = process.env.NEXT_PUBLIC_AUTH_DEV_LOGIN === 'true';
   const { publicDemo, google, branches, accounts } = await loadOptions();
 
@@ -90,6 +92,12 @@ export default async function LoginPage({ params }: PageProps<'/[locale]/login'>
             )}
           </>
         )}
+        <Link
+          href="/get-app"
+          className="flex items-center justify-center gap-2 text-sm font-medium text-primary hover:underline"
+        >
+          <Smartphone className="size-4" aria-hidden /> {tApp('link')}
+        </Link>
         {devLogin && !publicDemo && (
           <Suspense>
             <DevLogin />

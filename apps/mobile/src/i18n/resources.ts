@@ -50,6 +50,11 @@ export const resources = {
         registerHelp:
           'After creating your account you can request enrollment. The branch links your children to your account.',
       },
+      install: {
+        title: 'Install the app on your phone',
+        body: 'Tap Share in Safari, then “Add to Home Screen” to use it like an app.',
+        close: 'Close',
+      },
       menu: {
         children: 'Children',
         parents: 'Parents',
@@ -361,6 +366,11 @@ export const resources = {
         loginHelp:
           'الطاقم وأولياء الأمور المسجّلون من الفرع: استخدموا كلمة المرور التي أرسلها لكم الفرع. نسيت كلمة المرور؟ تواصل مع الفرع.',
         registerHelp: 'بعد إنشاء الحساب يمكنك تقديم طلب تسجيل طفلك. يربط الفرع أطفالك بحسابك.',
+      },
+      install: {
+        title: 'ثبّت التطبيق على جوالك',
+        body: 'اضغط زر المشاركة في Safari ثم «إضافة إلى الشاشة الرئيسية» ليعمل كتطبيق.',
+        close: 'إغلاق',
       },
       menu: {
         children: 'الأطفال',
