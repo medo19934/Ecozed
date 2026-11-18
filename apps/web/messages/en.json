@@ -258,7 +258,7 @@
     "class_required": "Choose a class for a class event.",
     "time_range_invalid": "End time must be after start time.",
     "invalid_time": "Use HH:MM time.",
-    "no_branch": "No active branch.",
+    "no_branch": "Choose a branch.",
     "invalid_credentials": "Wrong email/phone or password.",
     "account_exists": "An account with this email or phone already exists. Sign in, or ask your branch for a password.",
     "wrong_password": "Current password is wrong.",
@@ -268,7 +268,12 @@
     "invalid_date": "Invalid date.",
     "qr_used": "This code was already used. Scan the new code on the screen.",
     "pin_locked": "Too many wrong PINs. Try again in 5 minutes.",
-    "already_checked_in": "Already checked in."
+    "already_checked_in": "Already checked in.",
+    "has_records": "This person has linked records; deactivate instead of deleting.",
+    "other_branch": "You can only manage your own branch.",
+    "user_exists": "This person is already in this branch.",
+    "unknown_child": "This child no longer exists.",
+    "not_parent": "Only parents can be linked to children."
   },
   "settings": {
     "title": "Settings",
@@ -299,7 +304,11 @@
       "messages": "Messages between staff and parents",
       "childQrAttendance": "Child attendance by QR / PIN kiosk",
       "staffGeofencedAttendance": "Staff check-in by location (geofence)",
-      "dailyStoryAi": "AI Daily Story (uses AI credits)"
+      "dailyStoryAi": "AI Daily Story (uses AI credits)",
+      "dailyReports": "Daily reports",
+      "subscriptions": "Subscriptions & payments",
+      "calendar": "Calendar & events",
+      "units": "Learning units"
     },
     "featuresHint": "Turn modules on or off for this branch.",
     "testTitle": "TEST data",
@@ -308,7 +317,8 @@
     "testClear": "Remove TEST data",
     "testCounts": "Currently: {classes} classes · {staff} staff · {children} children",
     "testConfirm": "Remove all TEST data from this branch?",
-    "adminsTab": "General admins"
+    "adminsTab": "General admins",
+    "usersTab": "Users"
   },
   "classes": {
     "title": "Classes",
@@ -923,5 +933,76 @@
     "listTitle": "General admins",
     "removeTitle": "Remove general admin?",
     "removeHint": "{name} will no longer see all branches."
+  },
+  "users": {
+    "title": "Users",
+    "hintSuper": "Add branch managers, teachers and parents in every branch.",
+    "hintManager": "Add teachers and parents in your branch.",
+    "add": "Add user",
+    "edit": "Edit user",
+    "search": "Search by name, phone or email",
+    "role": "Role",
+    "branch": "Branch",
+    "status": "Status",
+    "allRoles": "All roles",
+    "allBranches": "All branches",
+    "allStatuses": "All statuses",
+    "fullName": "Full name",
+    "phone": "Phone",
+    "email": "Email",
+    "classes": "Classes",
+    "children": "Linked children",
+    "child": "Child",
+    "chooseChild": "Choose a child",
+    "relationship": "Relationship",
+    "relationshipHint": "Mother, father…",
+    "guardian": "Guardian",
+    "link": "Link",
+    "unlink": "Unlink",
+    "unlinkHint": "Unlink {child} from {name}?",
+    "noChildren": "No linked children",
+    "childrenOf": "{name}'s children",
+    "moveClass": "Move to class…",
+    "moveBranch": "Move to branch…",
+    "details": "Classes / children",
+    "actionsCol": "Actions",
+    "tempHint": "A temporary password is created and shown once after saving.",
+    "nameRequired": "Enter the name.",
+    "contactRequired": "Enter an email or phone.",
+    "empty": "No users.",
+    "deactivate": "Deactivate",
+    "deactivateHint": "{name} is locked out at once; all records are kept.",
+    "reactivate": "Reactivate",
+    "reset": "Reset password",
+    "resetTitle": "Reset password",
+    "resetHint": "Create a new temporary password for {name}?",
+    "deleteTitle": "Delete user",
+    "deleteHint": "Delete {name} permanently? Only allowed when they have no records.",
+    "cannotDelete": "Cannot delete",
+    "cannotDeleteHint": "{name} has linked records (children, messages, reports or attendance). You can deactivate the account instead.",
+    "auditTitle": "User management log",
+    "auditEmpty": "Nothing yet.",
+    "roles": {
+      "MANAGER": "Branch manager",
+      "STAFF": "Teacher / staff",
+      "PARENT": "Parent"
+    },
+    "statuses": {
+      "ACTIVE": "Active",
+      "DISABLED": "Deactivated"
+    },
+    "actions": {
+      "users": {
+        "create": "added",
+        "update": "edited",
+        "deactivate": "deactivated",
+        "reactivate": "reactivated",
+        "delete": "deleted",
+        "password_reset": "reset the password of",
+        "link_child": "linked a child to",
+        "unlink_child": "unlinked a child from",
+        "move_child": "moved child"
+      }
+    }
   }
 }

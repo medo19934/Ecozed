@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AdminsPanel } from './admins-panel';
+import { UsersPanel } from './users-panel';
 import { api, fileUrl } from '@/lib/api-client';
 import { isBranchAdmin } from '@/lib/use-can';
 import { useErrorMessage } from '@/lib/use-error-message';
@@ -400,9 +401,10 @@ export function SettingsView() {
         <Skeleton className="h-96 w-full" />
       ) : (
         <Tabs defaultValue="profile" className="grid gap-5">
-          <TabsList className="justify-self-start">
+          <TabsList className="max-w-full justify-self-start overflow-x-auto">
             <TabsTrigger value="profile">{t('profileTab')}</TabsTrigger>
             <TabsTrigger value="features">{t('featuresTab')}</TabsTrigger>
+            {isBranchAdmin(user) && <TabsTrigger value="users">{t('usersTab')}</TabsTrigger>}
             {isBranchAdmin(user) && <TabsTrigger value="test">{t('testTab')}</TabsTrigger>}
             {user?.isSuperAdmin && <TabsTrigger value="admins">{t('adminsTab')}</TabsTrigger>}
           </TabsList>
@@ -412,6 +414,11 @@ export function SettingsView() {
           <TabsContent value="features">
             <FeaturesTab branch={branch.data} />
           </TabsContent>
+          {isBranchAdmin(user) && (
+            <TabsContent value="users">
+              <UsersPanel />
+            </TabsContent>
+          )}
           {isBranchAdmin(user) && (
             <TabsContent value="test">
               <TestDataTab />
