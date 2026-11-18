@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { FEATURE_DEFAULTS } from '@latif/shared';
 import type {
   BranchDto,
   BranchOption,
@@ -52,7 +53,10 @@ export class BranchesService {
       useHijri: b.useHijri,
       currency: b.currency,
       timezone: b.timezone,
-      features: Object.fromEntries(features.map((f) => [f.key, f.enabled])),
+      features: {
+        ...FEATURE_DEFAULTS,
+        ...Object.fromEntries(features.map((f) => [f.key, f.enabled])),
+      },
       updatedAt: b.updatedAt.toISOString(),
     };
   }

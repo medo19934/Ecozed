@@ -7,9 +7,9 @@ export default function ParentLayout() {
       area="parent"
       tabs={[
         { name: 'index', titleKey: 'tabs.home', icon: House },
-        { name: 'calendar', titleKey: 'tabs.calendar', icon: CalendarDays },
-        { name: 'messages', titleKey: 'tabs.messages', icon: MessageCircle },
-        { name: 'reports', titleKey: 'tabs.reports', icon: NotebookPen },
+        { name: 'calendar', titleKey: 'tabs.calendar', icon: CalendarDays, feature: 'calendar' },
+        { name: 'messages', titleKey: 'tabs.messages', icon: MessageCircle, feature: 'messages' },
+        { name: 'reports', titleKey: 'tabs.reports', icon: NotebookPen, feature: 'dailyReports' },
         { name: 'profile', titleKey: 'tabs.profile', icon: UserRound },
       ]}
     />

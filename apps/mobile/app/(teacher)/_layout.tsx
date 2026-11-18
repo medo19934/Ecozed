@@ -16,9 +16,9 @@ export default function TeacherLayout() {
       tabs={[
         { name: 'index', titleKey: 'tabs.today', icon: Sun },
         { name: 'attendance', titleKey: 'tabs.attendance', icon: ClipboardCheck },
-        { name: 'calendar', titleKey: 'tabs.calendar', icon: CalendarDays },
-        { name: 'messages', titleKey: 'tabs.messages', icon: MessageCircle },
-        { name: 'reports', titleKey: 'tabs.reports', icon: NotebookPen },
+        { name: 'calendar', titleKey: 'tabs.calendar', icon: CalendarDays, feature: 'calendar' },
+        { name: 'messages', titleKey: 'tabs.messages', icon: MessageCircle, feature: 'messages' },
+        { name: 'reports', titleKey: 'tabs.reports', icon: NotebookPen, feature: 'dailyReports' },
         { name: 'more', titleKey: 'tabs.more', icon: LayoutGrid },
         { name: 'profile', titleKey: 'tabs.profile', icon: UserRound },
       ]}

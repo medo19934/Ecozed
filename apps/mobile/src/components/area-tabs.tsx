@@ -1,3 +1,4 @@
+import { moduleOn, type FeatureToggle } from '@latif/shared';
 import { Redirect, Tabs } from 'expo-router';
 import type { LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +11,8 @@ export interface TabDef {
   name: string;
   titleKey: string;
   icon: LucideIcon;
+  /** Hidden when this branch module is switched off (Settings > Modules). */
+  feature?: FeatureToggle;
 }
 
 /** Bottom tabs for one role area; redirects users who don't belong here. */
@@ -39,12 +42,13 @@ export function AreaTabs({ area, tabs }: { area: AppArea; tabs: TabDef[] }) {
         tabBarLabelStyle: { fontSize: 12, lineHeight: 18, fontWeight: '600' },
       }}
     >
-      {tabs.map(({ name, titleKey, icon: Icon }) => (
+      {tabs.map(({ name, titleKey, icon: Icon, feature }) => (
         <Tabs.Screen
           key={name}
           name={name}
           options={{
             title: t(titleKey),
+            ...(feature && user && !moduleOn(user, feature) ? { href: null } : {}),
             tabBarIcon: ({ color, size }) => <Icon color={color} size={size} />,
             ...(name === 'messages' && unread > 0
               ? {
