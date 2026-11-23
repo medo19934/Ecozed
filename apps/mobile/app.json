@@ -105,7 +105,7 @@
       "typedRoutes": true
     },
     "updates": {
-      "enabled": false,
+      "enabled": true,
       "url": "https://u.expo.dev/5539d8ea-a30e-4167-bb50-80aa4d3eab86"
     },
     "icon": "./assets/icon.png",
