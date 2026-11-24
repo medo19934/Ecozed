@@ -25,6 +25,8 @@ const norm = (s: string) =>
     .trim()
     .toLowerCase()
     .replace(/[أإآ]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
     .replace(/[.!؟?،]/g, '');
 const CONFIRM = ['تم', 'نعم', 'اعتمد', 'اكد', 'موافق', 'احفظ', 'yes', 'ok', 'confirm'];
 const CANCEL = ['الغاء', 'لا', 'الغ', 'cancel', 'no'];
