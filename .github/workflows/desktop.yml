@@ -25,9 +25,10 @@ jobs:
           - os: windows-latest
             script: dist:win
             file: desktop/dist/*.exe
-          - os: macos-latest
-            script: dist:mac
-            file: desktop/dist/*.dmg
+          # Mac zips are built on Linux (Mac runners queue/cancel on free private repos).
+          - os: ubuntu-latest
+            script: dist:mac-zip
+            file: desktop/dist/*.zip
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
     steps:
@@ -64,6 +65,6 @@ jobs:
           make_latest: false
           body: |
             **Windows:** download `latif-kids-setup-*.exe` → open → "More info" → "Run anyway" (first time only).
-            **Mac:** download `latif-kids-setup-*.dmg` → drag Latif Kids to Applications → right-click the app → Open (first time only).
+            **Mac:** download `latif-kids-mac-arm64.zip` (Apple M1–M4) or `latif-kids-mac-x64.zip` (Intel) → unzip → drag Latif Kids to Applications → right-click → Open (first time only).
             Connects to https://latif-kids.vercel.app — needs internet.
           files: out/*
