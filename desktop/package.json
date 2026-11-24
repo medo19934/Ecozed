@@ -1,0 +1,28 @@
+{
+  "name": "latif-kids-desktop",
+  "productName": "Latif Kids",
+  "version": "1.0.0",
+  "description": "Latif Kids desktop app (Windows / Mac) for the live platform.",
+  "main": "src/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis --publish never",
+    "dist:mac": "electron-builder --mac dmg --publish never"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "app.latifkids.desktop",
+    "productName": "Latif Kids",
+    "artifactName": "latif-kids-setup-${version}.${ext}",
+    "directories": { "buildResources": "build", "output": "dist" },
+    "files": ["src/**/*", "build/icon.png"],
+    "win": { "target": "nsis", "icon": "build/icon.png" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true, "shortcutName": "Latif Kids" },
+    "mac": { "target": "dmg", "icon": "build/icon.png", "category": "public.app-category.education" },
+    "dmg": { "title": "Latif Kids" }
+  }
+}
