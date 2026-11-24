@@ -11,5 +11,6 @@ import { AssistantService } from './assistant.service';
   imports: [BranchesModule, ChildrenModule, ClassesModule, SubscriptionsModule, UsersModule],
   controllers: [AssistantController],
   providers: [AssistantService],
+  exports: [AssistantService],
 })
 export class AssistantModule {}

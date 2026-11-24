@@ -695,3 +695,17 @@ model KioskTokenUse {
   @@id([tokenHash, userId])
   @@index([usedAt])
 }
+
+/// WhatsApp agent: the change list waiting for the admin's "تم" (one per user, replaced on each new request).
+model AgentPending {
+  userId     String   @id @db.Uuid
+  daycareId  String?  @db.Uuid
+  operations Json
+  createdAt  DateTime @default(now())
+}
+
+/// WhatsApp agent: message ids already handled (WhatsApp retries webhooks).
+model AgentInbound {
+  id        String   @id
+  createdAt DateTime @default(now())
+}

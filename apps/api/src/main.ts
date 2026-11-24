@@ -6,7 +6,7 @@ import { configureApp, setupSwagger } from './bootstrap';
 import { AppConfig } from './config/app-config.service';
 
 async function main(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   configureApp(app);
   setupSwagger(app);
   const port = app.get(AppConfig).get('API_PORT');

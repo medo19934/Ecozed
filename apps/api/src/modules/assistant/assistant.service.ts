@@ -136,7 +136,7 @@ export class AssistantService {
             ? (op.classNames ?? [])
             : [];
       for (const w of wanted) {
-        if (w && !names.has(norm(w))) {
+        if (w && !names.has(norm(w)) && !names.has(norm(`${w} class`))) {
           names.add(norm(w));
           classAdds.push({ type: 'class.create', branch: op.branch, name: w, capacity: 20 });
           warnings.push(`class_added: ${w}`);
@@ -204,7 +204,9 @@ export class AssistantService {
       where: { daycareId, deletedAt: null },
       select: { id: true, name: true },
     });
-    const hit = rows.find((c) => norm(c.name) === norm(name));
+    const hit =
+      rows.find((c) => norm(c.name) === norm(name)) ??
+      rows.find((c) => norm(c.name) === norm(`${name} class`));
     if (!hit) throw new Skip(`unknown_class: ${name}`);
     return hit.id;
   }

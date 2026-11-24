@@ -30,7 +30,7 @@ export async function createTestApp(): Promise<INestApplication> {
     .overrideProvider(GOOGLE_VERIFIER)
     .useValue(fakeGoogle)
     .compile();
-  const app = configureApp(moduleRef.createNestApplication({ logger: ['error'] }));
+  const app = configureApp(moduleRef.createNestApplication({ logger: ['error'], rawBody: true }));
   await app.init();
   return app;
 }

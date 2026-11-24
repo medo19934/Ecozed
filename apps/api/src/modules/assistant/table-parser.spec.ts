@@ -146,6 +146,12 @@ describe('assistant chat reader (free, rule-based)', () => {
       price: 1500,
       period: 'MONTHLY',
     });
+    expect(readCommand('أضف معلمة اسمها هند hind@x.com في فصل Panda Class')).toMatchObject({
+      classNames: ['Panda Class'],
+    });
+    expect(readCommand('انقل الطفل سعد إلى فصل Panda Class')).toMatchObject({
+      className: 'Panda Class',
+    });
     expect(readCommand('كيف حالك')).toBeNull();
   });
 

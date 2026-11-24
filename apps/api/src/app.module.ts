@@ -7,6 +7,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { AccessGuard } from './common/guards/access.guard';
 import { AuthGuard } from './common/guards/auth.guard';
 import { AppConfig } from './config/app-config.service';
+import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
 import { AssistantModule } from './modules/assistant/assistant.module';
 import { UsersModule } from './modules/users/users.module';
 import { AdminsModule } from './modules/admins/admins.module';
@@ -53,6 +54,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AdminsModule,
     UsersModule,
     AssistantModule,
+    WhatsAppModule,
     ReportsModule,
     StorageModule,
     DemoModule,

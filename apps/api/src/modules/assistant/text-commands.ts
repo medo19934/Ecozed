@@ -54,7 +54,7 @@ export function readCommand(line: string): AssistantOp | null {
   // Move a child: "انقل الطفل سعد إلى فصل الفراشات" / "move Saad to class Butterflies".
   if (
     (m = raw.match(
-      /^(?:انقل|انقلي|move)\s+(?:الطفل|الطفله|الطفلة|child|kid)?\s*(.+?)\s+(?:إلى|الى|to)\s+(?:فصل|الفصل|class|the)?\s*(.+?)(?:\s+class)?$/i,
+      /^(?:انقل|انقلي|move)\s+(?:الطفل|الطفله|الطفلة|child|kid)?\s*(.+?)\s+(?:إلى|الى|to)\s+(?:فصل|الفصل|class)?\s*(.+?)$/i,
     ))
   ) {
     return { type: 'child.move', childName: m[1]!.trim(), className: m[2]!.trim() };
@@ -117,9 +117,10 @@ export function readCommand(line: string): AssistantOp | null {
     const phoneRaw = rest.match(PHONE)?.[0];
     if (phoneRaw) rest = rest.replace(phoneRaw, ' ');
     let classNames: string[] = [];
-    const cls = rest.match(
-      /(?:في فصل|بفصل|لفصل|in class|to class|to the|in the)\s+(.+?)(?:\s+class)?$/i,
-    );
+    // "في فصل Panda Class" keeps the full name; only English "to the Birds class" drops the word.
+    const cls =
+      rest.match(/(?:to the|in the)\s+(.+?)\s+class$/i) ??
+      rest.match(/(?:في فصل|بفصل|لفصل|في الفصل|in class|to class)\s+(.+?)$/i);
     if (cls) {
       classNames = cls[1]!
         .split(/[،,و]\s*|\s+and\s+/)

@@ -26,6 +26,7 @@ async function boot(): Promise<string> {
   const { AppModule } = await import('./app.module');
   const { configureApp, setupSwagger } = await import('./bootstrap');
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
     logger: ['error', 'warn', 'log'],
   });
   app.set('trust proxy', 'loopback');

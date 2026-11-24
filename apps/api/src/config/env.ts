@@ -36,6 +36,21 @@ export const EnvSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
+  /**
+   * WhatsApp agent (Meta WhatsApp Cloud API). Without WHATSAPP_TOKEN replies are kept in a local
+   * outbox (simulator / tests) instead of being sent.
+   */
+  WHATSAPP_VERIFY_TOKEN: z.string().default(''),
+  WHATSAPP_APP_SECRET: z.string().default(''),
+  WHATSAPP_TOKEN: z.string().default(''),
+  WHATSAPP_PHONE_NUMBER_ID: z.string().default(''),
+  /** Enables POST /whatsapp/simulate + GET /whatsapp/outbox for local testing. Never in production. */
+  WHATSAPP_SIMULATOR: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  /** Voice notes → text (ElevenLabs speech-to-text). Optional: without it voice notes get a polite reply. */
+  ELEVENLABS_API_KEY: z.string().default(''),
   /** Local dev only: enables POST /auth/dev-login (email, no Google). Never in production. */
   AUTH_DEV_LOGIN: z
     .enum(['true', 'false'])

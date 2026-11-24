@@ -35,6 +35,8 @@ export const TENANT_EXEMPT_MODELS = new Set<string>([
   // Messaging crosses branches for parents; MessagesService checks access explicitly.
   'MessageThread',
   'Message',
+  // WhatsApp agent's pending change list (one per admin, server-only via prisma.raw).
+  'AgentPending',
 ]);
 
 /**
